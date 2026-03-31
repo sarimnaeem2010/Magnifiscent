@@ -26,31 +26,35 @@ function ScrollToTop() {
   return null;
 }
 
+function setOrClearMeta(selector: string, attr: string, val: string, fallback: string) {
+  let el = document.querySelector(selector) as HTMLMetaElement | null;
+  if (!el) {
+    el = document.createElement("meta");
+    if (attr.startsWith("[")) {
+      const [, name] = attr.match(/\[(.+?)=/) ?? [];
+      const [, value] = attr.match(/="(.+?)"/) ?? [];
+      if (name && value) el.setAttribute(name, value);
+    }
+    document.head.appendChild(el);
+  }
+  el.content = val || fallback;
+}
+
 function StorefrontEffects() {
   useEffect(() => {
     const ext = getExtendedSettings();
+    const defaultTitle = "MagnifiScent — Premium Eau de Parfum";
+    const defaultDesc = "Discover MagnifiScent's collection of premium Eau de Parfum fragrances.";
 
-    if (ext.seoTitle) document.title = ext.seoTitle;
+    document.title = ext.seoTitle || defaultTitle;
 
-    let metaDesc = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
-    if (!metaDesc) {
-      metaDesc = document.createElement("meta");
-      metaDesc.name = "description";
-      document.head.appendChild(metaDesc);
-    }
-    if (ext.seoDescription) metaDesc.content = ext.seoDescription;
+    setOrClearMeta('meta[name="description"]', '[name="description"]', ext.seoDescription, defaultDesc);
+    setOrClearMeta('meta[property="og:title"]', '[property="og:title"]', ext.seoTitle, defaultTitle);
+    setOrClearMeta('meta[property="og:description"]', '[property="og:description"]', ext.seoDescription, defaultDesc);
+    setOrClearMeta('meta[property="og:image"]', '[property="og:image"]', ext.seoOgImage, "");
 
-    if (ext.seoOgImage) {
-      let ogImg = document.querySelector('meta[property="og:image"]') as HTMLMetaElement | null;
-      if (!ogImg) {
-        ogImg = document.createElement("meta");
-        ogImg.setAttribute("property", "og:image");
-        document.head.appendChild(ogImg);
-      }
-      ogImg.content = ext.seoOgImage;
-    }
-
-    if (ext.ga4Id && !document.getElementById("ga4-script")) {
+    const existingGa4 = document.getElementById("ga4-script");
+    if (ext.ga4Id && !existingGa4) {
       const s1 = document.createElement("script");
       s1.id = "ga4-script";
       s1.async = true;
@@ -60,13 +64,19 @@ function StorefrontEffects() {
       s2.id = "ga4-init";
       s2.text = `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${ext.ga4Id}');`;
       document.head.appendChild(s2);
+    } else if (!ext.ga4Id && existingGa4) {
+      existingGa4.remove();
+      document.getElementById("ga4-init")?.remove();
     }
 
-    if (ext.fbPixelId && !document.getElementById("fbpixel-script")) {
+    const existingPixel = document.getElementById("fbpixel-script");
+    if (ext.fbPixelId && !existingPixel) {
       const s = document.createElement("script");
       s.id = "fbpixel-script";
       s.text = `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${ext.fbPixelId}');fbq('track','PageView');`;
       document.head.appendChild(s);
+    } else if (!ext.fbPixelId && existingPixel) {
+      existingPixel.remove();
     }
   }, []);
   return null;
