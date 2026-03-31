@@ -10,86 +10,14 @@ export type NotesImages = Record<string, string>;
 export type ProductCustomImages = Record<string, { img: string; img2: string }>;
 export type DealCustomImages = Record<string, { img1?: string; img2?: string }>;
 
-/* ─── Hero Slides ─── */
-export function getHeroSlides(): HeroSlide[] {
-  try {
-    const s = localStorage.getItem("admin_hero_slides");
-    if (s) return JSON.parse(s);
-  } catch {}
-  return [];
-}
-export function saveHeroSlides(slides: HeroSlide[]): void {
-  localStorage.setItem("admin_hero_slides", JSON.stringify(slides));
-}
-
-/* ─── Gender Banners ─── */
-export function getGenderBanners(): GenderBanners {
-  try {
-    const s = localStorage.getItem("admin_gender_banners");
-    if (s) return JSON.parse(s);
-  } catch {}
-  return { men: "", women: "" };
-}
-export function saveGenderBanners(b: GenderBanners): void {
-  localStorage.setItem("admin_gender_banners", JSON.stringify(b));
-}
-
-/* ─── Notes Images ─── */
-export function getNotesImages(): NotesImages {
-  try {
-    const s = localStorage.getItem("admin_notes_images");
-    if (s) return JSON.parse(s);
-  } catch {}
-  return {};
-}
-export function saveNotesImages(imgs: NotesImages): void {
-  localStorage.setItem("admin_notes_images", JSON.stringify(imgs));
-}
-
-/* ─── Product Custom Images ─── */
-export function getProductCustomImages(): ProductCustomImages {
-  try {
-    const s = localStorage.getItem("admin_product_images");
-    if (s) return JSON.parse(s);
-  } catch {}
-  return {};
-}
-export function saveProductCustomImages(imgs: ProductCustomImages): void {
-  localStorage.setItem("admin_product_images", JSON.stringify(imgs));
-}
-
-/* ─── Announcement Ticker ─── */
+/* ─── Announcement Ticker defaults ─── */
 export const DEFAULT_TICKER_MESSAGES = [
   "FREE SHIPPING ON ORDERS ABOVE Rs. 100",
   "20 DAYS RETURN & REFUND POLICY",
   "100% AUTHENTIC FRAGRANCES",
 ];
-export function getTickerMessages(): string[] {
-  try {
-    const s = localStorage.getItem("admin_ticker_messages");
-    if (s) {
-      const parsed = JSON.parse(s);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-    }
-  } catch {}
-  return [...DEFAULT_TICKER_MESSAGES];
-}
-export function saveTickerMessages(msgs: string[]): void {
-  localStorage.setItem("admin_ticker_messages", JSON.stringify(msgs));
-}
 
-/* ─── Deal Custom Images ─── */
-export function getDealCustomImages(): DealCustomImages {
-  try {
-    const s = localStorage.getItem("admin_deal_images");
-    if (s) return JSON.parse(s);
-  } catch {}
-  return {};
-}
-export function saveDealCustomImages(imgs: DealCustomImages): void {
-  localStorage.setItem("admin_deal_images", JSON.stringify(imgs));
-}
-
+/* ─── Admin Deal type ─── */
 export type AdminDealEntry = {
   id: string;
   name: string;
@@ -100,44 +28,7 @@ export type AdminDealEntry = {
   discount: number;
 };
 
-export function getLiveProducts(): LiveProduct[] {
-  const stored = localStorage.getItem("admin_products");
-  if (stored) {
-    try {
-      const parsed: LiveProduct[] = JSON.parse(stored);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-    } catch {
-    }
-  }
-  return PRODUCTS.map((p) => ({ ...p, stock: 20, active: true }));
-}
-
-export function getActiveProducts(): LiveProduct[] {
-  return getLiveProducts().filter((p) => p.active);
-}
-
-export function getLiveProductBySlug(slug: string): LiveProduct | undefined {
-  return getLiveProducts().find((p) => p.slug === slug);
-}
-
-export function getLiveRelated(product: LiveProduct): LiveProduct[] {
-  return getLiveProducts()
-    .filter((p) => p.id !== product.id && p.category === product.category && p.active)
-    .slice(0, 4);
-}
-
-export function getAdminDeal(id: string): AdminDealEntry | null {
-  const stored = localStorage.getItem("admin_deals");
-  if (!stored) return null;
-  try {
-    const deals: AdminDealEntry[] = JSON.parse(stored);
-    return deals.find((d) => d.id === id) ?? null;
-  } catch {
-    return null;
-  }
-}
-
-/* ─── Instagram Reels ─── */
+/* ─── Instagram Reels type ─── */
 export type InstagramReel = {
   id: string;
   url: string;
@@ -145,16 +36,6 @@ export type InstagramReel = {
   label: string;
   likes: number;
 };
-export function getInstagramReels(): InstagramReel[] {
-  try {
-    const s = localStorage.getItem("admin_instagram_reels");
-    if (s) return JSON.parse(s);
-  } catch {}
-  return [];
-}
-export function saveInstagramReels(reels: InstagramReel[]): void {
-  localStorage.setItem("admin_instagram_reels", JSON.stringify(reels));
-}
 
 /* ─── Home Headings ─── */
 export type HomeHeadings = {
@@ -189,44 +70,9 @@ export const DEFAULT_HOME_HEADINGS: HomeHeadings = {
   whyChoose: "Why Choose MagnifiScent?",
   whyChooseSubtitle: "Authenticity, longevity, and luxury — without compromise",
 };
-export function getHomeHeadings(): HomeHeadings {
-  try {
-    const s = localStorage.getItem("admin_home_headings");
-    if (s) return { ...DEFAULT_HOME_HEADINGS, ...JSON.parse(s) };
-  } catch {}
-  return { ...DEFAULT_HOME_HEADINGS };
-}
-export function saveHomeHeadings(h: HomeHeadings): void {
-  localStorage.setItem("admin_home_headings", JSON.stringify(h));
-}
 
-/* ─── Payment Settings ─── */
+/* ─── Payment Settings type ─── */
 export type PaymentSettings = { cod: boolean; card: boolean };
-export function getPaymentSettings(): PaymentSettings {
-  try {
-    const s = localStorage.getItem("admin_payment_settings");
-    if (s) return JSON.parse(s);
-  } catch {}
-  return { cod: true, card: true };
-}
-export function savePaymentSettings(s: PaymentSettings): void {
-  localStorage.setItem("admin_payment_settings", JSON.stringify(s));
-}
-
-export function getAdminDeals(): AdminDealEntry[] {
-  const stored = localStorage.getItem("admin_deals");
-  if (!stored) return [];
-  try {
-    return JSON.parse(stored);
-  } catch {
-    return [];
-  }
-}
-
-export function useAdminDealMap(): Map<string, AdminDealEntry> {
-  const deals = getAdminDeals();
-  return new Map(deals.map((d) => [d.id, d]));
-}
 
 /* ─── Policy Pages ─── */
 export type PolicyPage = {
@@ -420,26 +266,6 @@ Last updated: 2025`,
   },
 };
 
-export function getPolicyPages(): PolicyPages {
-  try {
-    const s = localStorage.getItem("admin_policy_pages");
-    if (s) {
-      const parsed = JSON.parse(s);
-      return {
-        returns: { ...DEFAULT_POLICY_PAGES.returns, ...parsed.returns },
-        shipping: { ...DEFAULT_POLICY_PAGES.shipping, ...parsed.shipping },
-        privacy: { ...DEFAULT_POLICY_PAGES.privacy, ...parsed.privacy },
-        terms: { ...DEFAULT_POLICY_PAGES.terms, ...parsed.terms },
-      };
-    }
-  } catch {}
-  return { ...DEFAULT_POLICY_PAGES };
-}
-
-export function savePolicyPages(pages: PolicyPages): void {
-  localStorage.setItem("admin_policy_pages", JSON.stringify(pages));
-}
-
 /* ─── Extended Store Settings ─── */
 export type ExtendedSettings = {
   seoTitle: string;
@@ -469,19 +295,7 @@ export const DEFAULT_EXTENDED_SETTINGS: ExtendedSettings = {
   maintenanceMessage: "We're making some updates to bring you a better experience. We'll be back very soon!",
 };
 
-export function getExtendedSettings(): ExtendedSettings {
-  try {
-    const s = localStorage.getItem("admin_extended_settings");
-    if (s) return { ...DEFAULT_EXTENDED_SETTINGS, ...JSON.parse(s) };
-  } catch {}
-  return { ...DEFAULT_EXTENDED_SETTINGS };
-}
-
-export function saveExtendedSettings(s: ExtendedSettings): void {
-  localStorage.setItem("admin_extended_settings", JSON.stringify(s));
-}
-
-/* ─── Discount Codes ─── */
+/* ─── Discount Codes type ─── */
 export type DiscountCode = {
   id: string;
   code: string;
@@ -490,117 +304,6 @@ export type DiscountCode = {
   active: boolean;
   expiry: string;
 };
-
-export function getDiscountCodes(): DiscountCode[] {
-  try {
-    const s = localStorage.getItem("admin_discount_codes");
-    if (s) return JSON.parse(s);
-  } catch {}
-  return [];
-}
-
-export function saveDiscountCodes(codes: DiscountCode[]): void {
-  localStorage.setItem("admin_discount_codes", JSON.stringify(codes));
-}
-
-export function applyDiscountCode(
-  code: string,
-  subtotal: number
-): { valid: boolean; discount: number; message: string; codeObj?: DiscountCode } {
-  const codes = getDiscountCodes();
-  const found = codes.find(
-    (c) => c.code.toUpperCase() === code.toUpperCase().trim() && c.active
-  );
-  if (!found) return { valid: false, discount: 0, message: "Invalid or inactive discount code." };
-  if (found.expiry) {
-    const expiry = new Date(found.expiry);
-    expiry.setHours(23, 59, 59);
-    if (expiry < new Date()) {
-      return { valid: false, discount: 0, message: "This discount code has expired." };
-    }
-  }
-  const discount =
-    found.type === "percent"
-      ? Math.min(subtotal * (found.value / 100), subtotal)
-      : Math.min(found.value, subtotal);
-  return {
-    valid: true,
-    discount,
-    message:
-      found.type === "percent"
-        ? `${found.value}% discount applied!`
-        : `Rs. ${found.value.toFixed(0)} discount applied!`,
-    codeObj: found,
-  };
-}
-
-/* ─── SMTP Settings ─── */
-export type SmtpSettings = {
-  host: string;
-  port: number;
-  secure: boolean;
-  username: string;
-  password: string;
-  fromName: string;
-  fromEmail: string;
-  replyTo: string;
-  apiUrl: string;
-};
-
-export const DEFAULT_SMTP_SETTINGS: SmtpSettings = {
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  username: "",
-  password: "",
-  fromName: "MagnifiScent",
-  fromEmail: "hello@magnifiscent.com",
-  replyTo: "hello@magnifiscent.com",
-  apiUrl: "",
-};
-
-export function getSmtpSettings(): SmtpSettings {
-  try {
-    const s = localStorage.getItem("admin_smtp_settings");
-    if (s) return { ...DEFAULT_SMTP_SETTINGS, ...JSON.parse(s) };
-    // migrate from old key
-    const old = localStorage.getItem("admin_email_settings");
-    if (old) return { ...DEFAULT_SMTP_SETTINGS, ...JSON.parse(old) };
-  } catch {}
-  return { ...DEFAULT_SMTP_SETTINGS };
-}
-
-export function saveSmtpSettings(s: SmtpSettings): void {
-  localStorage.setItem("admin_smtp_settings", JSON.stringify(s));
-}
-
-/* ─── Email API URL (stored locally — just a URL, not credentials) ─── */
-export function getEmailApiUrl(): string {
-  try {
-    const s = localStorage.getItem("admin_email_api_url");
-    if (s) return s;
-    // migrate from old smtp settings key
-    const smtp = localStorage.getItem("admin_smtp_settings") || localStorage.getItem("admin_email_settings");
-    if (smtp) {
-      const parsed = JSON.parse(smtp);
-      return parsed.apiUrl ?? "";
-    }
-  } catch {}
-  return "";
-}
-
-export function saveEmailApiUrl(url: string): void {
-  localStorage.setItem("admin_email_api_url", url);
-}
-
-/* ─── Email Admin API Key (stored locally — used for Bearer token auth) ─── */
-export function getEmailAdminKey(): string {
-  return localStorage.getItem("admin_email_api_key") ?? "";
-}
-
-export function saveEmailAdminKey(key: string): void {
-  localStorage.setItem("admin_email_api_key", key);
-}
 
 /* ─── Email Templates ─── */
 export type EmailTemplateKey =
@@ -695,48 +398,6 @@ export const DEFAULT_EMAIL_TEMPLATES: EmailTemplates = {
   },
 };
 
-export function getEmailTemplates(): EmailTemplates {
-  try {
-    const s = localStorage.getItem("admin_email_templates");
-    if (s) {
-      const parsed = JSON.parse(s);
-      return { ...DEFAULT_EMAIL_TEMPLATES, ...parsed };
-    }
-  } catch {}
-  return { ...DEFAULT_EMAIL_TEMPLATES };
-}
-
-export function saveEmailTemplates(t: EmailTemplates): void {
-  localStorage.setItem("admin_email_templates", JSON.stringify(t));
-}
-
-export function resetEmailTemplate(key: EmailTemplateKey): EmailTemplate {
-  return { ...DEFAULT_EMAIL_TEMPLATES[key] };
-}
-
-export type EmailLogEntry = {
-  id: string;
-  to: string;
-  subject: string;
-  status: "sent" | "failed" | "pending";
-  date: string;
-  message: string;
-};
-
-export function getEmailLog(): EmailLogEntry[] {
-  try {
-    const s = localStorage.getItem("admin_email_log");
-    if (s) return JSON.parse(s);
-  } catch {}
-  return [];
-}
-
-export function addEmailLog(entry: Omit<EmailLogEntry, "id">): void {
-  const log = getEmailLog();
-  log.unshift({ ...entry, id: Date.now().toString() });
-  localStorage.setItem("admin_email_log", JSON.stringify(log.slice(0, 50)));
-}
-
 /* ─── Email Notification Toggles ─── */
 export type EmailToggles = {
   order_confirmation: boolean;
@@ -758,36 +419,7 @@ export const DEFAULT_EMAIL_TOGGLES: EmailToggles = {
   low_stock_alert: false,
 };
 
-export function getEmailToggles(): EmailToggles {
-  try {
-    const s = localStorage.getItem("admin_email_toggles");
-    if (s) return { ...DEFAULT_EMAIL_TOGGLES, ...JSON.parse(s) };
-  } catch {}
-  return { ...DEFAULT_EMAIL_TOGGLES };
-}
-
-export function saveEmailToggles(t: EmailToggles): void {
-  localStorage.setItem("admin_email_toggles", JSON.stringify(t));
-}
-
-/* ─── Store Settings (read-only helper for storefront) ─── */
-export function getStoreFrontSettings(): { freeShippingThreshold: number; currency: string; storeName: string } {
-  try {
-    const s = localStorage.getItem("admin_settings");
-    if (s) {
-      const p = JSON.parse(s);
-      return {
-        freeShippingThreshold: p.freeShippingThreshold ?? 100,
-        currency: p.currency ?? "Rs.",
-        storeName: p.storeName ?? "MagnifiScent",
-      };
-    }
-  } catch {}
-  return { freeShippingThreshold: 100, currency: "Rs.", storeName: "MagnifiScent" };
-}
-
-
-/* ─── Order persistence (storefront → admin panel) ─── */
+/* ─── Order payload type ─── */
 export type NewOrderPayload = {
   id: string;
   customer: { name: string; email: string; phone: string; address: string };
@@ -798,11 +430,7 @@ export type NewOrderPayload = {
   paymentMethod: string;
 };
 
-export function saveNewOrder(order: NewOrderPayload): void {
-  try {
-    const stored = localStorage.getItem("admin_orders");
-    const existing = stored ? JSON.parse(stored) : [];
-    existing.unshift(order);
-    localStorage.setItem("admin_orders", JSON.stringify(existing));
-  } catch { /* silently ignore — never block checkout */ }
+/* ─── Static fallback helpers (no localStorage) ─── */
+export function getDefaultLiveProducts() {
+  return PRODUCTS.map((p: Product) => ({ ...p, stock: 20, active: true }));
 }

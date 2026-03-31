@@ -114,18 +114,13 @@ export default function Checkout() {
 
   function fireOrderConfirmationEmail(orderId: string) {
     if (!form.email) return;
-    fetch("/api/send-email", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        type: "order_confirmation",
-        orderId,
-        customerEmail: form.email,
-        customerName: `${form.firstName} ${form.lastName}`.trim(),
-        orderTotal: `${cur} ${orderTotal.toFixed(2)}`,
-        items: items.map((i) => ({ name: i.product.name, qty: i.qty, price: i.product.priceNum })),
-        variables: { store_name: storeSettings.storeName || "MagnifiScent" },
-      }),
+    api.sendEmail.orderConfirmation({
+      orderId,
+      customerEmail: form.email,
+      customerName: `${form.firstName} ${form.lastName}`.trim(),
+      orderTotal: `${cur} ${orderTotal.toFixed(2)}`,
+      items: items.map((i) => ({ name: i.product.name, qty: i.qty, price: i.product.priceNum })),
+      variables: { store_name: storeSettings.storeName || "MagnifiScent" },
     }).catch(() => {});
   }
 

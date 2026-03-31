@@ -213,13 +213,8 @@ export function AdminEmail() {
     const recipient = testEmail.trim() || smtp.fromEmail;
     setTestStatus("sending");
     try {
-      const res = await fetch("/api/send-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ type: "test", customerEmail: recipient }),
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
+      const data = await api.sendEmail.test(recipient);
+      if (data.success) {
         addToLog({ to: recipient, subject: "MagnifiScent — Test Email", status: "sent", date: new Date().toISOString(), message: `Message ID: ${data.messageId ?? "n/a"}` });
         setTestStatus("ok");
       } else {

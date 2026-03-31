@@ -243,4 +243,18 @@ export const api = {
     put: (config: unknown) =>
       put<{ success: boolean }>("/email-config", config, true),
   },
+
+  sendEmail: {
+    test: (customerEmail: string) =>
+      post<{ success: boolean; messageId?: string; error?: string }>("/send-email", { type: "test", customerEmail }),
+    orderConfirmation: (payload: {
+      orderId: string;
+      customerEmail: string;
+      customerName: string;
+      orderTotal: string;
+      items: Array<{ name: string; qty: number; price: number }>;
+      variables?: Record<string, string>;
+    }) =>
+      post<{ success: boolean }>("/send-email", { type: "order_confirmation", ...payload }),
+  },
 };

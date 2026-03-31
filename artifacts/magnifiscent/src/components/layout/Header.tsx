@@ -2,7 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { ShoppingBag, Search, Menu, X, ChevronDown } from "lucide-react";
 import { useLocation } from "wouter";
 import { useCart } from "@/context/CartContext";
-import { getTickerMessages } from "@/data/liveData";
+import { DEFAULT_TICKER_MESSAGES } from "@/data/liveData";
+import { api } from "@/lib/api";
 import logoImg from "@assets/whitelogo_1774978057429.png";
 
 const navLinks = [
@@ -24,10 +25,18 @@ const navLinks = [
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const tickerMessages = getTickerMessages();
+  const [tickerMessages, setTickerMessages] = useState<string[]>(DEFAULT_TICKER_MESSAGES);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { count, openCart } = useCart();
   const [location, navigate] = useLocation();
+
+  useEffect(() => {
+    api.content.tickerMessages.get().then((res) => {
+      if (res.success && Array.isArray(res.messages) && res.messages.length > 0) {
+        setTickerMessages(res.messages);
+      }
+    }).catch(() => {});
+  }, []);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
