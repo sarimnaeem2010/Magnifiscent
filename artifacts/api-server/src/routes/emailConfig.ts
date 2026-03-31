@@ -90,7 +90,8 @@ router.get("/email-config", requireAdminAuth, async (_req, res) => {
 });
 
 /* POST /api/email-config — admin auth required; saves full config to DB */
-router.post("/email-config", requireAdminAuth, async (req, res) => {
+/* PUT /api/email-config — alias for POST (same handler) */
+const saveEmailConfigHandler: import("express").RequestHandler = async (req, res) => {
   try {
     const { smtp, toggles, templates } = req.body;
     const existing = await readConfig();
@@ -144,6 +145,9 @@ router.post("/email-config", requireAdminAuth, async (req, res) => {
     const message = err instanceof Error ? err.message : "Unknown error";
     res.status(500).json({ success: false, error: message });
   }
-});
+};
+
+router.post("/email-config", requireAdminAuth, saveEmailConfigHandler);
+router.put("/email-config", requireAdminAuth, saveEmailConfigHandler);
 
 export default router;
