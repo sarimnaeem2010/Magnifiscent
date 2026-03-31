@@ -149,13 +149,15 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
           } else {
             const old = prev.find((o) => o.id === p.id);
             const changed = !old ||
-              old.name !== p.name || old.price !== p.price || old.priceNum !== p.priceNum ||
+              old.name !== p.name || old.slug !== p.slug || old.category !== p.category ||
+              old.price !== p.price || old.priceNum !== p.priceNum ||
               old.originalPrice !== p.originalPrice || old.originalPriceNum !== p.originalPriceNum ||
               old.stock !== p.stock || old.active !== p.active || old.desc !== p.desc ||
               old.img !== p.img || old.img2 !== p.img2;
             if (changed) {
               api.products.patch(p.id, {
-                name: p.name, priceNum: p.priceNum, price: p.price,
+                name: p.name, slug: p.slug, category: p.category,
+                priceNum: p.priceNum, price: p.price,
                 originalPriceNum: p.originalPriceNum, originalPrice: p.originalPrice,
                 stock: p.stock, active: p.active, desc: p.desc, notes: p.notes,
                 img: p.img, img2: p.img2,
