@@ -1,36 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { ChevronLeft, ChevronRight, Star, Instagram } from "lucide-react";
+import { Star, Instagram } from "lucide-react";
 import { PRODUCTS } from "@/data/products";
+import heroBannerImg from "@assets/sasas_1774966788321.png";
 import type { Product } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 import { useLocation } from "wouter";
-
-/* ─── Hero Slides ─── */
-const HERO_SLIDES = [
-  {
-    bg: "/hero-bg.png",
-    tagline: "NEW COLLECTION",
-    title: "Discover Your\nSignature Scent",
-    cta: "Shop Now",
-    href: "/products",
-  },
-  {
-    bg: "/men-split.png",
-    tagline: "MEN'S COLLECTION",
-    title: "Bold. Masculine.\nUnforgettable.",
-    cta: "Shop Men",
-    href: "/products?gender=men",
-  },
-  {
-    bg: "/women-split.png",
-    tagline: "WOMEN'S COLLECTION",
-    title: "Floral. Elegant.\nTimeless.",
-    cta: "Shop Women",
-    href: "/products?gender=women",
-  },
-];
 
 /* ─── Top Categories ─── */
 const CATEGORIES = [
@@ -215,16 +191,8 @@ function DealCard({ name, img1, img2, price, originalPrice, reviews, desc }: typ
 
 /* ─── Main Page ─── */
 export default function Home() {
-  const [heroSlide, setHeroSlide] = useState(0);
   const [productFilter, setProductFilter] = useState<"all" | "men" | "women">("all");
   const [, navigate] = useLocation();
-
-  useEffect(() => {
-    const t = setInterval(() => setHeroSlide((s) => (s + 1) % HERO_SLIDES.length), 5000);
-    return () => clearInterval(t);
-  }, []);
-
-  const slide = HERO_SLIDES[heroSlide];
 
   const filteredProducts = productFilter === "all"
     ? PRODUCTS
@@ -234,55 +202,14 @@ export default function Home() {
     <div className="min-h-screen bg-white text-gray-900">
       <Header />
 
-      {/* ── Hero Slideshow ── */}
-      <section className="relative w-full overflow-hidden" style={{ height: "clamp(400px, 60vw, 700px)" }}>
-        {HERO_SLIDES.map((s, i) => (
-          <div
-            key={i}
-            className="absolute inset-0 transition-opacity duration-700"
-            style={{ opacity: i === heroSlide ? 1 : 0 }}
-          >
-            <img src={s.bg} alt={s.title} className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-black/40" />
-          </div>
-        ))}
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white z-10 px-4">
-          <p className="text-xs font-bold uppercase tracking-[0.3em] mb-3 opacity-90">{slide.tagline}</p>
-          <h1
-            className="font-bold mb-6 leading-tight"
-            style={{ fontFamily: "Georgia, serif", fontSize: "clamp(2rem, 6vw, 4rem)", whiteSpace: "pre-line" }}
-          >
-            {slide.title}
-          </h1>
-          <button
-            onClick={() => navigate(slide.href)}
-            className="inline-block bg-white text-black font-bold uppercase tracking-widest text-xs px-8 py-3 hover:bg-gray-100 transition-colors border-none cursor-pointer"
-          >
-            {slide.cta}
-          </button>
-        </div>
-        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-          {HERO_SLIDES.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setHeroSlide(i)}
-              className="rounded-full border-2 border-white transition-all"
-              style={{ width: i === heroSlide ? 24 : 8, height: 8, background: i === heroSlide ? "white" : "rgba(255,255,255,0.4)" }}
-            />
-          ))}
-        </div>
-        <button
-          className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/60 text-white rounded-full p-2 transition-colors"
-          onClick={() => setHeroSlide((s) => (s - 1 + HERO_SLIDES.length) % HERO_SLIDES.length)}
-        >
-          <ChevronLeft size={20} />
-        </button>
-        <button
-          className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-black/30 hover:bg-black/60 text-white rounded-full p-2 transition-colors"
-          onClick={() => setHeroSlide((s) => (s + 1) % HERO_SLIDES.length)}
-        >
-          <ChevronRight size={20} />
-        </button>
+      {/* ── Hero Banner ── */}
+      <section className="w-full">
+        <img
+          src={heroBannerImg}
+          alt="Discover your best Perfume"
+          className="w-full block"
+          style={{ maxHeight: "600px", objectFit: "cover", objectPosition: "center" }}
+        />
       </section>
 
       {/* ── Top Categories ── */}
