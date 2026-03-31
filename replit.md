@@ -105,9 +105,25 @@ MagnifiScent perfume e-commerce storefront (React + Vite + Tailwind) with full S
 
 **Admin Panel** at `/admin` (password: `admin123`):
 - Dashboard, Products, Orders, Customers, Inventory, Deals, Media, Instagram, Pages, Email, Settings
-- All data stored in `localStorage` keys prefixed `admin_`
-- `AdminContext.tsx` — products, orders, deals, settings state
-- `liveData.ts` — all localStorage read/write helpers for hero slides, banners, tickers, payment settings, policy pages, extended settings, discount codes, email settings/templates/log, storefront helpers
+- All data persisted via PostgreSQL-backed REST API (`artifacts/api-server`)
+- `AdminContext.tsx` — products, orders, deals, settings state; syncs to API on every change
+- `liveData.ts` — types and static default constants only; no localStorage usage
+
+**Data Flow** (all pages use API as source of truth — no localStorage for store data):
+- All storefront pages (`Home`, `Products`, `ProductDetail`, `Deals`) fetch from API on mount
+- `Header.tsx` fetches ticker messages from API with static fallback
+- `AdminContext.tsx` loads products/orders/deals/settings from API on login
+- `AdminEmail.tsx` loads SMTP config from API; saves via `api.emailConfig.put()`
+- `Checkout.tsx` creates orders via `api.orders.create()` and sends emails via `api.sendEmail.orderConfirmation()`
+
+**API Server** (`artifacts/api-server`, port 8080):
+- Auth: `POST /api/admin/login` → JWT-like token stored in `sessionStorage`
+- Products: `GET /products`, `GET /products?all=true` (admin), `POST /products` (admin), `PATCH /products/:id` (admin), `DELETE /products/:id` (admin)
+- Orders, Deals, Settings, Content endpoints all behind admin Bearer token auth
+- Email config: `GET /api/email-config`, `PUT /api/email-config`
+
+**Environment Variables** (`artifacts/magnifiscent/.env.example`):
+- `VITE_API_BASE_URL` — base URL for API (default: `/api` via Vite proxy to port 8080)
 
 **Admin Settings** (`/admin/settings`) sections:
 - Store Information, Social Links, Admin Password, Payment Methods, Announcement Ticker
@@ -117,20 +133,18 @@ MagnifiScent perfume e-commerce storefront (React + Vite + Tailwind) with full S
 - Maintenance Mode (toggle + custom message)
 - Data Backup (full JSON export/import)
 
-**Admin Email** (`/admin/email`) — 3-tab panel:
-- SMTP Config: host/port/TLS, auth (username/password), sender identity, API URL, test email sender
-- Templates: editable HTML templates for Order Confirmation, Contact Form Reply, Shipping Update
-- Email Log: send history with status (sent/failed/pending)
+**Admin Email** (`/admin/email`) — 4-tab panel:
+- SMTP Config: host/port/TLS, auth (username/password), sender identity, test email sender
+- Notifications: toggles for each email type (customer + admin alerts)
+- Templates: editable HTML templates for all 7 email types
+- Email Log: in-memory send history with status (sent/failed/pending)
 
 **Checkout** (`/checkout`):
-- Dynamic shipping rate from `admin_extended_settings.shippingRate` (default Rs. 200)
-- Free shipping threshold from `admin_settings.freeShippingThreshold`
+- Dynamic shipping rate from API extended settings (default Rs. 200)
+- Free shipping threshold from API store settings
 - Tax line shown when `showTaxInCart` and `taxRate > 0`
-- Discount code field — validates against `admin_discount_codes`, shows green badge on success, deducts from total
+- Discount code field — validates via `api.discountCodes.apply()`, shows green badge on success
 - COD and Card payment methods (at least one always active)
-
-**localStorage keys** (all prefixed `admin_`):
-`orders`, `products`, `deals`, `settings`, `hero_slides`, `gender_banners`, `notes_images`, `deal_images`, `instagram_reels`, `home_headings`, `payment_settings`, `ticker_messages`, `extended_settings`, `discount_codes`, `policy_pages`, `email_settings`, `email_templates`, `email_log`
 
 ### `scripts` (`@workspace/scripts`)
 

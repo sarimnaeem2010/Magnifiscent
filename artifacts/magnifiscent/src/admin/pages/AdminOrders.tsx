@@ -13,10 +13,11 @@ const statusColor: Record<OrderStatus, string> = {
   Cancelled: "bg-red-100 text-red-700",
 };
 
-function OrderDetailPanel({ order, onClose, onStatusChange }: {
+function OrderDetailPanel({ order, onClose, onStatusChange, cur }: {
   order: Order;
   onClose: () => void;
   onStatusChange: (id: string, status: OrderStatus) => void;
+  cur: string;
 }) {
   return (
     <div className="fixed inset-0 z-50 flex">
@@ -210,6 +211,7 @@ export function AdminOrders() {
           order={selected}
           onClose={() => setSelected(null)}
           onStatusChange={updateStatus}
+          cur={cur}
         />
       )}
     </div>
