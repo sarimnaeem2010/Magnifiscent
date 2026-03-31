@@ -6,6 +6,7 @@ import { PRODUCTS } from "@/data/products";
 import { getActiveProducts } from "@/data/liveData";
 import heroBannerImg from "@assets/sasas_1774966788321.png";
 import womenBannerImg from "@assets/Gemini_Generated_Image_91h42l91h42l91h4.png";
+import menBannerImg from "@assets/Gemini_Generated_Image_gthzqdgthzqdgthz.png";
 import type { Product } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 import { useLocation } from "wouter";
@@ -288,7 +289,7 @@ export default function Home() {
             >
               <div className="overflow-hidden" style={{ height: 300 }}>
                 <img
-                  src={genderBanners.men || "/men-split.png"}
+                  src={genderBanners.men || menBannerImg}
                   alt="Men's Collection"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
