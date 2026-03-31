@@ -182,7 +182,7 @@ export function AdminDeals() {
                         <input type="number" className="w-20 px-2 py-1 border border-gray-300 rounded-lg text-xs text-right focus:outline-none focus:ring-2 focus:ring-gray-900"
                           value={editPrice} onChange={(e) => setEditPrice(e.target.value)} />
                       ) : (
-                        <span className="font-semibold">${d.price.toFixed(2)}</span>
+                        <span className="font-semibold">Rs. {d.price.toFixed(2)}</span>
                       )}
                     </td>
                     <td className="px-4 py-3 text-right">
@@ -190,7 +190,7 @@ export function AdminDeals() {
                         <input type="number" className="w-20 px-2 py-1 border border-gray-300 rounded-lg text-xs text-right focus:outline-none focus:ring-2 focus:ring-gray-900"
                           value={editOriginal} onChange={(e) => setEditOriginal(e.target.value)} />
                       ) : (
-                        <span className="text-gray-400 line-through">${d.originalPrice.toFixed(2)}</span>
+                        <span className="text-gray-400 line-through">Rs. {d.originalPrice.toFixed(2)}</span>
                       )}
                     </td>
                     <td className="px-4 py-3 text-center">

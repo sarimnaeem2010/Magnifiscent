@@ -114,7 +114,7 @@ function DealCard({ deal }: { deal: DealWithPrice }) {
         </button>
       </div>
       <div className="pt-3 pb-2">
-        <p className="text-xs text-green-600 font-bold mb-1">Save ${deal.savings.toFixed(2)}</p>
+        <p className="text-xs text-green-600 font-bold mb-1">Save Rs. {deal.savings.toFixed(2)}</p>
         <div className="flex items-center gap-1 mb-1">
           <StarRating count={5} />
           <span className="text-gray-400 text-xs ml-1">({deal.reviews})</span>
@@ -127,8 +127,8 @@ function DealCard({ deal }: { deal: DealWithPrice }) {
           ))}
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-sm font-bold text-gray-900">${deal.price.toFixed(2)}</span>
-          <span className="text-xs text-gray-400 line-through">${deal.originalPrice.toFixed(2)}</span>
+          <span className="text-sm font-bold text-gray-900">Rs. {deal.price.toFixed(2)}</span>
+          <span className="text-xs text-gray-400 line-through">Rs. {deal.originalPrice.toFixed(2)}</span>
         </div>
       </div>
     </div>

@@ -118,7 +118,7 @@ export function CartDrawer() {
                         </button>
                       </div>
                       <p className="font-bold text-sm text-gray-900">
-                        ${(product.priceNum * qty).toFixed(2)}
+                        Rs. {(product.priceNum * qty).toFixed(2)}
                       </p>
                     </div>
                   </div>
@@ -133,7 +133,7 @@ export function CartDrawer() {
           <div className="px-6 py-5 border-t border-gray-100 space-y-3">
             <div className="flex justify-between text-sm font-medium text-gray-700">
               <span>Subtotal</span>
-              <span>${total.toFixed(2)}</span>
+              <span>Rs. {total.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-xs text-gray-400">
               <span>Shipping</span>
@@ -141,13 +141,13 @@ export function CartDrawer() {
             </div>
             <div className="flex justify-between font-bold text-gray-900 pt-1 border-t border-gray-100">
               <span>Total</span>
-              <span>${total.toFixed(2)}</span>
+              <span>Rs. {total.toFixed(2)}</span>
             </div>
             <button
               onClick={() => { closeCart(); navigate("/checkout"); }}
               className="w-full bg-black text-white font-bold uppercase tracking-widest text-xs py-4 hover:bg-gray-800 transition-colors mt-2"
             >
-              Checkout — ${total.toFixed(2)}
+              Checkout — Rs. {total.toFixed(2)}
             </button>
             <button
               onClick={() => { closeCart(); navigate("/products"); }}

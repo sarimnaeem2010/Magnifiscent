@@ -60,7 +60,7 @@ export function saveProductCustomImages(imgs: ProductCustomImages): void {
 
 /* ─── Announcement Ticker ─── */
 export const DEFAULT_TICKER_MESSAGES = [
-  "FREE SHIPPING ON ORDERS ABOVE $100",
+  "FREE SHIPPING ON ORDERS ABOVE Rs. 100",
   "20 DAYS RETURN & REFUND POLICY",
   "100% AUTHENTIC FRAGRANCES",
 ];

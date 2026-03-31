@@ -125,8 +125,8 @@ export function AdminSettings() {
         <Field label="Store Name" value={form.storeName} onChange={update("storeName")} />
         <Field label="Contact Email" value={form.email} onChange={update("email")} type="email" />
         <Field label="Phone Number" value={form.phone} onChange={update("phone")} type="tel" />
-        <Field label="Currency Symbol" value={form.currency} onChange={update("currency")} placeholder="$" />
-        <Field label="Free Shipping Threshold ($)" value={form.freeShippingThreshold} onChange={update("freeShippingThreshold")} type="number" />
+        <Field label="Currency Symbol" value={form.currency} onChange={update("currency")} placeholder="Rs." />
+        <Field label="Free Shipping Threshold (Rs.)" value={form.freeShippingThreshold} onChange={update("freeShippingThreshold")} type="number" />
       </div>
 
       {/* Social Links */}
@@ -217,7 +217,7 @@ export function AdminSettings() {
                 className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 uppercase"
                 value={msg}
                 onChange={(e) => updateTicker(idx, e.target.value.toUpperCase())}
-                placeholder="E.G. FREE SHIPPING ON ORDERS ABOVE $100"
+                placeholder="E.G. FREE SHIPPING ON ORDERS ABOVE Rs. 100"
               />
               <button
                 onClick={() => removeTickerMsg(idx)}

@@ -67,7 +67,7 @@ const DEFAULT_SETTINGS: StoreSettings = {
   storeName: "MagnifiScent",
   email: "hello@magnifiscent.com",
   phone: "+1 (800) 555-0199",
-  currency: "$",
+  currency: "Rs.",
   freeShippingThreshold: 100,
   instagramUrl: "https://instagram.com/magnifiscent",
   twitterUrl: "https://twitter.com/magnifiscent",

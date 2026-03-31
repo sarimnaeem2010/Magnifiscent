@@ -212,7 +212,7 @@ export default function ProductDetail() {
             {/* Trust Badges */}
             <div className="grid grid-cols-3 gap-4 pt-6 border-t border-gray-100">
               {[
-                { icon: Package, label: "Free shipping", sub: "On orders over $100" },
+                { icon: Package, label: "Free shipping", sub: "On orders over Rs. 100" },
                 { icon: RotateCcw, label: "Easy returns", sub: "20-day return policy" },
                 { icon: Shield, label: "Authentic", sub: "100% genuine" },
               ].map(({ icon: Icon, label, sub }) => (
