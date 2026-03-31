@@ -40,6 +40,50 @@ router.get("/products/:slug", async (req, res) => {
   }
 });
 
+/* POST /api/products — admin auth required; create a new product */
+router.post("/products", requireAdminAuth, async (req, res) => {
+  try {
+    const { id, name, slug, img, img2, price, priceNum, originalPrice, originalPriceNum,
+      reviews, rating, category, desc, notes, size, stock, active } = req.body;
+    if (!id || !name || !slug || !category) {
+      res.status(400).json({ success: false, error: "Missing required fields: id, name, slug, category" });
+      return;
+    }
+    const [created] = await db.insert(productsTable).values({
+      id: Number(id), name, slug, img: img ?? "", img2: img2 ?? "",
+      price: price ?? "Rs. 0.00", priceNum: priceNum ?? 0,
+      originalPrice: originalPrice ?? "Rs. 0.00", originalPriceNum: originalPriceNum ?? 0,
+      reviews: reviews ?? 0, rating: rating ?? 5, category,
+      desc: desc ?? "", notes: notes ?? [], size: size ?? "100ml",
+      stock: stock ?? 0, active: active ?? false,
+    }).returning();
+    res.json({ success: true, product: created });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    res.status(500).json({ success: false, error: message });
+  }
+});
+
+/* DELETE /api/products/:id — admin auth required; remove a product */
+router.delete("/products/:id", requireAdminAuth, async (req, res) => {
+  try {
+    const id = parseInt(String(req.params.id), 10);
+    if (isNaN(id)) {
+      res.status(400).json({ success: false, error: "Invalid product id" });
+      return;
+    }
+    const [deleted] = await db.delete(productsTable).where(eq(productsTable.id, id)).returning();
+    if (!deleted) {
+      res.status(404).json({ success: false, error: "Product not found" });
+      return;
+    }
+    res.json({ success: true });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    res.status(500).json({ success: false, error: message });
+  }
+});
+
 /* PATCH /api/products/:id — admin auth required; partial update of stock/active/images/etc */
 router.patch("/products/:id", requireAdminAuth, async (req, res) => {
   try {

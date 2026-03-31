@@ -148,8 +148,12 @@ export const api = {
     list: () => get<{ success: boolean; products: ApiProduct[] }>("/products"),
     listAll: () => get<{ success: boolean; products: ApiProduct[] }>("/products?all=true", true),
     get: (slug: string) => get<{ success: boolean; product: ApiProduct }>(`/products/${slug}`),
+    create: (data: Partial<ApiProduct>) =>
+      post<{ success: boolean; product: ApiProduct }>("/products", data, true),
     patch: (id: number, data: Partial<ApiProduct>) =>
       patch<{ success: boolean; product: ApiProduct }>(`/products/${id}`, data, true),
+    delete: (id: number) =>
+      del<{ success: boolean }>(`/products/${id}`, true),
   },
 
   orders: {

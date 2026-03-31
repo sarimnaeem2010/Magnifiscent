@@ -4,12 +4,10 @@ import {
   Server, FileText, Clock, Bell, RotateCcw, AlertCircle,
 } from "lucide-react";
 import {
-  getEmailApiUrl, saveEmailApiUrl,
-  getEmailAdminKey, saveEmailAdminKey,
-  getEmailLog, addEmailLog, type EmailLogEntry,
   DEFAULT_EMAIL_TEMPLATES, type EmailTemplateKey, type EmailTemplate, type EmailTemplates,
   DEFAULT_EMAIL_TOGGLES, type EmailToggles,
 } from "@/data/liveData";
+import { api } from "@/lib/api";
 
 const TEMPLATE_LABELS: Record<EmailTemplateKey, string> = {
   order_confirmation: "Order Confirmation",
@@ -46,6 +44,15 @@ type SmtpFormState = {
   host: string; port: number; secure: boolean;
   username: string; password: string;
   fromName: string; fromEmail: string; replyTo: string;
+};
+
+type EmailLogEntry = {
+  id: string;
+  to: string;
+  subject: string;
+  status: "sent" | "failed" | "pending";
+  date: string;
+  message: string;
 };
 
 const DEFAULT_SMTP: SmtpFormState = {
@@ -100,53 +107,45 @@ type Tab = "smtp" | "notifications" | "templates" | "log";
 
 export function AdminEmail() {
   const [activeTab, setActiveTab] = useState<Tab>("smtp");
-  const [apiUrl, setApiUrl] = useState(() => getEmailApiUrl());
-  const [apiUrlDraft, setApiUrlDraft] = useState(() => getEmailApiUrl());
-  const [adminKey, setAdminKey] = useState(() => getEmailAdminKey());
-  const [adminKeyDraft, setAdminKeyDraft] = useState(() => getEmailAdminKey());
   const [loadStatus, setLoadStatus] = useState<"idle" | "loading" | "loaded" | "error">("idle");
 
-  // SMTP form state (populated from API)
   const [smtp, setSmtp] = useState<SmtpFormState>({ ...DEFAULT_SMTP });
   const [smtpSaved, setSmtpSaved] = useState(false);
   const [smtpSaving, setSmtpSaving] = useState(false);
   const [smtpError, setSmtpError] = useState("");
   const [showPw, setShowPw] = useState(false);
 
-  // Notification toggles state
   const [toggles, setToggles] = useState<EmailToggles>({ ...DEFAULT_EMAIL_TOGGLES });
   const [togglesSaved, setTogglesSaved] = useState(false);
   const [togglesSaving, setTogglesSaving] = useState(false);
 
-  // Templates state
   const [templates, setTemplates] = useState<EmailTemplates>({ ...DEFAULT_EMAIL_TEMPLATES });
   const [templatesSaved, setTemplatesSaved] = useState(false);
   const [templatesSaving, setTemplatesSaving] = useState(false);
   const [activeTemplate, setActiveTemplate] = useState<EmailTemplateKey>("order_confirmation");
   const [showPreview, setShowPreview] = useState(false);
 
-  // Test email
   const [testEmail, setTestEmail] = useState("");
   const [testStatus, setTestStatus] = useState<"idle" | "sending" | "ok" | "error">("idle");
   const [testError, setTestError] = useState("");
 
-  // Log state
-  const [emailLog, setEmailLog] = useState<EmailLogEntry[]>(() => getEmailLog());
+  const [emailLog, setEmailLog] = useState<EmailLogEntry[]>([]);
 
-  const loadFromServer = useCallback(async (url: string, key?: string) => {
-    if (!url.trim()) return;
-    const authKey = key !== undefined ? key : adminKey;
+  const loadConfig = useCallback(async () => {
     setLoadStatus("loading");
     try {
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (authKey) headers["Authorization"] = `Bearer ${authKey}`;
-      const res = await fetch(`${url.replace(/\/$/, "")}/api/email-config`, { headers });
-      const data = await res.json();
-      if (res.ok && data.success && data.config) {
-        const { smtp: serverSmtp, toggles: serverToggles, templates: serverTemplates } = data.config;
-        if (serverSmtp) setSmtp({ ...DEFAULT_SMTP, ...serverSmtp });
-        if (serverToggles) setToggles({ ...DEFAULT_EMAIL_TOGGLES, ...serverToggles });
-        if (serverTemplates) setTemplates({ ...DEFAULT_EMAIL_TEMPLATES, ...serverTemplates });
+      const res = await api.emailConfig.get();
+      if (res.success && res.config) {
+        const config = res.config as {
+          smtp?: Partial<SmtpFormState>;
+          toggles?: Partial<EmailToggles>;
+          templates?: Partial<EmailTemplates>;
+          log?: EmailLogEntry[];
+        };
+        if (config.smtp) setSmtp({ ...DEFAULT_SMTP, ...config.smtp });
+        if (config.toggles) setToggles({ ...DEFAULT_EMAIL_TOGGLES, ...config.toggles });
+        if (config.templates) setTemplates({ ...DEFAULT_EMAIL_TEMPLATES, ...config.templates });
+        if (config.log) setEmailLog(config.log);
         setLoadStatus("loaded");
       } else {
         setLoadStatus("error");
@@ -156,43 +155,20 @@ export function AdminEmail() {
     }
   }, []);
 
-  // Load from server on mount if apiUrl is set
   useEffect(() => {
-    if (apiUrl) loadFromServer(apiUrl);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const handleSaveApiUrl = () => {
-    const trimmedUrl = apiUrlDraft.trim();
-    const trimmedKey = adminKeyDraft.trim();
-    setApiUrl(trimmedUrl);
-    setAdminKey(trimmedKey);
-    saveEmailApiUrl(trimmedUrl);
-    saveEmailAdminKey(trimmedKey);
-    if (trimmedUrl) loadFromServer(trimmedUrl, trimmedKey);
-  };
-
-  const authHeaders = (): Record<string, string> => {
-    const h: Record<string, string> = { "Content-Type": "application/json" };
-    if (adminKey) h["Authorization"] = `Bearer ${adminKey}`;
-    return h;
-  };
+    loadConfig();
+  }, [loadConfig]);
 
   const handleSaveSmtp = async () => {
-    if (!apiUrl) { setSmtpError("Set the API URL first."); return; }
     setSmtpSaving(true);
     setSmtpError("");
     try {
-      const res = await fetch(`${apiUrl.replace(/\/$/, "")}/api/email-config`, {
-        method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify({ smtp }),
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
+      const res = await api.emailConfig.put({ smtp });
+      if ((res as { success: boolean }).success) {
         setSmtpSaved(true);
         setTimeout(() => setSmtpSaved(false), 2500);
       } else {
-        setSmtpError(data.error ?? "Failed to save.");
+        setSmtpError("Failed to save SMTP settings.");
       }
     } catch (e: unknown) {
       setSmtpError(e instanceof Error ? e.message : "Network error");
@@ -201,37 +177,21 @@ export function AdminEmail() {
   };
 
   const handleSaveToggles = async () => {
-    if (!apiUrl) return;
     setTogglesSaving(true);
     try {
-      const res = await fetch(`${apiUrl.replace(/\/$/, "")}/api/email-config`, {
-        method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify({ toggles }),
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setTogglesSaved(true);
-        setTimeout(() => setTogglesSaved(false), 2500);
-      }
+      await api.emailConfig.put({ toggles });
+      setTogglesSaved(true);
+      setTimeout(() => setTogglesSaved(false), 2500);
     } catch { /* ignore */ }
     setTogglesSaving(false);
   };
 
   const handleSaveTemplates = async () => {
-    if (!apiUrl) return;
     setTemplatesSaving(true);
     try {
-      const res = await fetch(`${apiUrl.replace(/\/$/, "")}/api/email-config`, {
-        method: "POST",
-        headers: authHeaders(),
-        body: JSON.stringify({ templates }),
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setTemplatesSaved(true);
-        setTimeout(() => setTemplatesSaved(false), 2500);
-      }
+      await api.emailConfig.put({ templates });
+      setTemplatesSaved(true);
+      setTimeout(() => setTemplatesSaved(false), 2500);
     } catch { /* ignore */ }
     setTemplatesSaving(false);
   };
@@ -245,37 +205,34 @@ export function AdminEmail() {
     setTemplates((t) => ({ ...t, [activeTemplate]: { ...t[activeTemplate], [field]: val } }));
   };
 
+  const addToLog = (entry: Omit<EmailLogEntry, "id">) => {
+    setEmailLog((prev) => [{ ...entry, id: Date.now().toString() }, ...prev].slice(0, 50));
+  };
+
   const handleSendTestEmail = async () => {
-    if (!apiUrl.trim()) {
-      setTestStatus("error");
-      setTestError("Set and save the API URL in the SMTP Config tab first.");
-      setTimeout(() => setTestStatus("idle"), 4000);
-      return;
-    }
     const recipient = testEmail.trim() || smtp.fromEmail;
     setTestStatus("sending");
     try {
-      const res = await fetch(`${apiUrl.replace(/\/$/, "")}/api/send-email`, {
+      const res = await fetch("/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ type: "test", customerEmail: recipient }),
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        addEmailLog({ to: recipient, subject: "MagnifiScent — Test Email", status: "sent", date: new Date().toISOString(), message: `Message ID: ${data.messageId ?? "n/a"}` });
+        addToLog({ to: recipient, subject: "MagnifiScent — Test Email", status: "sent", date: new Date().toISOString(), message: `Message ID: ${data.messageId ?? "n/a"}` });
         setTestStatus("ok");
       } else {
-        addEmailLog({ to: recipient, subject: "MagnifiScent — Test Email", status: "failed", date: new Date().toISOString(), message: data.error ?? "Unknown error" });
+        addToLog({ to: recipient, subject: "MagnifiScent — Test Email", status: "failed", date: new Date().toISOString(), message: data.error ?? "Unknown error" });
         setTestStatus("error");
         setTestError(data.error ?? "Failed to send.");
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Network error";
-      addEmailLog({ to: recipient, subject: "MagnifiScent — Test Email", status: "failed", date: new Date().toISOString(), message: msg });
+      addToLog({ to: recipient, subject: "MagnifiScent — Test Email", status: "failed", date: new Date().toISOString(), message: msg });
       setTestStatus("error");
       setTestError(msg);
     }
-    setEmailLog(getEmailLog());
     setTimeout(() => setTestStatus("idle"), 4000);
   };
 
@@ -286,14 +243,32 @@ export function AdminEmail() {
     { key: "log", label: "Email Log", icon: <Clock size={14} /> },
   ];
 
-  const noApiUrl = !apiUrl.trim();
-
   return (
     <div className="max-w-3xl space-y-6">
       <div>
         <h1 className="text-xl font-bold text-gray-900">Email & SMTP</h1>
         <p className="text-sm text-gray-500 mt-1">Configure outgoing mail settings, toggle notifications, edit templates, and review send history.</p>
       </div>
+
+      {/* Connection status */}
+      {loadStatus === "loading" && (
+        <div className="flex items-center gap-2 text-sm text-gray-500">
+          <RefreshCw size={14} className="animate-spin" /> Loading email configuration…
+        </div>
+      )}
+      {loadStatus === "error" && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+          <AlertCircle size={16} className="text-amber-500 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm text-amber-700 font-semibold">Could not load email config</p>
+            <p className="text-xs text-amber-600 mt-0.5">The API server may not be running. Make sure the API server workflow is active.</p>
+            <button onClick={loadConfig} className="mt-2 text-xs font-bold text-amber-700 underline bg-transparent border-none cursor-pointer">Retry</button>
+          </div>
+        </div>
+      )}
+      {loadStatus === "loaded" && (
+        <p className="text-xs text-green-600 font-semibold flex items-center gap-1"><Check size={12} /> Email configuration loaded from server.</p>
+      )}
 
       {/* Tab bar */}
       <div className="flex border border-gray-200 rounded-xl overflow-hidden">
@@ -312,138 +287,90 @@ export function AdminEmail() {
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-3">
             <Mail size={18} className="text-blue-500 flex-shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-semibold text-blue-800">How email sending works</p>
+              <p className="text-sm font-semibold text-blue-800">Secure server-side email sending</p>
               <p className="text-xs text-blue-600 mt-1 leading-relaxed">
-                Enter your API server URL below. SMTP credentials are stored <strong>securely on the server</strong> — they are never sent from customer browsers. The server sends all transactional emails using the stored config.
+                SMTP credentials are stored <strong>securely on the server</strong> — they are never exposed to browsers. The API server sends all transactional emails using the stored configuration.
               </p>
             </div>
           </div>
 
-          {/* API URL card — must be set first */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
-            <h2 className="text-sm font-semibold text-gray-700 pb-2 border-b border-gray-100">API Server Connection</h2>
-            <div className="flex gap-3">
-              <input
-                type="url"
-                className="flex-1 px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-                placeholder="https://your-api-server.replit.app"
-                value={apiUrlDraft}
-                onChange={(e) => setApiUrlDraft(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") handleSaveApiUrl(); }}
-              />
+            <h2 className="text-sm font-semibold text-gray-700 pb-2 border-b border-gray-100">SMTP Server</h2>
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="SMTP Host" value={smtp.host} onChange={(v) => setSmtp((s) => ({ ...s, host: v }))} placeholder="smtp.gmail.com" />
+              <Field label="Port" value={smtp.port} onChange={(v) => setSmtp((s) => ({ ...s, port: parseInt(v) || 587 }))} type="number" placeholder="587" />
             </div>
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Admin API Key</label>
-              <input
-                type="password"
-                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-                placeholder="Paste your SESSION_SECRET or ADMIN_API_KEY here"
-                value={adminKeyDraft}
-                onChange={(e) => setAdminKeyDraft(e.target.value)}
-                onKeyDown={(e) => { if (e.key === "Enter") handleSaveApiUrl(); }}
-              />
-              <p className="text-xs text-gray-400 mt-1">Must match the <code className="text-xs bg-gray-100 px-1 rounded">SESSION_SECRET</code> (or <code className="text-xs bg-gray-100 px-1 rounded">ADMIN_API_KEY</code>) env var on the API server. This key is never sent to customers.</p>
+            <div className="flex items-center gap-3">
+              <ToggleSwitch enabled={smtp.secure} onToggle={() => setSmtp((s) => ({ ...s, secure: !s.secure }))} />
+              <div>
+                <p className="text-sm font-medium text-gray-700">Use SSL/TLS</p>
+                <p className="text-xs text-gray-400">Enable for port 465. Leave off for port 587 with STARTTLS.</p>
+              </div>
             </div>
-            <button onClick={handleSaveApiUrl}
-              className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white rounded-lg border-none cursor-pointer transition-colors"
-              style={{ background: loadStatus === "loaded" ? "#10b981" : "#111827" }}>
-              {loadStatus === "loading" ? <RefreshCw size={13} className="animate-spin" /> : loadStatus === "loaded" ? <Check size={13} /> : null}
-              {loadStatus === "loaded" ? "Connected" : loadStatus === "loading" ? "Connecting…" : "Connect & Load Config"}
-            </button>
-            {loadStatus === "error" && (
-              <p className="text-xs text-amber-600 flex items-center gap-1.5"><AlertCircle size={12} /> Could not connect. Check the URL, ensure the API server is running, and verify the API key matches.</p>
-            )}
-            {loadStatus === "loaded" && (
-              <p className="text-xs text-green-600">Connected to API server. SMTP settings loaded.</p>
-            )}
           </div>
 
-          {noApiUrl && (
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3">
-              <AlertCircle size={16} className="text-amber-500 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-amber-700">Enter and connect your API server URL above to configure SMTP settings.</p>
-            </div>
-          )}
-
-          <div className={`space-y-5 ${noApiUrl ? "opacity-50 pointer-events-none" : ""}`}>
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
-              <h2 className="text-sm font-semibold text-gray-700 pb-2 border-b border-gray-100">SMTP Server</h2>
-              <div className="grid grid-cols-2 gap-4">
-                <Field label="SMTP Host" value={smtp.host} onChange={(v) => setSmtp((s) => ({ ...s, host: v }))} placeholder="smtp.gmail.com" />
-                <Field label="Port" value={smtp.port} onChange={(v) => setSmtp((s) => ({ ...s, port: parseInt(v) || 587 }))} type="number" placeholder="587" />
-              </div>
-              <div className="flex items-center gap-3">
-                <ToggleSwitch enabled={smtp.secure} onToggle={() => setSmtp((s) => ({ ...s, secure: !s.secure }))} />
-                <div>
-                  <p className="text-sm font-medium text-gray-700">Use SSL/TLS</p>
-                  <p className="text-xs text-gray-400">Enable for port 465. Leave off for port 587 with STARTTLS.</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
-              <h2 className="text-sm font-semibold text-gray-700 pb-2 border-b border-gray-100">Authentication</h2>
-              <Field label="Username / Email" value={smtp.username} onChange={(v) => setSmtp((s) => ({ ...s, username: v }))} placeholder="hello@magnifiscent.com" type="email" />
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Password / App Password</label>
-                <div className="relative">
-                  <input
-                    type={showPw ? "text" : "password"}
-                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 pr-10"
-                    value={smtp.password}
-                    onChange={(e) => setSmtp((s) => ({ ...s, password: e.target.value }))}
-                    placeholder={loadStatus === "loaded" ? "Leave blank to keep existing" : "App password or SMTP password"}
-                  />
-                  <button type="button" onClick={() => setShowPw((p) => !p)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 bg-transparent border-none cursor-pointer">
-                    {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
-                  </button>
-                </div>
-                <p className="text-xs text-gray-400 mt-1">For Gmail, use an App Password from your Google Account security settings.</p>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
-              <h2 className="text-sm font-semibold text-gray-700 pb-2 border-b border-gray-100">Sender Identity</h2>
-              <div className="grid grid-cols-2 gap-4">
-                <Field label="From Name" value={smtp.fromName} onChange={(v) => setSmtp((s) => ({ ...s, fromName: v }))} placeholder="MagnifiScent" />
-                <Field label="From Email" value={smtp.fromEmail} onChange={(v) => setSmtp((s) => ({ ...s, fromEmail: v }))} placeholder="hello@magnifiscent.com" type="email" />
-              </div>
-              <Field label="Reply-To Email" value={smtp.replyTo} onChange={(v) => setSmtp((s) => ({ ...s, replyTo: v }))} placeholder="support@magnifiscent.com" type="email" />
-            </div>
-
-            {smtpError && (
-              <p className="text-xs text-red-500 flex items-center gap-1.5"><AlertCircle size={12} />{smtpError}</p>
-            )}
-
-            <button onClick={handleSaveSmtp} disabled={smtpSaving}
-              className="flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white rounded-lg border-none cursor-pointer transition-colors disabled:opacity-60"
-              style={{ background: smtpSaved ? "#10b981" : "#111827" }}>
-              {smtpSaving ? <RefreshCw size={14} className="animate-spin" /> : smtpSaved ? <><Check size={14} />Saved!</> : "Save SMTP Settings"}
-            </button>
-
-            {/* Test Email */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
-              <h2 className="text-sm font-semibold text-gray-700 pb-2 border-b border-gray-100">Send Test Email</h2>
-              <p className="text-xs text-gray-500">Send a test email to verify your SMTP settings. Defaults to your configured From Email address.</p>
-              <div className="flex gap-3">
-                <input type="email"
-                  className="flex-1 px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-                  placeholder={smtp.fromEmail || "recipient@example.com"}
-                  value={testEmail}
-                  onChange={(e) => setTestEmail(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === "Enter") handleSendTestEmail(); }}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
+            <h2 className="text-sm font-semibold text-gray-700 pb-2 border-b border-gray-100">Authentication</h2>
+            <Field label="Username / Email" value={smtp.username} onChange={(v) => setSmtp((s) => ({ ...s, username: v }))} placeholder="hello@magnifiscent.com" type="email" />
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Password / App Password</label>
+              <div className="relative">
+                <input
+                  type={showPw ? "text" : "password"}
+                  className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 pr-10"
+                  value={smtp.password}
+                  onChange={(e) => setSmtp((s) => ({ ...s, password: e.target.value }))}
+                  placeholder={loadStatus === "loaded" ? "Leave blank to keep existing" : "App password or SMTP password"}
                 />
-                <button onClick={handleSendTestEmail} disabled={testStatus === "sending"}
-                  className="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white rounded-lg border-none cursor-pointer transition-colors disabled:opacity-60"
-                  style={{ background: testStatus === "ok" ? "#10b981" : testStatus === "error" ? "#ef4444" : "#111827" }}>
-                  {testStatus === "sending" ? <RefreshCw size={14} className="animate-spin" /> : <Send size={14} />}
-                  {testStatus === "idle" ? "Send Test" : testStatus === "sending" ? "Sending…" : testStatus === "ok" ? "Sent!" : "Failed"}
+                <button type="button" onClick={() => setShowPw((p) => !p)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 bg-transparent border-none cursor-pointer">
+                  {showPw ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
               </div>
-              {testStatus === "error" && testError && <p className="text-xs text-red-500">{testError}</p>}
-              {testStatus === "ok" && <p className="text-xs text-green-600">Test email sent successfully! Check your inbox.</p>}
+              <p className="text-xs text-gray-400 mt-1">For Gmail, use an App Password from your Google Account security settings.</p>
             </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
+            <h2 className="text-sm font-semibold text-gray-700 pb-2 border-b border-gray-100">Sender Identity</h2>
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="From Name" value={smtp.fromName} onChange={(v) => setSmtp((s) => ({ ...s, fromName: v }))} placeholder="MagnifiScent" />
+              <Field label="From Email" value={smtp.fromEmail} onChange={(v) => setSmtp((s) => ({ ...s, fromEmail: v }))} placeholder="hello@magnifiscent.com" type="email" />
+            </div>
+            <Field label="Reply-To Email" value={smtp.replyTo} onChange={(v) => setSmtp((s) => ({ ...s, replyTo: v }))} placeholder="support@magnifiscent.com" type="email" />
+          </div>
+
+          {smtpError && (
+            <p className="text-xs text-red-500 flex items-center gap-1.5"><AlertCircle size={12} />{smtpError}</p>
+          )}
+
+          <button onClick={handleSaveSmtp} disabled={smtpSaving}
+            className="flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white rounded-lg border-none cursor-pointer transition-colors disabled:opacity-60"
+            style={{ background: smtpSaved ? "#10b981" : "#111827" }}>
+            {smtpSaving ? <RefreshCw size={14} className="animate-spin" /> : smtpSaved ? <><Check size={14} />Saved!</> : "Save SMTP Settings"}
+          </button>
+
+          {/* Test Email */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
+            <h2 className="text-sm font-semibold text-gray-700 pb-2 border-b border-gray-100">Send Test Email</h2>
+            <p className="text-xs text-gray-500">Send a test email to verify your SMTP settings. Defaults to your configured From Email address.</p>
+            <div className="flex gap-3">
+              <input type="email"
+                className="flex-1 px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                placeholder={smtp.fromEmail || "recipient@example.com"}
+                value={testEmail}
+                onChange={(e) => setTestEmail(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") handleSendTestEmail(); }}
+              />
+              <button onClick={handleSendTestEmail} disabled={testStatus === "sending"}
+                className="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white rounded-lg border-none cursor-pointer transition-colors disabled:opacity-60"
+                style={{ background: testStatus === "ok" ? "#10b981" : testStatus === "error" ? "#ef4444" : "#111827" }}>
+                {testStatus === "sending" ? <RefreshCw size={14} className="animate-spin" /> : <Send size={14} />}
+                {testStatus === "idle" ? "Send Test" : testStatus === "sending" ? "Sending…" : testStatus === "ok" ? "Sent!" : "Failed"}
+              </button>
+            </div>
+            {testStatus === "error" && testError && <p className="text-xs text-red-500">{testError}</p>}
+            {testStatus === "ok" && <p className="text-xs text-green-600">Test email sent successfully! Check your inbox.</p>}
           </div>
         </div>
       )}
@@ -451,12 +378,6 @@ export function AdminEmail() {
       {/* Notifications Tab */}
       {activeTab === "notifications" && (
         <div className="space-y-5">
-          {noApiUrl && (
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3">
-              <AlertCircle size={16} className="text-amber-500 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-amber-700">Connect your API server in the SMTP Config tab to save notification settings.</p>
-            </div>
-          )}
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100">
               <h2 className="text-sm font-semibold text-gray-700">Email Notification Types</h2>
@@ -491,7 +412,7 @@ export function AdminEmail() {
               ))}
             </div>
           </div>
-          <button onClick={handleSaveToggles} disabled={noApiUrl || togglesSaving}
+          <button onClick={handleSaveToggles} disabled={togglesSaving}
             className="flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white rounded-lg border-none cursor-pointer transition-colors disabled:opacity-50"
             style={{ background: togglesSaved ? "#10b981" : "#111827" }}>
             {togglesSaving ? <RefreshCw size={14} className="animate-spin" /> : togglesSaved ? <><Check size={14} />Saved!</> : "Save Notification Settings"}
@@ -502,12 +423,6 @@ export function AdminEmail() {
       {/* Templates Tab */}
       {activeTab === "templates" && (
         <div className="space-y-5">
-          {noApiUrl && (
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3">
-              <AlertCircle size={16} className="text-amber-500 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-amber-700">Connect your API server in the SMTP Config tab to save template changes.</p>
-            </div>
-          )}
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div className="flex border-b border-gray-100 overflow-x-auto">
               {(Object.keys(TEMPLATE_LABELS) as EmailTemplateKey[]).map((key) => (
@@ -552,7 +467,7 @@ export function AdminEmail() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <button onClick={handleSaveTemplates} disabled={noApiUrl || templatesSaving}
+            <button onClick={handleSaveTemplates} disabled={templatesSaving}
               className="flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white rounded-lg border-none cursor-pointer transition-colors disabled:opacity-50"
               style={{ background: templatesSaved ? "#10b981" : "#111827" }}>
               {templatesSaving ? <RefreshCw size={14} className="animate-spin" /> : templatesSaved ? <><Check size={14} />Saved!</> : "Save Templates"}
@@ -571,7 +486,7 @@ export function AdminEmail() {
           <div className="flex items-center justify-between">
             <p className="text-sm text-gray-500">Last 50 email send attempts, newest first.</p>
             {emailLog.length > 0 && (
-              <button onClick={() => { localStorage.removeItem("admin_email_log"); setEmailLog([]); }}
+              <button onClick={() => setEmailLog([])}
                 className="flex items-center gap-1.5 text-xs text-red-500 hover:text-red-700 bg-transparent border-none cursor-pointer">
                 <Trash2 size={12} />Clear Log
               </button>
