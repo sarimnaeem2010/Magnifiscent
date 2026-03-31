@@ -246,10 +246,11 @@ export default function Home() {
   const genderBanners = getGenderBanners();
   const notesImgs = getNotesImages();
   const headings = getHomeHeadings();
-  const adminReels = getInstagramReels();
-  const instaPosts = adminReels.length > 0
-    ? adminReels.map((r) => ({ img: r.img || PRODUCTS[0].img, likes: r.likes, tag: r.label, label: r.label, url: r.url }))
-    : INSTAGRAM_POSTS.map((p) => ({ ...p, url: "https://instagram.com" }));
+  const instaPosts = (() => {
+    const reels = getInstagramReels();
+    if (reels.length > 0) return reels.map((r) => ({ img: r.img || PRODUCTS[0].img, likes: r.likes, tag: r.label, label: r.label, url: r.url }));
+    return INSTAGRAM_POSTS.map((p) => ({ ...p, url: "https://instagram.com" }));
+  })();
 
   const [liveProducts] = useState(() => getActiveProducts());
   const filteredProducts = productFilter === "all"

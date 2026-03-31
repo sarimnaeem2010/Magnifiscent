@@ -1,6 +1,25 @@
 import React, { useState, useRef } from "react";
-import { Plus, Trash2, ImageIcon, Link, Save, CheckCircle2, Instagram } from "lucide-react";
+import { Plus, Trash2, ImageIcon, Save, CheckCircle2, Instagram } from "lucide-react";
 import { getInstagramReels, saveInstagramReels, type InstagramReel } from "@/data/liveData";
+import { PRODUCTS } from "@/data/products";
+
+const DEFAULT_REELS: InstagramReel[] = [
+  { id: "d1", url: "https://instagram.com", img: PRODUCTS[0].img, label: "NEW LAUNCH",  likes: 241 },
+  { id: "d2", url: "https://instagram.com", img: PRODUCTS[4].img, label: "LONG LASTING", likes: 387 },
+  { id: "d3", url: "https://instagram.com", img: PRODUCTS[1].img, label: "DARK ANGEL",  likes: 192 },
+  { id: "d4", url: "https://instagram.com", img: PRODUCTS[5].img, label: "ALLURE",       likes: 518 },
+  { id: "d5", url: "https://instagram.com", img: PRODUCTS[2].img, label: "RISING SUN",   likes: 164 },
+  { id: "d6", url: "https://instagram.com", img: PRODUCTS[3].img, label: "SIGMA",        likes: 203 },
+  { id: "d7", url: "https://instagram.com", img: PRODUCTS[0].img, label: "BEST SELLER",  likes: 391 },
+  { id: "d8", url: "https://instagram.com", img: PRODUCTS[4].img, label: "FOR HIM",      likes: 276 },
+];
+
+function seedIfEmpty(): InstagramReel[] {
+  const saved = getInstagramReels();
+  if (saved.length > 0) return saved;
+  saveInstagramReels(DEFAULT_REELS);
+  return DEFAULT_REELS;
+}
 
 function compressImage(file: File, maxW: number, maxH: number, quality = 0.8): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -29,7 +48,7 @@ function compressImage(file: File, maxW: number, maxH: number, quality = 0.8): P
 const EMPTY_FORM = { url: "", label: "", likes: "", img: "" };
 
 export function AdminInstagram() {
-  const [reels, setReels] = useState<InstagramReel[]>(() => getInstagramReels());
+  const [reels, setReels] = useState<InstagramReel[]>(() => seedIfEmpty());
   const [saved, setSaved] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
