@@ -1,5 +1,6 @@
 import { Router } from "express";
 import nodemailer from "nodemailer";
+import { readConfig } from "./emailConfig";
 
 const router = Router();
 
@@ -8,15 +9,14 @@ function replacePlaceholders(template: string, vars: Record<string, string>): st
   return template.replace(/\{\{(\w+)\}\}/g, (_, key) => vars[key] ?? "");
 }
 
-/* ── Server-side default templates (used as fallback only) ── */
+/* ── Server-side default templates (fallback when admin hasn't customised) ── */
 const SERVER_DEFAULT_TEMPLATES: Record<string, { subject: string; body: string }> = {
   order_confirmation: {
     subject: "Your MagnifiScent Order is Confirmed!",
     body: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#fff;border:1px solid #e5e7eb;border-radius:8px">
 <h2 style="font-family:Georgia,serif;color:#111827;margin-top:0">Order Confirmed!</h2>
 <p>Dear {{customer_name}},</p>
-<p>Thank you for your order! Your order <strong>{{order_id}}</strong> totalling <strong>{{order_total}}</strong> has been received and is being processed.</p>
-<p>Your order will be dispatched within 1–2 business days.</p>
+<p>Thank you for your order <strong>{{order_id}}</strong> totalling <strong>{{order_total}}</strong>. It is now being processed and will be dispatched within 1–2 business days.</p>
 <p style="color:#6b7280;font-size:14px"><em>— The {{store_name}} Team</em></p>
 </div>`,
   },
@@ -52,7 +52,7 @@ const SERVER_DEFAULT_TEMPLATES: Record<string, { subject: string; body: string }
     body: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#fff;border:1px solid #e5e7eb;border-radius:8px">
 <h2 style="font-family:Georgia,serif;color:#111827;margin-top:0">Welcome to {{store_name}}!</h2>
 <p>Dear {{customer_name}},</p>
-<p>Thank you for placing your first order with us. Your order <strong>{{order_id}}</strong> is being processed.</p>
+<p>Thank you for placing your first order <strong>{{order_id}}</strong> with us!</p>
 <p style="color:#6b7280;font-size:14px"><em>— The {{store_name}} Team</em></p>
 </div>`,
   },
@@ -61,7 +61,7 @@ const SERVER_DEFAULT_TEMPLATES: Record<string, { subject: string; body: string }
     body: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#fff;border:1px solid #e5e7eb;border-radius:8px">
 <h2 style="font-family:Georgia,serif;color:#111827;margin-top:0">New Order Alert</h2>
 <p>Customer: <strong>{{customer_name}}</strong></p>
-<p>Order: <strong>{{order_id}}</strong> — Total: <strong>{{order_total}}</strong></p>
+<p>Order ID: <strong>{{order_id}}</strong> — Total: <strong>{{order_total}}</strong></p>
 </div>`,
   },
   low_stock_alert: {
@@ -83,7 +83,6 @@ const SERVER_DEFAULT_TEMPLATES: Record<string, { subject: string; body: string }
 
 /* Simple in-memory rate limiter (per SMTP user, max 20 req/min) */
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-
 function checkRateLimit(key: string): boolean {
   const now = Date.now();
   const entry = rateLimitMap.get(key);
@@ -99,57 +98,66 @@ function checkRateLimit(key: string): boolean {
 /*
  * POST /api/send-email
  *
- * Accepts:
- *   smtp: { host, port, secure, auth: { user, pass } }  — required
- *   from: string  — "Name <email>"
- *   replyTo?: string
- *   to: string  — recipient (for customer emails)
- *              OR use customerEmail for the checkout contract
- *   type: string  — template key ("order_confirmation", "test", etc.)
- *
- *   Business payload (checkout contract):
+ * Callers provide ONLY business context:
+ *   type: string — email type key
  *   orderId?, customerEmail?, customerName?, orderTotal?, items?
+ *   variables?: Record<string, string> — extra variable overrides
  *
- *   Template override (uses admin-saved template if provided):
- *   template?: { subject: string; body: string }
+ * The server:
+ *   1. Reads SMTP config from its own server-side storage (email-config.json)
+ *   2. Checks the toggle for the requested type
+ *   3. Resolves template (admin-saved first, server default as fallback)
+ *   4. Replaces {{variables}} and sends via nodemailer
  *
- *   variables?: Record<string, string>  — merged with auto-mapped business fields
- *
- * Security: rate-limited per SMTP user; validates smtp host is present.
+ * SMTP credentials never travel through the client → server path for normal sends.
+ * Admin test-sends (type: "test") work the same way once SMTP is stored server-side.
  */
 router.post("/send-email", async (req, res) => {
   try {
-    const {
-      smtp, from, replyTo,
-      to, customerEmail,
-      type,
-      orderId, customerName, orderTotal, items,
-      template: clientTemplate,
-      variables: extraVars,
-    } = req.body;
+    const { type, orderId, customerEmail, customerName, orderTotal, items, variables: extraVars } = req.body;
 
     if (!type) {
       res.status(400).json({ success: false, error: "Missing required field: type" });
       return;
     }
-    if (!smtp?.host || !smtp?.auth?.user || !smtp?.auth?.pass) {
-      res.status(400).json({ success: false, error: "Missing or incomplete SMTP config (host, auth.user, auth.pass required)" });
+
+    // Load server-side config
+    const config = await readConfig();
+
+    if (!config.smtp?.host || !config.smtp?.username || !config.smtp?.password) {
+      res.status(503).json({ success: false, error: "SMTP not configured on server. Save SMTP settings from the admin panel first." });
       return;
     }
 
-    const recipient = customerEmail ?? to;
-    if (!recipient) {
-      res.status(400).json({ success: false, error: "Missing recipient: provide 'to' or 'customerEmail'" });
+    // Check toggle (skip for "test" sends)
+    if (type !== "test" && config.toggles[type as keyof typeof config.toggles] === false) {
+      res.json({ success: true, skipped: true, reason: `Notification type '${type}' is disabled.` });
       return;
     }
 
-    // Rate limit by SMTP user to prevent open relay abuse
-    if (!checkRateLimit(smtp.auth.user)) {
+    const recipient = customerEmail;
+    if (!recipient && type !== "new_order_alert" && type !== "low_stock_alert") {
+      res.status(400).json({ success: false, error: "Missing required field: customerEmail" });
+      return;
+    }
+
+    // Rate limit by SMTP username
+    if (!checkRateLimit(config.smtp.username)) {
       res.status(429).json({ success: false, error: "Rate limit exceeded. Try again in a minute." });
       return;
     }
 
-    // Build variables map: auto-map business payload fields + caller-supplied extras
+    // Resolve template: admin-saved (from server config) > server hardcoded default
+    const savedTpl = config.templates[type];
+    const defaultTpl = SERVER_DEFAULT_TEMPLATES[type];
+    const tpl = (savedTpl?.subject && savedTpl?.body) ? savedTpl : defaultTpl;
+
+    if (!tpl) {
+      res.status(400).json({ success: false, error: `Unknown email type: ${type}` });
+      return;
+    }
+
+    // Build variables map
     const vars: Record<string, string> = {
       customer_name: customerName ?? "",
       order_id: orderId ?? "",
@@ -158,30 +166,28 @@ router.post("/send-email", async (req, res) => {
       ...(extraVars ?? {}),
     };
 
-    // Resolve template: prefer admin-saved template (sent from client), fall back to server defaults
-    const tpl = clientTemplate ?? SERVER_DEFAULT_TEMPLATES[type];
-    if (!tpl) {
-      res.status(400).json({ success: false, error: `Unknown email type: ${type}` });
-      return;
-    }
-
     const subject = replacePlaceholders(tpl.subject, vars);
     const html = replacePlaceholders(tpl.body, vars);
 
     const transporter = nodemailer.createTransport({
-      host: smtp.host,
-      port: smtp.port ?? 587,
-      secure: smtp.secure ?? false,
+      host: config.smtp.host,
+      port: config.smtp.port ?? 587,
+      secure: config.smtp.secure ?? false,
       auth: {
-        user: smtp.auth.user,
-        pass: smtp.auth.pass,
+        user: config.smtp.username,
+        pass: config.smtp.password,
       },
     });
 
+    // Determine recipient: for admin alerts, send to the configured fromEmail
+    const to = (type === "new_order_alert" || type === "low_stock_alert")
+      ? config.smtp.fromEmail
+      : (recipient ?? config.smtp.fromEmail);
+
     const info = await transporter.sendMail({
-      from: from ?? smtp.auth.user,
-      replyTo: replyTo ?? undefined,
-      to: recipient,
+      from: `"${config.smtp.fromName}" <${config.smtp.fromEmail}>`,
+      replyTo: config.smtp.replyTo || undefined,
+      to,
       subject,
       html,
     });

@@ -574,6 +574,25 @@ export function saveSmtpSettings(s: SmtpSettings): void {
   localStorage.setItem("admin_smtp_settings", JSON.stringify(s));
 }
 
+/* ─── Email API URL (stored locally — just a URL, not credentials) ─── */
+export function getEmailApiUrl(): string {
+  try {
+    const s = localStorage.getItem("admin_email_api_url");
+    if (s) return s;
+    // migrate from old smtp settings key
+    const smtp = localStorage.getItem("admin_smtp_settings") || localStorage.getItem("admin_email_settings");
+    if (smtp) {
+      const parsed = JSON.parse(smtp);
+      return parsed.apiUrl ?? "";
+    }
+  } catch {}
+  return "";
+}
+
+export function saveEmailApiUrl(url: string): void {
+  localStorage.setItem("admin_email_api_url", url);
+}
+
 /* ─── Email Templates ─── */
 export type EmailTemplateKey =
   | "order_confirmation"

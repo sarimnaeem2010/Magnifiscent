@@ -4,7 +4,7 @@ import { Footer } from "@/components/layout/Footer";
 import { ChevronRight, Shield, Lock, Truck, Tag } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useLocation } from "wouter";
-import { getPaymentSettings, getExtendedSettings, getStoreFrontSettings, applyDiscountCode, getSmtpSettings, getEmailToggles, getEmailTemplates } from "@/data/liveData";
+import { getPaymentSettings, getExtendedSettings, getStoreFrontSettings, applyDiscountCode, getEmailApiUrl } from "@/data/liveData";
 
 export default function Checkout() {
   const { items, total, clearCart } = useCart();
@@ -61,39 +61,23 @@ export default function Checkout() {
   }
 
   function fireOrderConfirmationEmail(orderId: string) {
-    try {
-      const smtpSettings = getSmtpSettings();
-      const emailToggles = getEmailToggles();
-      if (!emailToggles.order_confirmation) return;
-      if (!smtpSettings.apiUrl || !form.email) return;
-      const savedTemplate = getEmailTemplates().order_confirmation;
-      fetch(`${smtpSettings.apiUrl.replace(/\/$/, "")}/api/send-email`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "order_confirmation",
-          orderId,
-          customerEmail: form.email,
-          customerName: `${form.firstName} ${form.lastName}`.trim(),
-          orderTotal: `${cur} ${orderTotal.toFixed(2)}`,
-          items: items.map((i) => ({ name: i.product.name, qty: i.qty, price: i.product.priceNum })),
-          smtp: {
-            host: smtpSettings.host,
-            port: smtpSettings.port,
-            secure: smtpSettings.secure,
-            auth: { user: smtpSettings.username, pass: smtpSettings.password },
-          },
-          from: `"${smtpSettings.fromName}" <${smtpSettings.fromEmail}>`,
-          replyTo: smtpSettings.replyTo,
-          template: savedTemplate,
-          variables: {
-            store_name: storeSettings.storeName || "MagnifiScent",
-          },
-        }),
-      }).catch(() => {});
-    } catch {
-      // fire-and-forget: never block the order success UX
-    }
+    const apiUrl = getEmailApiUrl();
+    if (!apiUrl || !form.email) return;
+    // Send only business context — the server resolves SMTP config, toggles,
+    // and templates from its own server-side storage. No credentials in transit.
+    fetch(`${apiUrl.replace(/\/$/, "")}/api/send-email`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "order_confirmation",
+        orderId,
+        customerEmail: form.email,
+        customerName: `${form.firstName} ${form.lastName}`.trim(),
+        orderTotal: `${cur} ${orderTotal.toFixed(2)}`,
+        items: items.map((i) => ({ name: i.product.name, qty: i.qty, price: i.product.priceNum })),
+        variables: { store_name: storeSettings.storeName || "MagnifiScent" },
+      }),
+    }).catch(() => {});
   }
 
   function handleSubmit(e: React.FormEvent) {
