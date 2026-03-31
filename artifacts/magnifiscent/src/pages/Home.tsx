@@ -12,6 +12,7 @@ import { useCart } from "@/context/CartContext";
 import { useLocation } from "wouter";
 import {
   getHeroSlides, getGenderBanners, getNotesImages, getInstagramReels, getHomeHeadings,
+  getDealCustomImages,
   type HeroSlide,
 } from "@/data/liveData";
 
@@ -38,6 +39,7 @@ const REVIEWS = [
 /* ─── Deals ─── */
 const DEALS = [
   {
+    id: "iconic-duo",
     name: "THE ICONIC DUO",
     img1: PRODUCTS[4].img,
     img2: PRODUCTS[0].img,
@@ -47,6 +49,7 @@ const DEALS = [
     desc: "Two signature fragrances paired in one exclusive combo — one bold, one floral.",
   },
   {
+    id: "floral-dream",
     name: "FLORAL DREAM PACK",
     img1: PRODUCTS[0].img,
     img2: PRODUCTS[3].img,
@@ -56,6 +59,7 @@ const DEALS = [
     desc: "CHIC and SIGMA — warm and feminine florals combined in a stunning gift set.",
   },
   {
+    id: "dark-allure",
     name: "DARK ALLURE DUO",
     img1: PRODUCTS[1].img,
     img2: PRODUCTS[5].img,
@@ -65,6 +69,7 @@ const DEALS = [
     desc: "Dark Angel meets Allure — deeply mysterious and seductive, for the bold woman.",
   },
   {
+    id: "fresh-bloom",
     name: "FRESH BLOOM DUO",
     img1: PRODUCTS[2].img,
     img2: PRODUCTS[0].img,
@@ -253,6 +258,7 @@ export default function Home() {
   const genderBanners = getGenderBanners();
   const notesImgs = getNotesImages();
   const headings = getHomeHeadings();
+  const dealImgs = getDealCustomImages();
   const instaPosts = (() => {
     const reels = getInstagramReels();
     if (reels.length > 0) return reels.map((r) => ({ img: r.img || PRODUCTS[0].img, likes: r.likes, tag: r.label, label: r.label, url: r.url }));
@@ -281,7 +287,13 @@ export default function Home() {
             </button>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {DEALS.map((d) => <DealCard key={d.name} {...d} />)}
+            {DEALS.map((d) => (
+                <DealCard
+                  key={d.id}
+                  {...d}
+                  img1={dealImgs[d.id] || d.img1}
+                />
+              ))}
           </div>
         </div>
       </section>
