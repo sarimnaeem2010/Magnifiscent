@@ -439,3 +439,229 @@ export function getPolicyPages(): PolicyPages {
 export function savePolicyPages(pages: PolicyPages): void {
   localStorage.setItem("admin_policy_pages", JSON.stringify(pages));
 }
+
+/* ─── Extended Store Settings ─── */
+export type ExtendedSettings = {
+  seoTitle: string;
+  seoDescription: string;
+  seoOgImage: string;
+  shippingRate: number;
+  shippingCarrier: string;
+  taxRate: number;
+  showTaxInCart: boolean;
+  ga4Id: string;
+  fbPixelId: string;
+  maintenanceMode: boolean;
+  maintenanceMessage: string;
+};
+
+export const DEFAULT_EXTENDED_SETTINGS: ExtendedSettings = {
+  seoTitle: "MagnifiScent — Premium Eau de Parfum",
+  seoDescription: "Discover MagnifiScent's collection of premium Eau de Parfum fragrances for men and women. Authentic, long-lasting luxury perfumes.",
+  seoOgImage: "",
+  shippingRate: 200,
+  shippingCarrier: "TCS Courier",
+  taxRate: 0,
+  showTaxInCart: false,
+  ga4Id: "",
+  fbPixelId: "",
+  maintenanceMode: false,
+  maintenanceMessage: "We're making some updates to bring you a better experience. We'll be back very soon!",
+};
+
+export function getExtendedSettings(): ExtendedSettings {
+  try {
+    const s = localStorage.getItem("admin_extended_settings");
+    if (s) return { ...DEFAULT_EXTENDED_SETTINGS, ...JSON.parse(s) };
+  } catch {}
+  return { ...DEFAULT_EXTENDED_SETTINGS };
+}
+
+export function saveExtendedSettings(s: ExtendedSettings): void {
+  localStorage.setItem("admin_extended_settings", JSON.stringify(s));
+}
+
+/* ─── Discount Codes ─── */
+export type DiscountCode = {
+  id: string;
+  code: string;
+  type: "percent" | "fixed";
+  value: number;
+  active: boolean;
+  expiry: string;
+};
+
+export function getDiscountCodes(): DiscountCode[] {
+  try {
+    const s = localStorage.getItem("admin_discount_codes");
+    if (s) return JSON.parse(s);
+  } catch {}
+  return [];
+}
+
+export function saveDiscountCodes(codes: DiscountCode[]): void {
+  localStorage.setItem("admin_discount_codes", JSON.stringify(codes));
+}
+
+export function applyDiscountCode(
+  code: string,
+  subtotal: number
+): { valid: boolean; discount: number; message: string; codeObj?: DiscountCode } {
+  const codes = getDiscountCodes();
+  const found = codes.find(
+    (c) => c.code.toUpperCase() === code.toUpperCase().trim() && c.active
+  );
+  if (!found) return { valid: false, discount: 0, message: "Invalid or inactive discount code." };
+  if (found.expiry) {
+    const expiry = new Date(found.expiry);
+    expiry.setHours(23, 59, 59);
+    if (expiry < new Date()) {
+      return { valid: false, discount: 0, message: "This discount code has expired." };
+    }
+  }
+  const discount =
+    found.type === "percent"
+      ? Math.min(subtotal * (found.value / 100), subtotal)
+      : Math.min(found.value, subtotal);
+  return {
+    valid: true,
+    discount,
+    message:
+      found.type === "percent"
+        ? `${found.value}% discount applied!`
+        : `Rs. ${found.value.toFixed(0)} discount applied!`,
+    codeObj: found,
+  };
+}
+
+/* ─── Email Settings ─── */
+export type EmailSettings = {
+  host: string;
+  port: number;
+  secure: boolean;
+  username: string;
+  password: string;
+  fromName: string;
+  fromEmail: string;
+  replyTo: string;
+  apiUrl: string;
+};
+
+export const DEFAULT_EMAIL_SETTINGS: EmailSettings = {
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false,
+  username: "",
+  password: "",
+  fromName: "MagnifiScent",
+  fromEmail: "hello@magnifiscent.com",
+  replyTo: "hello@magnifiscent.com",
+  apiUrl: "",
+};
+
+export type EmailTemplateKey = "order_confirmation" | "contact_reply" | "shipping_update";
+
+export type EmailTemplate = {
+  subject: string;
+  body: string;
+};
+
+export type EmailTemplates = Record<EmailTemplateKey, EmailTemplate>;
+
+const DEFAULT_EMAIL_TEMPLATES: EmailTemplates = {
+  order_confirmation: {
+    subject: "Your MagnifiScent Order is Confirmed! 🎉",
+    body: `<h2>Thank you for your order!</h2>
+<p>Dear {{firstName}},</p>
+<p>We've received your order and it's being processed. Here are your order details:</p>
+<table>
+  <tr><td><strong>Order ID:</strong></td><td>{{orderId}}</td></tr>
+  <tr><td><strong>Total:</strong></td><td>{{total}}</td></tr>
+  <tr><td><strong>Payment:</strong></td><td>{{paymentMethod}}</td></tr>
+  <tr><td><strong>Shipping to:</strong></td><td>{{address}}</td></tr>
+</table>
+<p>Your order will be dispatched within 1-2 business days via {{carrier}}.</p>
+<p>Thank you for choosing MagnifiScent!</p>
+<p><em>— The MagnifiScent Team</em></p>`,
+  },
+  contact_reply: {
+    subject: "We received your message — MagnifiScent",
+    body: `<h2>Thank you for reaching out!</h2>
+<p>Dear {{firstName}},</p>
+<p>We've received your message and will get back to you within 24-48 hours.</p>
+<p>In the meantime, you can browse our collection at <a href="https://magnifiscent.com">magnifiscent.com</a>.</p>
+<p><em>— The MagnifiScent Team</em></p>`,
+  },
+  shipping_update: {
+    subject: "Your MagnifiScent order has been shipped! 📦",
+    body: `<h2>Your order is on its way!</h2>
+<p>Dear {{firstName}},</p>
+<p>Great news — your order <strong>{{orderId}}</strong> has been shipped via {{carrier}}.</p>
+<p><strong>Tracking Number:</strong> {{trackingNumber}}</p>
+<p>Estimated delivery: 3-5 business days.</p>
+<p><em>— The MagnifiScent Team</em></p>`,
+  },
+};
+
+export function getEmailSettings(): EmailSettings {
+  try {
+    const s = localStorage.getItem("admin_email_settings");
+    if (s) return { ...DEFAULT_EMAIL_SETTINGS, ...JSON.parse(s) };
+  } catch {}
+  return { ...DEFAULT_EMAIL_SETTINGS };
+}
+
+export function saveEmailSettings(s: EmailSettings): void {
+  localStorage.setItem("admin_email_settings", JSON.stringify(s));
+}
+
+export function getEmailTemplates(): EmailTemplates {
+  try {
+    const s = localStorage.getItem("admin_email_templates");
+    if (s) return { ...DEFAULT_EMAIL_TEMPLATES, ...JSON.parse(s) };
+  } catch {}
+  return { ...DEFAULT_EMAIL_TEMPLATES };
+}
+
+export function saveEmailTemplates(t: EmailTemplates): void {
+  localStorage.setItem("admin_email_templates", JSON.stringify(t));
+}
+
+export type EmailLogEntry = {
+  id: string;
+  to: string;
+  subject: string;
+  status: "sent" | "failed" | "pending";
+  date: string;
+  message: string;
+};
+
+export function getEmailLog(): EmailLogEntry[] {
+  try {
+    const s = localStorage.getItem("admin_email_log");
+    if (s) return JSON.parse(s);
+  } catch {}
+  return [];
+}
+
+export function addEmailLog(entry: Omit<EmailLogEntry, "id">): void {
+  const log = getEmailLog();
+  log.unshift({ ...entry, id: Date.now().toString() });
+  localStorage.setItem("admin_email_log", JSON.stringify(log.slice(0, 50)));
+}
+
+/* ─── Store Settings (read-only helper for storefront) ─── */
+export function getStoreFrontSettings(): { freeShippingThreshold: number; currency: string; storeName: string } {
+  try {
+    const s = localStorage.getItem("admin_settings");
+    if (s) {
+      const p = JSON.parse(s);
+      return {
+        freeShippingThreshold: p.freeShippingThreshold ?? 100,
+        currency: p.currency ?? "Rs.",
+        storeName: p.storeName ?? "MagnifiScent",
+      };
+    }
+  } catch {}
+  return { freeShippingThreshold: 100, currency: "Rs.", storeName: "MagnifiScent" };
+}

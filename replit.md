@@ -91,6 +91,47 @@ Generated Zod schemas from the OpenAPI spec (e.g. `HealthCheckResponse`). Used b
 
 Generated React Query hooks and fetch client from the OpenAPI spec (e.g. `useHealthCheck`, `healthCheck`).
 
+### `artifacts/magnifiscent` (`@workspace/magnifiscent`)
+
+MagnifiScent perfume e-commerce storefront (React + Vite + Tailwind) with full Shopify-style admin panel.
+
+**Storefront** at `/`:
+- Home, Products, Product Detail, Deals/Combos, About, Contact, Checkout
+- Policy pages: Returns (`/returns`), Shipping (`/shipping`), Privacy (`/privacy`), Terms (`/terms`)
+- Cart via `CartContext`, cart drawer, `Rs.` currency throughout
+- Maintenance overlay: when admin enables maintenance mode, storefront shows a full-page "Coming back soon" page; /admin is always accessible
+- SEO: page title/meta description/OG image set from admin settings on mount
+- Analytics: GA4 and Facebook Pixel script tags injected when IDs are set in admin
+
+**Admin Panel** at `/admin` (password: `admin123`):
+- Dashboard, Products, Orders, Customers, Inventory, Deals, Media, Instagram, Pages, Email, Settings
+- All data stored in `localStorage` keys prefixed `admin_`
+- `AdminContext.tsx` — products, orders, deals, settings state
+- `liveData.ts` — all localStorage read/write helpers for hero slides, banners, tickers, payment settings, policy pages, extended settings, discount codes, email settings/templates/log, storefront helpers
+
+**Admin Settings** (`/admin/settings`) sections:
+- Store Information, Social Links, Admin Password, Payment Methods, Announcement Ticker
+- SEO & Meta Tags, Shipping Settings (flat rate + free shipping threshold + carrier), Tax Settings (rate + show in cart)
+- Discount Codes (code list with %-off or Rs.-off, expiry, active toggle)
+- Analytics & Tracking (GA4 ID, Facebook Pixel ID)
+- Maintenance Mode (toggle + custom message)
+- Data Backup (full JSON export/import)
+
+**Admin Email** (`/admin/email`) — 3-tab panel:
+- SMTP Config: host/port/TLS, auth (username/password), sender identity, API URL, test email sender
+- Templates: editable HTML templates for Order Confirmation, Contact Form Reply, Shipping Update
+- Email Log: send history with status (sent/failed/pending)
+
+**Checkout** (`/checkout`):
+- Dynamic shipping rate from `admin_extended_settings.shippingRate` (default Rs. 200)
+- Free shipping threshold from `admin_settings.freeShippingThreshold`
+- Tax line shown when `showTaxInCart` and `taxRate > 0`
+- Discount code field — validates against `admin_discount_codes`, shows green badge on success, deducts from total
+- COD and Card payment methods (at least one always active)
+
+**localStorage keys** (all prefixed `admin_`):
+`orders`, `products`, `deals`, `settings`, `hero_slides`, `gender_banners`, `notes_images`, `deal_images`, `instagram_reels`, `home_headings`, `payment_settings`, `ticker_messages`, `extended_settings`, `discount_codes`, `policy_pages`, `email_settings`, `email_templates`, `email_log`
+
 ### `scripts` (`@workspace/scripts`)
 
 Utility scripts package. Each script is a `.ts` file in `src/` with a corresponding npm script in `package.json`. Run scripts via `pnpm --filter @workspace/scripts run <script>`. Scripts can import any workspace package (e.g., `@workspace/db`) by adding it as a dependency in `scripts/package.json`.

@@ -1,14 +1,22 @@
 import React, { useState, useRef } from "react";
 import { useAdmin } from "../AdminContext";
 import type { StoreSettings } from "../AdminContext";
-import { Check, Eye, EyeOff, X, Download, Upload } from "lucide-react";
-import { getPaymentSettings, savePaymentSettings, type PaymentSettings, getTickerMessages, saveTickerMessages } from "@/data/liveData";
+import { Check, Eye, EyeOff, X, Download, Upload, Plus } from "lucide-react";
+import {
+  getPaymentSettings, savePaymentSettings, type PaymentSettings,
+  getTickerMessages, saveTickerMessages,
+  getExtendedSettings, saveExtendedSettings, type ExtendedSettings,
+  getDiscountCodes, saveDiscountCodes, type DiscountCode,
+} from "@/data/liveData";
 
 const STORE_KEYS = [
   "admin_orders", "admin_products", "admin_deals", "admin_settings",
   "admin_hero_slides", "admin_gender_banners", "admin_notes_images",
   "admin_deal_images", "admin_instagram_reels", "admin_home_headings",
   "admin_payment_settings", "admin_ticker_messages",
+  "admin_extended_settings", "admin_discount_codes",
+  "admin_policy_pages",
+  "admin_email_settings", "admin_email_templates", "admin_email_log",
 ];
 
 function DataBackup() {
@@ -138,9 +146,51 @@ export function AdminSettings() {
   const [paymentSaved, setPaymentSaved] = useState(false);
   const [ticker, setTicker] = useState<string[]>(() => getTickerMessages());
   const [tickerSaved, setTickerSaved] = useState(false);
+  const [ext, setExt] = useState<ExtendedSettings>(() => getExtendedSettings());
+  const [extSaved, setExtSaved] = useState(false);
+  const [discountCodes, setDiscountCodes] = useState<DiscountCode[]>(() => getDiscountCodes());
+  const [dcSaved, setDcSaved] = useState(false);
 
   const update = (field: keyof StoreSettings) => (val: string) => {
     setForm((f) => ({ ...f, [field]: field === "freeShippingThreshold" ? parseFloat(val) || 0 : val }));
+  };
+
+  const updateExt = (field: keyof ExtendedSettings) => (val: string | boolean | number) => {
+    setExt((e) => ({ ...e, [field]: val }));
+  };
+
+  const saveExt = () => {
+    saveExtendedSettings(ext);
+    setExtSaved(true);
+    setTimeout(() => setExtSaved(false), 2500);
+  };
+
+  const addDiscountCode = () => {
+    const newCode: DiscountCode = {
+      id: Date.now().toString(),
+      code: "",
+      type: "percent",
+      value: 10,
+      active: true,
+      expiry: "",
+    };
+    setDiscountCodes((prev) => [...prev, newCode]);
+  };
+
+  const updateDiscountCode = (id: string, field: keyof DiscountCode, val: string | boolean | number) => {
+    setDiscountCodes((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, [field]: val } : c))
+    );
+  };
+
+  const removeDiscountCode = (id: string) => {
+    setDiscountCodes((prev) => prev.filter((c) => c.id !== id));
+  };
+
+  const saveDc = () => {
+    saveDiscountCodes(discountCodes);
+    setDcSaved(true);
+    setTimeout(() => setDcSaved(false), 2500);
   };
 
   const handleSave = () => {
@@ -210,7 +260,6 @@ export function AdminSettings() {
         <Field label="Contact Email" value={form.email} onChange={update("email")} type="email" />
         <Field label="Phone Number" value={form.phone} onChange={update("phone")} type="tel" />
         <Field label="Currency Symbol" value={form.currency} onChange={update("currency")} placeholder="Rs." />
-        <Field label="Free Shipping Threshold (Rs.)" value={form.freeShippingThreshold} onChange={update("freeShippingThreshold")} type="number" />
       </div>
 
       {/* Social Links */}
@@ -329,6 +378,212 @@ export function AdminSettings() {
             {tickerSaved ? <><Check size={13} /> Saved!</> : "Save Ticker"}
           </button>
         </div>
+      </div>
+
+      {/* ═══ SEO ═══ */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
+        <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+          <div>
+            <h2 className="text-sm font-semibold text-gray-700">SEO & Meta Tags</h2>
+            <p className="text-xs text-gray-400 mt-0.5">Shown in Google search results and social media previews.</p>
+          </div>
+          {extSaved && <span className="text-xs font-bold text-green-600">✓ Saved</span>}
+        </div>
+        <Field label="Page Title" value={ext.seoTitle} onChange={(v) => updateExt("seoTitle")(v)} placeholder="MagnifiScent — Premium Eau de Parfum" />
+        <div>
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Meta Description</label>
+          <textarea
+            rows={3}
+            className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 resize-none"
+            value={ext.seoDescription}
+            onChange={(e) => updateExt("seoDescription")(e.target.value)}
+            placeholder="Describe your store for search engines…"
+          />
+        </div>
+        <Field label="OG / Social Share Image URL" value={ext.seoOgImage} onChange={(v) => updateExt("seoOgImage")(v)} placeholder="https://…" />
+        <button onClick={saveExt} className="flex items-center gap-2 px-5 py-2 text-xs font-bold text-white rounded-lg border-none cursor-pointer transition-colors" style={{ background: extSaved ? "#10b981" : "#111827" }}>
+          {extSaved ? <><Check size={13} />Saved!</> : "Save SEO Settings"}
+        </button>
+      </div>
+
+      {/* ═══ Shipping ═══ */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
+        <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+          <div>
+            <h2 className="text-sm font-semibold text-gray-700">Shipping Settings</h2>
+            <p className="text-xs text-gray-400 mt-0.5">Flat-rate shipping shown at checkout.</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="Shipping Rate (Rs.)" value={ext.shippingRate} onChange={(v) => updateExt("shippingRate")(parseFloat(v) || 0)} type="number" placeholder="200" />
+          <Field label="Free Shipping Threshold (Rs.)" value={form.freeShippingThreshold} onChange={update("freeShippingThreshold")} type="number" placeholder="2500" />
+        </div>
+        <Field label="Courier / Carrier Label" value={ext.shippingCarrier} onChange={(v) => updateExt("shippingCarrier")(v)} placeholder="TCS Courier" />
+        <p className="text-xs text-gray-400">When order subtotal ≥ Free Shipping Threshold, shipping is free. Otherwise the flat Shipping Rate is charged.</p>
+        <button onClick={() => { saveExt(); handleSave(); }} className="flex items-center gap-2 px-5 py-2 text-xs font-bold text-white rounded-lg border-none cursor-pointer transition-colors" style={{ background: extSaved ? "#10b981" : "#111827" }}>
+          {extSaved ? <><Check size={13} />Saved!</> : "Save Shipping"}
+        </button>
+      </div>
+
+      {/* ═══ Taxes ═══ */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
+        <div className="pb-2 border-b border-gray-100">
+          <h2 className="text-sm font-semibold text-gray-700">Tax Settings</h2>
+          <p className="text-xs text-gray-400 mt-0.5">Apply a tax percentage to cart totals.</p>
+        </div>
+        <Field label="Tax Rate (%)" value={ext.taxRate} onChange={(v) => updateExt("taxRate")(parseFloat(v) || 0)} type="number" placeholder="0" />
+        <Toggle
+          label="Show Tax Line in Cart & Checkout"
+          desc="Displays a separate tax line when tax rate > 0"
+          enabled={ext.showTaxInCart}
+          onToggle={() => updateExt("showTaxInCart")(!ext.showTaxInCart)}
+        />
+        <button onClick={saveExt} className="flex items-center gap-2 px-5 py-2 text-xs font-bold text-white rounded-lg border-none cursor-pointer transition-colors" style={{ background: extSaved ? "#10b981" : "#111827" }}>
+          {extSaved ? <><Check size={13} />Saved!</> : "Save Tax Settings"}
+        </button>
+      </div>
+
+      {/* ═══ Discount Codes ═══ */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
+        <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+          <div>
+            <h2 className="text-sm font-semibold text-gray-700">Discount Codes</h2>
+            <p className="text-xs text-gray-400 mt-0.5">Customers enter these codes at checkout to get a discount.</p>
+          </div>
+          {dcSaved && <span className="text-xs font-bold text-green-600">✓ Saved</span>}
+        </div>
+
+        {discountCodes.length === 0 && (
+          <p className="text-xs text-gray-400 py-2">No discount codes yet. Click "Add Code" to create one.</p>
+        )}
+
+        <div className="space-y-3">
+          {discountCodes.map((dc) => (
+            <div key={dc.id} className="border border-gray-100 rounded-lg p-4 space-y-3 bg-gray-50">
+              <div className="flex items-center gap-3">
+                <div className="flex-1">
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Code</label>
+                  <input
+                    type="text"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white"
+                    value={dc.code}
+                    onChange={(e) => updateDiscountCode(dc.id, "code", e.target.value.toUpperCase())}
+                    placeholder="SAVE10"
+                  />
+                </div>
+                <div className="w-28">
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Type</label>
+                  <select
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white"
+                    value={dc.type}
+                    onChange={(e) => updateDiscountCode(dc.id, "type", e.target.value)}
+                  >
+                    <option value="percent">% Off</option>
+                    <option value="fixed">Rs. Off</option>
+                  </select>
+                </div>
+                <div className="w-24">
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Value</label>
+                  <input
+                    type="number"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white"
+                    value={dc.value}
+                    min={0}
+                    onChange={(e) => updateDiscountCode(dc.id, "value", parseFloat(e.target.value) || 0)}
+                  />
+                </div>
+                <button
+                  onClick={() => removeDiscountCode(dc.id)}
+                  className="mt-5 p-1.5 text-gray-400 hover:text-red-500 bg-transparent border-none cursor-pointer transition-colors"
+                >
+                  <X size={15} />
+                </button>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="flex-1">
+                  <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Expiry Date (optional)</label>
+                  <input
+                    type="date"
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 bg-white"
+                    value={dc.expiry}
+                    onChange={(e) => updateDiscountCode(dc.id, "expiry", e.target.value)}
+                  />
+                </div>
+                <div className="flex items-center gap-2 mt-4">
+                  <button
+                    onClick={() => updateDiscountCode(dc.id, "active", !dc.active)}
+                    className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors border-none cursor-pointer flex-shrink-0"
+                    style={{ background: dc.active ? "#111827" : "#d1d5db" }}
+                  >
+                    <span className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow" style={{ transform: dc.active ? "translateX(24px)" : "translateX(3px)" }} />
+                  </button>
+                  <span className="text-xs font-medium text-gray-600">{dc.active ? "Active" : "Inactive"}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-3 pt-1">
+          <button
+            onClick={addDiscountCode}
+            className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-gray-600 border border-gray-200 rounded-lg hover:border-gray-400 bg-white cursor-pointer transition-colors"
+          >
+            <Plus size={13} /> Add Code
+          </button>
+          <button
+            onClick={saveDc}
+            className="flex items-center gap-2 px-5 py-2 text-xs font-bold text-white rounded-lg border-none cursor-pointer transition-colors"
+            style={{ background: dcSaved ? "#10b981" : "#111827" }}
+          >
+            {dcSaved ? <><Check size={13} />Saved!</> : "Save Codes"}
+          </button>
+        </div>
+      </div>
+
+      {/* ═══ Analytics ═══ */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
+        <div className="pb-2 border-b border-gray-100">
+          <h2 className="text-sm font-semibold text-gray-700">Analytics & Tracking</h2>
+          <p className="text-xs text-gray-400 mt-0.5">Script tags are injected into the page head when an ID is provided.</p>
+        </div>
+        <Field label="Google Analytics 4 Measurement ID" value={ext.ga4Id} onChange={(v) => updateExt("ga4Id")(v)} placeholder="G-XXXXXXXXXX" />
+        <Field label="Facebook Pixel ID" value={ext.fbPixelId} onChange={(v) => updateExt("fbPixelId")(v)} placeholder="123456789012345" />
+        <button onClick={saveExt} className="flex items-center gap-2 px-5 py-2 text-xs font-bold text-white rounded-lg border-none cursor-pointer transition-colors" style={{ background: extSaved ? "#10b981" : "#111827" }}>
+          {extSaved ? <><Check size={13} />Saved!</> : "Save Analytics"}
+        </button>
+      </div>
+
+      {/* ═══ Maintenance Mode ═══ */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
+        <div className="pb-2 border-b border-gray-100">
+          <h2 className="text-sm font-semibold text-gray-700">Maintenance Mode</h2>
+          <p className="text-xs text-gray-400 mt-0.5">When on, visitors see a "coming back soon" page. The admin panel is always accessible.</p>
+        </div>
+        <Toggle
+          label="Enable Maintenance Mode"
+          desc="Storefront visitors see a maintenance message. /admin is unaffected."
+          enabled={ext.maintenanceMode}
+          onToggle={() => updateExt("maintenanceMode")(!ext.maintenanceMode)}
+        />
+        {ext.maintenanceMode && (
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+            <p className="text-xs font-bold text-amber-700">⚠ Maintenance mode is ON — your store is not visible to customers.</p>
+          </div>
+        )}
+        <div>
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Custom Message</label>
+          <textarea
+            rows={3}
+            className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 resize-none"
+            value={ext.maintenanceMessage}
+            onChange={(e) => updateExt("maintenanceMessage")(e.target.value)}
+            placeholder="We'll be back soon…"
+          />
+        </div>
+        <button onClick={saveExt} className="flex items-center gap-2 px-5 py-2 text-xs font-bold text-white rounded-lg border-none cursor-pointer transition-colors" style={{ background: ext.maintenanceMode ? "#ef4444" : extSaved ? "#10b981" : "#111827" }}>
+          {extSaved ? <><Check size={13} />Saved!</> : ext.maintenanceMode ? "Save (Store is DOWN)" : "Save Settings"}
+        </button>
       </div>
 
       {/* Data Backup */}

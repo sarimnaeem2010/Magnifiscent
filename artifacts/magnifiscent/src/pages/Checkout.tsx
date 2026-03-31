@@ -1,16 +1,19 @@
 import React, { useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { ChevronRight, Shield, Lock, Truck } from "lucide-react";
+import { ChevronRight, Shield, Lock, Truck, Tag } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useLocation } from "wouter";
-import { getPaymentSettings } from "@/data/liveData";
+import { getPaymentSettings, getExtendedSettings, getStoreFrontSettings, applyDiscountCode } from "@/data/liveData";
 
 export default function Checkout() {
   const { items, total, clearCart } = useCart();
   const [, navigate] = useLocation();
   const [step, setStep] = useState<"form" | "success">("form");
   const paymentSettings = getPaymentSettings();
+  const extSettings = getExtendedSettings();
+  const storeSettings = getStoreFrontSettings();
+  const cur = storeSettings.currency || "Rs.";
 
   const availableMethods: ("card" | "cod")[] = [];
   if (paymentSettings.card) availableMethods.push("card");
@@ -18,17 +21,43 @@ export default function Checkout() {
 
   const [payMethod, setPayMethod] = useState<"card" | "cod">(availableMethods[0] ?? "cod");
 
-  const shipping = total >= 100 ? 0 : 9.99;
-  const orderTotal = total + shipping;
+  const shippingRate = extSettings.shippingRate ?? 200;
+  const freeShippingThreshold = storeSettings.freeShippingThreshold ?? 100;
+  const taxRate = extSettings.taxRate ?? 0;
+  const showTax = extSettings.showTaxInCart && taxRate > 0;
+
+  const [discountInput, setDiscountInput] = useState("");
+  const [appliedDiscount, setAppliedDiscount] = useState(0);
+  const [discountMsg, setDiscountMsg] = useState("");
+  const [discountValid, setDiscountValid] = useState<boolean | null>(null);
+
+  const shipping = total >= freeShippingThreshold ? 0 : shippingRate;
+  const taxAmount = showTax ? (total - appliedDiscount) * (taxRate / 100) : 0;
+  const orderTotal = total - appliedDiscount + shipping + taxAmount;
 
   const [form, setForm] = useState({
     firstName: "", lastName: "", email: "", phone: "",
-    address: "", city: "", state: "", zip: "", country: "United States",
+    address: "", city: "", state: "", zip: "", country: "Pakistan",
     cardName: "", cardNumber: "", cardExpiry: "", cardCvv: "",
   });
 
   function handleInput(field: string, value: string) {
     setForm((f) => ({ ...f, [field]: value }));
+  }
+
+  function handleApplyDiscount() {
+    if (!discountInput.trim()) return;
+    const result = applyDiscountCode(discountInput, total);
+    setDiscountValid(result.valid);
+    setDiscountMsg(result.message);
+    setAppliedDiscount(result.valid ? result.discount : 0);
+  }
+
+  function handleRemoveDiscount() {
+    setAppliedDiscount(0);
+    setDiscountMsg("");
+    setDiscountValid(null);
+    setDiscountInput("");
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -117,8 +146,8 @@ export default function Checkout() {
                 </h2>
                 <div className="grid grid-cols-2 gap-4">
                   {[
-                    { field: "firstName", label: "First Name", placeholder: "John" },
-                    { field: "lastName", label: "Last Name", placeholder: "Smith" },
+                    { field: "firstName", label: "First Name", placeholder: "Ali" },
+                    { field: "lastName", label: "Last Name", placeholder: "Ahmed" },
                   ].map(({ field, label, placeholder }) => (
                     <div key={field}>
                       <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">{label} *</label>
@@ -140,7 +169,7 @@ export default function Checkout() {
                       value={form.email}
                       onChange={(e) => handleInput("email", e.target.value)}
                       className="w-full border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:border-gray-400 transition-colors"
-                      placeholder="john@email.com"
+                      placeholder="ali@email.com"
                     />
                   </div>
                   <div>
@@ -150,7 +179,7 @@ export default function Checkout() {
                       value={form.phone}
                       onChange={(e) => handleInput("phone", e.target.value)}
                       className="w-full border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:border-gray-400 transition-colors"
-                      placeholder="+1 (555) 000-0000"
+                      placeholder="+92 300 1234567"
                     />
                   </div>
                 </div>
@@ -170,15 +199,15 @@ export default function Checkout() {
                       value={form.address}
                       onChange={(e) => handleInput("address", e.target.value)}
                       className="w-full border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:border-gray-400 transition-colors"
-                      placeholder="123 Main Street, Apt 4"
+                      placeholder="House 12, Street 4, Block A"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     {[
-                      { field: "city", label: "City", placeholder: "New York" },
-                      { field: "state", label: "State", placeholder: "NY" },
-                      { field: "zip", label: "ZIP Code", placeholder: "10001" },
-                      { field: "country", label: "Country", placeholder: "United States" },
+                      { field: "city", label: "City", placeholder: "Karachi" },
+                      { field: "state", label: "Province", placeholder: "Sindh" },
+                      { field: "zip", label: "Postal Code", placeholder: "74000" },
+                      { field: "country", label: "Country", placeholder: "Pakistan" },
                     ].map(({ field, label, placeholder }) => (
                       <div key={field}>
                         <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">{label} *</label>
@@ -202,7 +231,6 @@ export default function Checkout() {
                   Payment Method
                 </h2>
 
-                {/* Method tabs */}
                 {availableMethods.length > 1 && (
                   <div className="flex gap-0 mb-5 border border-gray-200 overflow-hidden">
                     {availableMethods.map((m) => (
@@ -237,7 +265,7 @@ export default function Checkout() {
                           value={form.cardName}
                           onChange={(e) => handleInput("cardName", e.target.value)}
                           className="w-full border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:border-gray-400 transition-colors"
-                          placeholder="John Smith"
+                          placeholder="Ali Ahmed"
                         />
                       </div>
                       <div>
@@ -299,11 +327,59 @@ export default function Checkout() {
                 )}
               </div>
 
+              {/* Discount Code */}
+              <div>
+                <h2 className="font-bold text-sm uppercase tracking-widest text-gray-900 mb-4 pb-3 border-b border-gray-100">
+                  Discount Code
+                </h2>
+                {discountValid === true ? (
+                  <div className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <Tag size={16} className="text-green-600 flex-shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-sm font-bold text-green-700">{discountInput.toUpperCase()}</p>
+                      <p className="text-xs text-green-600">{discountMsg}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleRemoveDiscount}
+                      className="text-xs text-green-600 hover:text-green-800 underline bg-transparent border-none cursor-pointer"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={discountInput}
+                        onChange={(e) => setDiscountInput(e.target.value.toUpperCase())}
+                        onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleApplyDiscount(); } }}
+                        className="flex-1 border border-gray-200 px-4 py-3 text-sm font-mono uppercase focus:outline-none focus:border-gray-400 transition-colors"
+                        placeholder="Enter discount code"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleApplyDiscount}
+                        className="px-5 py-3 bg-black text-white text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors border-none cursor-pointer"
+                      >
+                        Apply
+                      </button>
+                    </div>
+                    {discountValid === false && (
+                      <p className="text-xs text-red-500">{discountMsg}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+
               <button
                 type="submit"
                 className="w-full bg-black text-white font-bold uppercase tracking-widest text-sm py-4 hover:bg-gray-800 transition-colors border-none cursor-pointer"
               >
-                {payMethod === "cod" ? `Place Order (COD) — Rs. ${orderTotal.toFixed(2)}` : `Pay Now — Rs. ${orderTotal.toFixed(2)}`}
+                {payMethod === "cod"
+                  ? `Place Order (COD) — ${cur} ${orderTotal.toFixed(2)}`
+                  : `Pay Now — ${cur} ${orderTotal.toFixed(2)}`}
               </button>
 
               <div className="flex items-center justify-center gap-2 text-xs text-gray-400">
@@ -335,7 +411,7 @@ export default function Checkout() {
                         <p className="text-xs text-gray-400">{product.category}</p>
                       </div>
                       <p className="font-bold text-xs text-gray-900 flex-shrink-0">
-                        Rs. {(product.priceNum * qty).toFixed(2)}
+                        {cur} {(product.priceNum * qty).toFixed(2)}
                       </p>
                     </div>
                   ))}
@@ -343,19 +419,36 @@ export default function Checkout() {
                 <div className="px-6 pb-6 pt-4 border-t border-gray-100 space-y-3">
                   <div className="flex justify-between text-sm text-gray-600">
                     <span>Subtotal</span>
-                    <span>Rs. {total.toFixed(2)}</span>
+                    <span>{cur} {total.toFixed(2)}</span>
                   </div>
+                  {appliedDiscount > 0 && (
+                    <div className="flex justify-between text-sm text-green-600 font-medium">
+                      <span>Discount ({discountInput.toUpperCase()})</span>
+                      <span>− {cur} {appliedDiscount.toFixed(2)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-sm text-gray-600">
                     <span>Shipping</span>
-                    <span className={shipping === 0 ? "text-green-600 font-medium" : ""}>{shipping === 0 ? "Free" : `Rs. ${shipping.toFixed(2)}`}</span>
+                    <span className={shipping === 0 ? "text-green-600 font-medium" : ""}>
+                      {shipping === 0 ? "Free" : `${cur} ${shipping.toFixed(2)}`}
+                    </span>
                   </div>
                   {shipping === 0 && (
                     <p className="text-xs text-green-600">🎉 You qualify for free shipping!</p>
                   )}
+                  {showTax && taxAmount > 0 && (
+                    <div className="flex justify-between text-sm text-gray-600">
+                      <span>Tax ({taxRate}%)</span>
+                      <span>{cur} {taxAmount.toFixed(2)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between font-bold text-gray-900 pt-3 border-t border-gray-100">
                     <span>Total</span>
-                    <span>Rs. {orderTotal.toFixed(2)}</span>
+                    <span>{cur} {orderTotal.toFixed(2)}</span>
                   </div>
+                  {extSettings.shippingCarrier && shipping > 0 && (
+                    <p className="text-xs text-gray-400">via {extSettings.shippingCarrier}</p>
+                  )}
                 </div>
               </div>
             </div>
