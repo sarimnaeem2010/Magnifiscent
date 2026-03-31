@@ -144,34 +144,28 @@ function ProductCard({ product }: { product: Product }) {
 
 function DealCard({ name, img1, img2, price, originalPrice, reviews, desc }: typeof DEALS[0]) {
   const [hovered, setHovered] = useState(false);
+  const [, navigate] = useLocation();
 
   return (
     <div
-      className="product-card flex-shrink-0 w-[200px] md:w-[240px] cursor-pointer"
+      className="cursor-pointer"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      onClick={() => navigate("/deals")}
     >
-      <div className="relative overflow-hidden bg-gray-50" style={{ aspectRatio: "3/4" }}>
-        <span className="sale-badge">SALE</span>
+      <div className="relative overflow-hidden rounded-xl bg-gray-900" style={{ aspectRatio: "1/1" }}>
         <img src={img1} alt={name} className="w-full h-full object-cover absolute inset-0"
           style={{ opacity: hovered ? 0 : 1, transition: "opacity 0.4s ease" }} />
         <img src={img2} alt={name} className="w-full h-full object-cover absolute inset-0"
           style={{ opacity: hovered ? 1 : 0, transition: "opacity 0.4s ease" }} />
-        <button
-          className="quickshop-btn"
-          style={{ transform: hovered ? "translateY(0)" : "translateY(100%)", transition: "transform 0.3s ease" }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          Quick Shop
-        </button>
       </div>
-      <div className="pt-3 pb-2">
-        <p className="text-gray-400 text-xs mb-1 italic leading-snug">{desc.slice(0, 55)}…</p>
+      <div className="pt-2.5 pb-2">
         <div className="flex items-center gap-1 mb-1">
           <StarRating count={5} />
           <span className="text-gray-400 text-xs ml-1">({reviews})</span>
         </div>
-        <h3 className="font-semibold text-sm text-gray-900 mb-1">{name}</h3>
+        <h3 className="font-bold text-sm text-gray-900 mb-0.5">{name}</h3>
+        <p className="text-xs text-gray-500 leading-snug mb-1.5 line-clamp-1">{desc}</p>
         <div className="flex items-center gap-2">
           <span className="text-sm font-bold text-gray-900">{price}</span>
           <span className="text-xs text-gray-400 line-through">{originalPrice}</span>
@@ -213,16 +207,8 @@ export default function Home() {
               View All
             </button>
           </div>
-          <div className="scroll-x pb-2">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {DEALS.map((d) => <DealCard key={d.name} {...d} />)}
-          </div>
-          <div className="text-center mt-8">
-            <button
-              onClick={() => navigate("/products")}
-              className="inline-block border border-black text-black font-bold uppercase tracking-widest text-xs px-10 py-3 hover:bg-black hover:text-white transition-colors bg-transparent cursor-pointer"
-            >
-              View All Products
-            </button>
           </div>
         </div>
       </section>
