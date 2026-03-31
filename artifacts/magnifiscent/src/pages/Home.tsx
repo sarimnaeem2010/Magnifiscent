@@ -34,8 +34,12 @@ const HERO_SLIDES = [
 
 /* ─── Top Categories ─── */
 const CATEGORIES = [
-  { label: "MEN", count: 3, img: "/men-split.png", href: "/products?gender=men" },
-  { label: "WOMEN", count: 4, img: "/women-split.png", href: "/products?gender=women" },
+  { label: "MEN", count: "3", img: "/men-banner.png", href: "/products?gender=men" },
+  { label: "WOMEN", count: "4", img: "/women-banner.png", href: "/products?gender=women" },
+  { label: "FRESH", count: "2", img: "/storm-product.png", href: "/products" },
+  { label: "FLORAL", count: "3", img: "/women-split.png", href: "/products" },
+  { label: "WOODY", count: "2", img: "/noir-product.png", href: "/products" },
+  { label: "ORIENTAL", count: "3", img: "/story-bg.png", href: "/products" },
 ];
 
 /* ─── Notes ─── */
@@ -283,32 +287,28 @@ export default function Home() {
 
       {/* ── Top Categories ── */}
       <section className="py-10 border-b border-gray-100">
-        <div className="max-w-3xl mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-4">
           <h2 className="section-title text-center">Top Categories</h2>
-          <div className="flex justify-center gap-6">
+          <div className="flex justify-center flex-wrap gap-6 md:gap-10">
             {CATEGORIES.map((cat) => (
               <button
                 key={cat.label}
                 onClick={() => navigate(cat.href)}
-                className="group flex flex-col items-center gap-3 border-none bg-transparent cursor-pointer"
-                style={{ width: 220 }}
+                className="category-tile border-none bg-transparent"
               >
-                <div
-                  className="w-full overflow-hidden"
-                  style={{ borderRadius: 16, height: 220 }}
-                >
-                  <img
-                    src={cat.img}
-                    alt={cat.label}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                </div>
-                <div className="flex items-baseline gap-1">
-                  <span className="font-bold text-sm uppercase tracking-widest text-gray-900">{cat.label}</span>
-                  <span className="text-xs text-gray-400 font-normal">({cat.count})</span>
-                </div>
+                <img src={cat.img} alt={cat.label} className="cat-img" />
+                <span className="cat-label">{cat.label}</span>
+                <span className="cat-count">({cat.count})</span>
               </button>
             ))}
+          </div>
+          <div className="text-center mt-6">
+            <button
+              onClick={() => navigate("/products")}
+              className="text-sm font-semibold uppercase tracking-widest text-gray-700 hover:text-black border-b-2 border-gray-700 hover:border-black pb-1 transition-colors bg-transparent border-t-0 border-l-0 border-r-0 cursor-pointer"
+            >
+              All Collections
+            </button>
           </div>
         </div>
       </section>
