@@ -40,7 +40,8 @@ export function AdminCustomers() {
   );
 
   const totalRevenue = customers.reduce((s, c) => s + c.totalSpent, 0);
-  const avgOrderValue = orders.length > 0 ? totalRevenue / orders.filter((o) => o.status !== "Cancelled").length : 0;
+  const nonCancelledCount = orders.filter((o) => o.status !== "Cancelled").length;
+  const avgOrderValue = nonCancelledCount > 0 ? totalRevenue / nonCancelledCount : 0;
 
   return (
     <div className="space-y-4">
