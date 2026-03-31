@@ -8,16 +8,6 @@ import type { Product } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 import { useLocation } from "wouter";
 
-/* ─── Top Categories ─── */
-const CATEGORIES = [
-  { label: "MEN", count: "1", img: "/men-banner.png", href: "/products?gender=men" },
-  { label: "WOMEN", count: "5", img: "/women-banner.png", href: "/products?gender=women" },
-  { label: "FRESH", count: "2", img: "/men-banner.png", href: "/products" },
-  { label: "FLORAL", count: "3", img: "/women-split.png", href: "/products" },
-  { label: "WOODY", count: "2", img: "/men-split.png", href: "/products" },
-  { label: "ORIENTAL", count: "3", img: "/story-bg.png", href: "/products" },
-];
-
 /* ─── Notes ─── */
 const NOTES = [
   { label: "FLORAL", count: "3", color: "#fce7f3", imgBg: "#f9a8d4" },
@@ -208,36 +198,8 @@ export default function Home() {
           src={heroBannerImg}
           alt="Discover your best Perfume"
           className="w-full block"
-          style={{ maxHeight: "600px", objectFit: "cover", objectPosition: "center" }}
+          style={{ display: "block" }}
         />
-      </section>
-
-      {/* ── Top Categories ── */}
-      <section className="py-10 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="section-title text-center">Top Categories</h2>
-          <div className="flex justify-center flex-wrap gap-6 md:gap-10">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat.label}
-                onClick={() => navigate(cat.href)}
-                className="category-tile border-none bg-transparent"
-              >
-                <img src={cat.img} alt={cat.label} className="cat-img" />
-                <span className="cat-label">{cat.label}</span>
-                <span className="cat-count">({cat.count})</span>
-              </button>
-            ))}
-          </div>
-          <div className="text-center mt-6">
-            <button
-              onClick={() => navigate("/products")}
-              className="text-sm font-semibold uppercase tracking-widest text-gray-700 hover:text-black border-b-2 border-gray-700 hover:border-black pb-1 transition-colors bg-transparent border-t-0 border-l-0 border-r-0 cursor-pointer"
-            >
-              All Collections
-            </button>
-          </div>
-        </div>
       </section>
 
       {/* ── Deals & Combo ── */}
@@ -268,17 +230,17 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 py-8">
           <h2 className="section-title">Shop By Gender</h2>
         </div>
-        <div className="flex flex-col md:flex-row" style={{ minHeight: 294 }}>
+        <div className="flex flex-col md:flex-row" style={{ minHeight: 160 }}>
           <button
             onClick={() => navigate("/products?gender=men")}
             className="flex-1 relative group overflow-hidden cursor-pointer border-none bg-transparent p-0 text-left"
-            style={{ minHeight: 210 }}
+            style={{ minHeight: 140 }}
           >
-            <img src="/men-split.png" alt="Men's Collection" className="w-full h-full object-cover" style={{ minHeight: 210 }} />
+            <img src="/men-split.png" alt="Men's Collection" className="w-full h-full object-cover" style={{ minHeight: 140 }} />
             <div className="absolute inset-0 bg-black/35 group-hover:bg-black/20 transition-colors duration-500" />
-            <div className="absolute inset-0 flex flex-col items-center justify-end pb-8 text-white text-center">
-              <h3 className="font-bold text-4xl md:text-5xl uppercase tracking-widest mb-2" style={{ fontFamily: "Georgia, serif" }}>MEN</h3>
-              <p className="text-sm text-white/80 mb-5">1 product</p>
+            <div className="absolute inset-0 flex flex-col items-center justify-end pb-5 text-white text-center">
+              <h3 className="font-bold text-3xl md:text-4xl uppercase tracking-widest mb-1" style={{ fontFamily: "Georgia, serif" }}>MEN</h3>
+              <p className="text-sm text-white/80 mb-3">1 product</p>
               <span className="inline-block border border-white text-white text-xs font-bold uppercase tracking-widest px-6 py-2 group-hover:bg-white group-hover:text-black transition-all duration-300">
                 Shop Now
               </span>
@@ -287,13 +249,13 @@ export default function Home() {
           <button
             onClick={() => navigate("/products?gender=women")}
             className="flex-1 relative group overflow-hidden cursor-pointer border-none bg-transparent p-0 text-left"
-            style={{ minHeight: 210 }}
+            style={{ minHeight: 140 }}
           >
-            <img src="/women-split.png" alt="Women's Collection" className="w-full h-full object-cover" style={{ minHeight: 210 }} />
+            <img src="/women-split.png" alt="Women's Collection" className="w-full h-full object-cover" style={{ minHeight: 140 }} />
             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-500" />
-            <div className="absolute inset-0 flex flex-col items-center justify-end pb-8 text-white text-center">
-              <h3 className="font-bold text-4xl md:text-5xl uppercase tracking-widest mb-2" style={{ fontFamily: "Georgia, serif" }}>WOMEN</h3>
-              <p className="text-sm text-white/80 mb-5">5 products</p>
+            <div className="absolute inset-0 flex flex-col items-center justify-end pb-5 text-white text-center">
+              <h3 className="font-bold text-3xl md:text-4xl uppercase tracking-widest mb-1" style={{ fontFamily: "Georgia, serif" }}>WOMEN</h3>
+              <p className="text-sm text-white/80 mb-3">5 products</p>
               <span className="inline-block border border-white text-white text-xs font-bold uppercase tracking-widest px-6 py-2 group-hover:bg-white group-hover:text-black transition-all duration-300">
                 Shop Now
               </span>
