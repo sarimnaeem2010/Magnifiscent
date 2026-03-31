@@ -309,6 +309,7 @@ export default function Home() {
     INSTAGRAM_POSTS.map((p) => ({ ...p, url: "https://instagram.com" }))
   );
   const [liveProducts, setLiveProducts] = useState<ApiProduct[]>([]);
+  const [productsLoading, setProductsLoading] = useState(true);
 
   useEffect(() => {
     api.content.genderBanners.get().then((res) => { if (res.success) setGenderBanners(res.banners); }).catch(() => {});
@@ -322,9 +323,10 @@ export default function Home() {
         setInstaPosts(res.reels.map((r) => ({ img: r.img, likes: r.likes, tag: r.label, label: r.label, url: r.url })));
       }
     }).catch(() => {});
+    setProductsLoading(true);
     api.products.list().then((res) => {
       if (res.success) setLiveProducts(res.products);
-    }).catch(() => {});
+    }).catch(() => {}).finally(() => setProductsLoading(false));
   }, []);
 
   const filteredProducts = productFilter === "all"
@@ -436,11 +438,17 @@ export default function Home() {
               ))}
             </div>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
-            {filteredProducts.map((p) => (
-              <ProductCard key={p.id} product={p} />
-            ))}
-          </div>
+          {productsLoading ? (
+            <div className="flex justify-center items-center py-16">
+              <div className="w-10 h-10 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
+              {filteredProducts.map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+            </div>
+          )}
           <div className="text-center mt-8">
             <button
               onClick={() => navigate("/products")}

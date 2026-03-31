@@ -77,13 +77,15 @@ export default function Products() {
   const [filter, setFilter] = useState<"all" | "men" | "women">(initialGender as "all" | "men" | "women");
   const [, navigate] = useLocation();
   const [allProducts, setAllProducts] = useState<ApiProduct[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setLoading(true);
     api.products.list().then((res) => {
       if (res.success) {
         setAllProducts(res.products);
       }
-    }).catch(() => {});
+    }).catch(() => {}).finally(() => setLoading(false));
   }, []);
 
   useEffect(() => {
@@ -134,11 +136,17 @@ export default function Products() {
           <p className="text-sm text-gray-400">{filtered.length} products</p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
-          {filtered.map((p) => (
-            <ProductCard key={p.id} product={p} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex justify-center items-center py-24">
+            <div className="w-10 h-10 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
+            {filtered.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        )}
 
         <div className="text-center mt-10">
           <button

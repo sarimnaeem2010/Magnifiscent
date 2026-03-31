@@ -1,7 +1,4 @@
-import { PRODUCTS } from "./products";
-import type { Product } from "./products";
-
-export type LiveProduct = Product & { stock: number; active: boolean };
+export type LiveProduct = { id: string; name: string; slug: string; category: string; price: number; stock: number; active: boolean; img: string; img2: string; desc: string; rating: number; reviews: number };
 
 /* ─── Media types ─── */
 export type HeroSlide = { id: string; src: string; alt: string };
@@ -430,7 +427,4 @@ export type NewOrderPayload = {
   paymentMethod: string;
 };
 
-/* ─── Static fallback helpers (no localStorage) ─── */
-export function getDefaultLiveProducts() {
-  return PRODUCTS.map((p: Product) => ({ ...p, stock: 20, active: true }));
-}
+

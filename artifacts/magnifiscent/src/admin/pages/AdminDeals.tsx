@@ -46,6 +46,10 @@ function DealImageSlot({
   const ref = useRef<HTMLInputElement>(null);
   const [src, setSrc] = useState(currentImg);
 
+  useEffect(() => {
+    setSrc(currentImg);
+  }, [currentImg]);
+
   const handleUpload = async (file: File) => {
     const b64 = await compressImage(file, 400, 400, 0.75);
     const updated = { ...allImages, [dealId]: { ...allImages[dealId], [slot]: b64 } };
