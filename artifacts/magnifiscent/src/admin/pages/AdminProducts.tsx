@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useAdmin } from "../AdminContext";
 import type { AdminProduct } from "../AdminContext";
-import { Plus, Pencil, Trash2, X, Check } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Check, ImageIcon } from "lucide-react";
 
 type ProductForm = {
   name: string;
@@ -12,7 +12,53 @@ type ProductForm = {
   desc: string;
   notes: string;
   active: boolean;
+  img: string;
+  img2: string;
 };
+
+function readFile(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = (e) => resolve(e.target?.result as string);
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
+
+function ImgUploadCell({ src, label, onChange }: { src: string; label: string; onChange: (b64: string) => void }) {
+  const ref = useRef<HTMLInputElement>(null);
+  return (
+    <div>
+      <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">{label}</label>
+      <div
+        className="relative w-full rounded-lg overflow-hidden border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center cursor-pointer group hover:border-gray-400 transition-colors"
+        style={{ aspectRatio: "3/4" }}
+        onClick={() => ref.current?.click()}
+      >
+        {src ? (
+          <>
+            <img src={src} alt={label} className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <span className="text-white text-[10px] font-bold uppercase tracking-wider bg-black/60 px-2 py-1 rounded">Change</span>
+            </div>
+          </>
+        ) : (
+          <div className="flex flex-col items-center gap-1 text-gray-400 p-2">
+            <ImageIcon size={20} />
+            <p className="text-[10px] font-medium text-center">Click to upload</p>
+          </div>
+        )}
+      </div>
+      <input ref={ref} type="file" accept="image/*" className="hidden"
+        onChange={async (e) => {
+          const file = e.target.files?.[0];
+          if (file) { const b64 = await readFile(file); onChange(b64); }
+          e.target.value = "";
+        }}
+      />
+    </div>
+  );
+}
 
 const emptyForm: ProductForm = {
   name: "",
@@ -23,6 +69,8 @@ const emptyForm: ProductForm = {
   desc: "",
   notes: "",
   active: true,
+  img: "",
+  img2: "",
 };
 
 function Modal({ title, onClose, onSave, form, setForm }: {
@@ -43,6 +91,19 @@ function Modal({ title, onClose, onSave, form, setForm }: {
           </button>
         </div>
         <div className="p-6 space-y-4">
+          {/* Image upload */}
+          <div className="grid grid-cols-2 gap-3">
+            <ImgUploadCell
+              label="Main Image"
+              src={form.img}
+              onChange={(b64) => setForm((f) => ({ ...f, img: b64 }))}
+            />
+            <ImgUploadCell
+              label="Hover Image"
+              src={form.img2}
+              onChange={(b64) => setForm((f) => ({ ...f, img2: b64 }))}
+            />
+          </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="col-span-2">
               <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Product Name *</label>
@@ -177,6 +238,8 @@ export function AdminProducts() {
       desc: p.desc,
       notes: p.notes.join(", "),
       active: p.active,
+      img: p.img || "",
+      img2: p.img2 || "",
     });
     setModalOpen(true);
   };
@@ -203,6 +266,8 @@ export function AdminProducts() {
                 desc: form.desc,
                 notes,
                 active: form.active,
+                ...(form.img ? { img: form.img } : {}),
+                ...(form.img2 ? { img2: form.img2 } : {}),
               }
             : p
         )
@@ -215,8 +280,8 @@ export function AdminProducts() {
           id: newId,
           name: form.name,
           slug: form.name.toLowerCase().replace(/\s+/g, "-"),
-          img: "/women-split.png",
-          img2: "/women-split.png",
+          img: form.img || "/women-split.png",
+          img2: form.img2 || form.img || "/women-split.png",
           category: form.category,
           priceNum,
           price: `$${priceNum.toFixed(2)}`,

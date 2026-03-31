@@ -10,6 +10,7 @@ import { AdminCustomers } from "./pages/AdminCustomers";
 import { AdminInventory } from "./pages/AdminInventory";
 import { AdminDeals } from "./pages/AdminDeals";
 import { AdminSettings } from "./pages/AdminSettings";
+import { AdminMedia } from "./pages/AdminMedia";
 
 function AdminRoutes() {
   const { isAuthenticated } = useAdmin();
@@ -28,6 +29,7 @@ function AdminRoutes() {
         <Route path="/admin/inventory" component={AdminInventory} />
         <Route path="/admin/deals" component={AdminDeals} />
         <Route path="/admin/settings" component={AdminSettings} />
+        <Route path="/admin/media" component={AdminMedia} />
         <Route component={AdminDashboard} />
       </Switch>
     </AdminLayout>

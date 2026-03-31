@@ -3,10 +3,15 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Star, Instagram } from "lucide-react";
 import { PRODUCTS } from "@/data/products";
+import { getActiveProducts } from "@/data/liveData";
 import heroBannerImg from "@assets/sasas_1774966788321.png";
 import type { Product } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 import { useLocation } from "wouter";
+import {
+  getHeroSlides, getGenderBanners, getNotesImages,
+  type HeroSlide,
+} from "@/data/liveData";
 
 /* ─── Notes ─── */
 const NOTES = [
@@ -77,6 +82,61 @@ const INSTAGRAM_POSTS = [
   { img: PRODUCTS[2].img, likes: 164, tag: "#RisingSun" },
   { img: "/women-split.png", likes: 293, tag: "#MagnifiScent" },
 ];
+
+/* ─── Hero Slider ─── */
+function HeroBanner() {
+  const [slides] = useState<HeroSlide[]>(() => getHeroSlides().filter((s) => s.src));
+  const [activeIdx, setActiveIdx] = useState(0);
+
+  useEffect(() => {
+    if (slides.length <= 1) return;
+    const id = setInterval(() => setActiveIdx((i) => (i + 1) % slides.length), 4000);
+    return () => clearInterval(id);
+  }, [slides.length]);
+
+  if (slides.length === 0) {
+    return (
+      <section className="w-full">
+        <img src={heroBannerImg} alt="Discover your best Perfume" className="w-full block" />
+      </section>
+    );
+  }
+
+  return (
+    <section className="w-full relative overflow-hidden">
+      {slides.map((slide, i) => (
+        <img
+          key={slide.id}
+          src={slide.src}
+          alt={slide.alt || "Hero Banner"}
+          className="w-full block absolute inset-0"
+          style={{
+            opacity: i === activeIdx ? 1 : 0,
+            transition: "opacity 0.8s ease",
+            position: i === 0 ? "relative" : "absolute",
+            top: 0, left: 0,
+          }}
+        />
+      ))}
+      {slides.length > 1 && (
+        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10">
+          {slides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setActiveIdx(i)}
+              className="rounded-full transition-all border-none cursor-pointer"
+              style={{
+                width: i === activeIdx ? 20 : 8,
+                height: 8,
+                background: i === activeIdx ? "white" : "rgba(255,255,255,0.5)",
+              }}
+            />
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
 
 /* ─── Reusable Components ─── */
 function StarRating({ count }: { count: number }) {
@@ -179,24 +239,20 @@ function DealCard({ name, img1, img2, price, originalPrice, reviews, desc }: typ
 export default function Home() {
   const [productFilter, setProductFilter] = useState<"all" | "men" | "women">("all");
   const [, navigate] = useLocation();
+  const genderBanners = getGenderBanners();
+  const notesImgs = getNotesImages();
 
+  const [liveProducts] = useState(() => getActiveProducts());
   const filteredProducts = productFilter === "all"
-    ? PRODUCTS
-    : PRODUCTS.filter((p) => p.category === productFilter);
+    ? liveProducts
+    : liveProducts.filter((p) => p.category === productFilter);
 
   return (
     <div className="min-h-screen bg-white text-gray-900">
       <Header />
 
-      {/* ── Hero Banner ── */}
-      <section className="w-full">
-        <img
-          src={heroBannerImg}
-          alt="Discover your best Perfume"
-          className="w-full block"
-          style={{ display: "block" }}
-        />
-      </section>
+      {/* ── Hero Banner / Slider ── */}
+      <HeroBanner />
 
       {/* ── Deals & Combo ── */}
       <section id="deals" className="py-10 border-b border-gray-100">
@@ -224,7 +280,7 @@ export default function Home() {
             >
               <div className="overflow-hidden" style={{ height: 300 }}>
                 <img
-                  src="/men-split.png"
+                  src={genderBanners.men || "/men-split.png"}
                   alt="Men's Collection"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
@@ -240,7 +296,7 @@ export default function Home() {
             >
               <div className="overflow-hidden" style={{ height: 300 }}>
                 <img
-                  src="/women-split.png"
+                  src={genderBanners.women || "/women-split.png"}
                   alt="Women's Collection"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
@@ -298,24 +354,33 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="section-title">Shop By Notes</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
-            {NOTES.map((note) => (
-              <button
-                key={note.label}
-                onClick={() => navigate("/products")}
-                className="flex flex-col items-center gap-3 group bg-transparent border-none cursor-pointer"
-              >
-                <div
-                  className="w-full aspect-square rounded-lg flex items-center justify-center text-white font-bold text-2xl group-hover:scale-105 transition-transform duration-300"
-                  style={{ background: `linear-gradient(135deg, ${note.imgBg}, ${note.color})` }}
+            {NOTES.map((note) => {
+              const customImg = notesImgs[note.label];
+              return (
+                <button
+                  key={note.label}
+                  onClick={() => navigate("/products")}
+                  className="flex flex-col items-center gap-3 group bg-transparent border-none cursor-pointer"
                 >
-                  {note.label[0]}
-                </div>
-                <div className="text-center">
-                  <p className="text-xs font-bold uppercase tracking-widest text-gray-800">{note.label}</p>
-                  <p className="text-xs text-gray-500">{note.count} products</p>
-                </div>
-              </button>
-            ))}
+                  <div
+                    className="w-full aspect-square rounded-lg overflow-hidden group-hover:scale-105 transition-transform duration-300"
+                    style={!customImg ? { background: `linear-gradient(135deg, ${note.imgBg}, ${note.color})` } : {}}
+                  >
+                    {customImg ? (
+                      <img src={customImg} alt={note.label} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-white font-bold text-2xl">
+                        {note.label[0]}
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-center">
+                    <p className="text-xs font-bold uppercase tracking-widest text-gray-800">{note.label}</p>
+                    <p className="text-xs text-gray-500">{note.count} products</p>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       </section>
