@@ -534,8 +534,8 @@ export function applyDiscountCode(
   };
 }
 
-/* ─── Email Settings ─── */
-export type EmailSettings = {
+/* ─── SMTP Settings ─── */
+export type SmtpSettings = {
   host: string;
   port: number;
   secure: boolean;
@@ -547,7 +547,7 @@ export type EmailSettings = {
   apiUrl: string;
 };
 
-export const DEFAULT_EMAIL_SETTINGS: EmailSettings = {
+export const DEFAULT_SMTP_SETTINGS: SmtpSettings = {
   host: "smtp.gmail.com",
   port: 587,
   secure: false,
@@ -559,7 +559,30 @@ export const DEFAULT_EMAIL_SETTINGS: EmailSettings = {
   apiUrl: "",
 };
 
-export type EmailTemplateKey = "order_confirmation" | "contact_reply" | "shipping_update";
+export function getSmtpSettings(): SmtpSettings {
+  try {
+    const s = localStorage.getItem("admin_smtp_settings");
+    if (s) return { ...DEFAULT_SMTP_SETTINGS, ...JSON.parse(s) };
+    // migrate from old key
+    const old = localStorage.getItem("admin_email_settings");
+    if (old) return { ...DEFAULT_SMTP_SETTINGS, ...JSON.parse(old) };
+  } catch {}
+  return { ...DEFAULT_SMTP_SETTINGS };
+}
+
+export function saveSmtpSettings(s: SmtpSettings): void {
+  localStorage.setItem("admin_smtp_settings", JSON.stringify(s));
+}
+
+/* ─── Email Templates ─── */
+export type EmailTemplateKey =
+  | "order_confirmation"
+  | "order_shipped"
+  | "order_delivered"
+  | "abandoned_cart"
+  | "welcome_email"
+  | "new_order_alert"
+  | "low_stock_alert";
 
 export type EmailTemplate = {
   subject: string;
@@ -568,63 +591,99 @@ export type EmailTemplate = {
 
 export type EmailTemplates = Record<EmailTemplateKey, EmailTemplate>;
 
-const DEFAULT_EMAIL_TEMPLATES: EmailTemplates = {
+export const DEFAULT_EMAIL_TEMPLATES: EmailTemplates = {
   order_confirmation: {
-    subject: "Your MagnifiScent Order is Confirmed! 🎉",
-    body: `<h2>Thank you for your order!</h2>
-<p>Dear {{firstName}},</p>
-<p>We've received your order and it's being processed. Here are your order details:</p>
-<table>
-  <tr><td><strong>Order ID:</strong></td><td>{{orderId}}</td></tr>
-  <tr><td><strong>Total:</strong></td><td>{{total}}</td></tr>
-  <tr><td><strong>Payment:</strong></td><td>{{paymentMethod}}</td></tr>
-  <tr><td><strong>Shipping to:</strong></td><td>{{address}}</td></tr>
+    subject: "Your MagnifiScent Order is Confirmed!",
+    body: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#fff;border:1px solid #e5e7eb;border-radius:8px">
+<h2 style="font-family:Georgia,serif;color:#111827;margin-top:0">Order Confirmed!</h2>
+<p>Dear {{customer_name}},</p>
+<p>Thank you for your order! Here are your order details:</p>
+<table style="width:100%;border-collapse:collapse;margin:16px 0">
+  <tr><td style="padding:8px 0;color:#6b7280;border-bottom:1px solid #f3f4f6"><strong>Order ID:</strong></td><td style="padding:8px 0;border-bottom:1px solid #f3f4f6">{{order_id}}</td></tr>
+  <tr><td style="padding:8px 0;color:#6b7280;border-bottom:1px solid #f3f4f6"><strong>Order Total:</strong></td><td style="padding:8px 0;border-bottom:1px solid #f3f4f6">{{order_total}}</td></tr>
+  <tr><td style="padding:8px 0;color:#6b7280"><strong>Store:</strong></td><td style="padding:8px 0">{{store_name}}</td></tr>
 </table>
-<p>Your order will be dispatched within 1-2 business days via {{carrier}}.</p>
-<p>Thank you for choosing MagnifiScent!</p>
-<p><em>— The MagnifiScent Team</em></p>`,
+<p>Your order will be dispatched within 1–2 business days.</p>
+<p style="color:#6b7280;font-size:14px"><em>— The {{store_name}} Team</em></p>
+</div>`,
   },
-  contact_reply: {
-    subject: "We received your message — MagnifiScent",
-    body: `<h2>Thank you for reaching out!</h2>
-<p>Dear {{firstName}},</p>
-<p>We've received your message and will get back to you within 24-48 hours.</p>
-<p>In the meantime, you can browse our collection at <a href="https://magnifiscent.com">magnifiscent.com</a>.</p>
-<p><em>— The MagnifiScent Team</em></p>`,
+  order_shipped: {
+    subject: "Your MagnifiScent order has been shipped!",
+    body: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#fff;border:1px solid #e5e7eb;border-radius:8px">
+<h2 style="font-family:Georgia,serif;color:#111827;margin-top:0">Your Order Is On Its Way!</h2>
+<p>Dear {{customer_name}},</p>
+<p>Your order <strong>{{order_id}}</strong> has been shipped.</p>
+<p>Estimated delivery: 3–5 business days.</p>
+<p style="color:#6b7280;font-size:14px"><em>— The {{store_name}} Team</em></p>
+</div>`,
   },
-  shipping_update: {
-    subject: "Your MagnifiScent order has been shipped! 📦",
-    body: `<h2>Your order is on its way!</h2>
-<p>Dear {{firstName}},</p>
-<p>Great news — your order <strong>{{orderId}}</strong> has been shipped via {{carrier}}.</p>
-<p><strong>Tracking Number:</strong> {{trackingNumber}}</p>
-<p>Estimated delivery: 3-5 business days.</p>
-<p><em>— The MagnifiScent Team</em></p>`,
+  order_delivered: {
+    subject: "Your MagnifiScent order has been delivered!",
+    body: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#fff;border:1px solid #e5e7eb;border-radius:8px">
+<h2 style="font-family:Georgia,serif;color:#111827;margin-top:0">Order Delivered!</h2>
+<p>Dear {{customer_name}},</p>
+<p>Your order <strong>{{order_id}}</strong> has been delivered. We hope you love your fragrance!</p>
+<p style="color:#6b7280;font-size:14px"><em>— The {{store_name}} Team</em></p>
+</div>`,
+  },
+  abandoned_cart: {
+    subject: "You left something behind — complete your MagnifiScent order",
+    body: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#fff;border:1px solid #e5e7eb;border-radius:8px">
+<h2 style="font-family:Georgia,serif;color:#111827;margin-top:0">Your Cart Misses You</h2>
+<p>Dear {{customer_name}},</p>
+<p>You left items in your cart. Come back and complete your order before they sell out!</p>
+<p style="color:#6b7280;font-size:14px"><em>— The {{store_name}} Team</em></p>
+</div>`,
+  },
+  welcome_email: {
+    subject: "Welcome to MagnifiScent — Thank you for your first order!",
+    body: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#fff;border:1px solid #e5e7eb;border-radius:8px">
+<h2 style="font-family:Georgia,serif;color:#111827;margin-top:0">Welcome to {{store_name}}!</h2>
+<p>Dear {{customer_name}},</p>
+<p>Thank you for placing your first order with us. We're thrilled to have you as a customer!</p>
+<p>Your order <strong>{{order_id}}</strong> is being processed and will be dispatched soon.</p>
+<p style="color:#6b7280;font-size:14px"><em>— The {{store_name}} Team</em></p>
+</div>`,
+  },
+  new_order_alert: {
+    subject: "New Order Received — {{order_id}}",
+    body: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#fff;border:1px solid #e5e7eb;border-radius:8px">
+<h2 style="font-family:Georgia,serif;color:#111827;margin-top:0">New Order Alert</h2>
+<p>A new order has been placed on your store.</p>
+<table style="width:100%;border-collapse:collapse;margin:16px 0">
+  <tr><td style="padding:8px 0;color:#6b7280;border-bottom:1px solid #f3f4f6"><strong>Order ID:</strong></td><td style="padding:8px 0;border-bottom:1px solid #f3f4f6">{{order_id}}</td></tr>
+  <tr><td style="padding:8px 0;color:#6b7280;border-bottom:1px solid #f3f4f6"><strong>Customer:</strong></td><td style="padding:8px 0;border-bottom:1px solid #f3f4f6">{{customer_name}}</td></tr>
+  <tr><td style="padding:8px 0;color:#6b7280"><strong>Total:</strong></td><td style="padding:8px 0">{{order_total}}</td></tr>
+</table>
+</div>`,
+  },
+  low_stock_alert: {
+    subject: "Low Stock Alert — {{store_name}}",
+    body: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#fff;border:1px solid #e5e7eb;border-radius:8px">
+<h2 style="font-family:Georgia,serif;color:#111827;margin-top:0">Low Stock Alert</h2>
+<p>A product in your store is running low on stock. Please review your inventory and restock as needed.</p>
+<p style="color:#6b7280;font-size:14px"><em>— {{store_name}} Admin</em></p>
+</div>`,
   },
 };
-
-export function getEmailSettings(): EmailSettings {
-  try {
-    const s = localStorage.getItem("admin_email_settings");
-    if (s) return { ...DEFAULT_EMAIL_SETTINGS, ...JSON.parse(s) };
-  } catch {}
-  return { ...DEFAULT_EMAIL_SETTINGS };
-}
-
-export function saveEmailSettings(s: EmailSettings): void {
-  localStorage.setItem("admin_email_settings", JSON.stringify(s));
-}
 
 export function getEmailTemplates(): EmailTemplates {
   try {
     const s = localStorage.getItem("admin_email_templates");
-    if (s) return { ...DEFAULT_EMAIL_TEMPLATES, ...JSON.parse(s) };
+    if (s) {
+      const parsed = JSON.parse(s);
+      return { ...DEFAULT_EMAIL_TEMPLATES, ...parsed };
+    }
   } catch {}
   return { ...DEFAULT_EMAIL_TEMPLATES };
 }
 
 export function saveEmailTemplates(t: EmailTemplates): void {
   localStorage.setItem("admin_email_templates", JSON.stringify(t));
+}
+
+export function resetEmailTemplate(key: EmailTemplateKey): EmailTemplate {
+  return { ...DEFAULT_EMAIL_TEMPLATES[key] };
 }
 
 export type EmailLogEntry = {

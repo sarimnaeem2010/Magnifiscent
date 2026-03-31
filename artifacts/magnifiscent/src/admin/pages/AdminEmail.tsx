@@ -1,25 +1,34 @@
 import React, { useState } from "react";
 import {
   Check, Eye, EyeOff, Send, RefreshCw, Trash2, Mail,
-  Server, FileText, Clock, Bell,
+  Server, FileText, Clock, Bell, RotateCcw,
 } from "lucide-react";
 import {
-  getEmailSettings, saveEmailSettings, type EmailSettings,
-  getEmailTemplates, saveEmailTemplates, type EmailTemplates, type EmailTemplateKey,
+  getSmtpSettings, saveSmtpSettings, type SmtpSettings,
+  getEmailTemplates, saveEmailTemplates, resetEmailTemplate,
+  type EmailTemplates, type EmailTemplateKey,
   getEmailLog, addEmailLog, type EmailLogEntry,
   getEmailToggles, saveEmailToggles, type EmailToggles,
 } from "@/data/liveData";
 
 const TEMPLATE_LABELS: Record<EmailTemplateKey, string> = {
   order_confirmation: "Order Confirmation",
-  contact_reply: "Contact Form Reply",
-  shipping_update: "Shipping Update",
+  order_shipped: "Order Shipped",
+  order_delivered: "Order Delivered",
+  abandoned_cart: "Abandoned Cart",
+  welcome_email: "Welcome Email",
+  new_order_alert: "New Order Alert",
+  low_stock_alert: "Low Stock Alert",
 };
 
 const TEMPLATE_VARS: Record<EmailTemplateKey, string[]> = {
-  order_confirmation: ["{{firstName}}", "{{orderId}}", "{{total}}", "{{paymentMethod}}", "{{address}}", "{{carrier}}"],
-  contact_reply: ["{{firstName}}", "{{email}}", "{{message}}"],
-  shipping_update: ["{{firstName}}", "{{orderId}}", "{{carrier}}", "{{trackingNumber}}"],
+  order_confirmation: ["{{customer_name}}", "{{order_id}}", "{{order_total}}", "{{store_name}}"],
+  order_shipped: ["{{customer_name}}", "{{order_id}}", "{{store_name}}"],
+  order_delivered: ["{{customer_name}}", "{{order_id}}", "{{store_name}}"],
+  abandoned_cart: ["{{customer_name}}", "{{store_name}}"],
+  welcome_email: ["{{customer_name}}", "{{order_id}}", "{{store_name}}"],
+  new_order_alert: ["{{order_id}}", "{{customer_name}}", "{{order_total}}"],
+  low_stock_alert: ["{{store_name}}"],
 };
 
 type ToggleInfo = {
@@ -94,14 +103,14 @@ export function AdminEmail() {
   const [activeTab, setActiveTab] = useState<Tab>("smtp");
 
   // SMTP state
-  const [smtp, setSmtp] = useState<EmailSettings>(() => getEmailSettings());
+  const [smtp, setSmtp] = useState<SmtpSettings>(() => getSmtpSettings());
   const [smtpSaved, setSmtpSaved] = useState(false);
   const [showPw, setShowPw] = useState(false);
   const [testEmail, setTestEmail] = useState("");
   const [testStatus, setTestStatus] = useState<"idle" | "sending" | "ok" | "error">("idle");
   const [testError, setTestError] = useState("");
 
-  // Notifications toggles state
+  // Notification toggles state
   const [toggles, setToggles] = useState<EmailToggles>(() => getEmailToggles());
   const [togglesSaved, setTogglesSaved] = useState(false);
 
@@ -114,12 +123,12 @@ export function AdminEmail() {
   // Log state
   const [emailLog, setEmailLog] = useState<EmailLogEntry[]>(() => getEmailLog());
 
-  const updateSmtp = (field: keyof EmailSettings) => (val: string | boolean | number) => {
+  const updateSmtp = (field: keyof SmtpSettings) => (val: string | boolean | number) => {
     setSmtp((s) => ({ ...s, [field]: val }));
   };
 
   const handleSaveSmtp = () => {
-    saveEmailSettings(smtp);
+    saveSmtpSettings(smtp);
     setSmtpSaved(true);
     setTimeout(() => setSmtpSaved(false), 2500);
   };
@@ -141,6 +150,11 @@ export function AdminEmail() {
     }));
   };
 
+  const handleResetTemplate = () => {
+    const defaults = resetEmailTemplate(activeTemplate);
+    setTemplates((t) => ({ ...t, [activeTemplate]: defaults }));
+  };
+
   const handleSaveTemplates = () => {
     saveEmailTemplates(templates);
     setTemplatesSaved(true);
@@ -150,15 +164,7 @@ export function AdminEmail() {
   const handleSendTestEmail = async () => {
     if (!testEmail.trim()) return;
     if (!smtp.apiUrl.trim()) {
-      const log: EmailLogEntry = {
-        id: Date.now().toString(),
-        to: testEmail,
-        subject: "MagnifiScent Test Email",
-        status: "pending",
-        date: new Date().toISOString(),
-        message: "API URL not configured. Configure the API URL in SMTP settings to enable real sending.",
-      };
-      addEmailLog(log);
+      addEmailLog({ to: testEmail, subject: "MagnifiScent — Test Email", status: "pending", date: new Date().toISOString(), message: "API URL not configured." });
       setEmailLog(getEmailLog());
       setTestStatus("error");
       setTestError("API URL not configured. Please add your API server URL in the SMTP settings.");
@@ -171,12 +177,11 @@ export function AdminEmail() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          type: "test",
           smtp: { host: smtp.host, port: smtp.port, secure: smtp.secure, auth: { user: smtp.username, pass: smtp.password } },
           from: `"${smtp.fromName}" <${smtp.fromEmail}>`,
           replyTo: smtp.replyTo,
           to: testEmail,
-          subject: "MagnifiScent — Test Email",
-          html: `<h2>Test Email</h2><p>Your SMTP settings are working correctly!</p><p><em>— MagnifiScent Admin Panel</em></p>`,
         }),
       });
       const data = await res.json();
@@ -356,10 +361,9 @@ export function AdminEmail() {
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-100">
               <h2 className="text-sm font-semibold text-gray-700">Email Notification Types</h2>
-              <p className="text-xs text-gray-400 mt-1">Enable or disable each type of automated email. Changes take effect immediately after saving.</p>
+              <p className="text-xs text-gray-400 mt-1">Enable or disable each type of automated email. Changes take effect after saving.</p>
             </div>
 
-            {/* Customer emails */}
             <div className="px-6 py-3 bg-gray-50 border-b border-gray-100">
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Customer Emails</p>
             </div>
@@ -375,7 +379,6 @@ export function AdminEmail() {
               ))}
             </div>
 
-            {/* Admin emails */}
             <div className="px-6 py-3 bg-gray-50 border-b border-gray-100">
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Admin Alerts</p>
             </div>
@@ -406,12 +409,13 @@ export function AdminEmail() {
       {activeTab === "templates" && (
         <div className="space-y-5">
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="flex border-b border-gray-100">
+            {/* Template selector — scrollable row */}
+            <div className="flex border-b border-gray-100 overflow-x-auto">
               {(Object.keys(TEMPLATE_LABELS) as EmailTemplateKey[]).map((key) => (
                 <button
                   key={key}
                   onClick={() => { setActiveTemplate(key); setShowPreview(false); }}
-                  className="flex-1 px-4 py-3 text-xs font-semibold transition-colors border-none cursor-pointer"
+                  className="flex-shrink-0 px-4 py-3 text-xs font-semibold transition-colors border-none cursor-pointer whitespace-nowrap"
                   style={{
                     background: activeTemplate === key ? "#f9fafb" : "#fff",
                     color: activeTemplate === key ? "#111827" : "#9ca3af",
@@ -467,13 +471,22 @@ export function AdminEmail() {
             </div>
           </div>
 
-          <button
-            onClick={handleSaveTemplates}
-            className="flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white rounded-lg border-none cursor-pointer transition-colors"
-            style={{ background: templatesSaved ? "#10b981" : "#111827" }}
-          >
-            {templatesSaved ? <><Check size={14} />Saved!</> : "Save Templates"}
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleSaveTemplates}
+              className="flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white rounded-lg border-none cursor-pointer transition-colors"
+              style={{ background: templatesSaved ? "#10b981" : "#111827" }}
+            >
+              {templatesSaved ? <><Check size={14} />Saved!</> : "Save Templates"}
+            </button>
+            <button
+              onClick={handleResetTemplate}
+              className="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+            >
+              <RotateCcw size={13} />
+              Reset to Default
+            </button>
+          </div>
         </div>
       )}
 

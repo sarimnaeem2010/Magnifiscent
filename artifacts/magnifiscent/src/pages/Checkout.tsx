@@ -4,7 +4,7 @@ import { Footer } from "@/components/layout/Footer";
 import { ChevronRight, Shield, Lock, Truck, Tag } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useLocation } from "wouter";
-import { getPaymentSettings, getExtendedSettings, getStoreFrontSettings, applyDiscountCode, getEmailSettings, getEmailToggles, getEmailTemplates } from "@/data/liveData";
+import { getPaymentSettings, getExtendedSettings, getStoreFrontSettings, applyDiscountCode, getSmtpSettings, getEmailToggles } from "@/data/liveData";
 
 export default function Checkout() {
   const { items, total, clearCart } = useCart();
@@ -62,36 +62,30 @@ export default function Checkout() {
 
   function fireOrderConfirmationEmail(orderId: string) {
     try {
-      const emailSettings = getEmailSettings();
+      const smtpSettings = getSmtpSettings();
       const emailToggles = getEmailToggles();
-      const emailTemplates = getEmailTemplates();
       if (!emailToggles.order_confirmation) return;
-      if (!emailSettings.apiUrl || !form.email) return;
-      const template = emailTemplates.order_confirmation;
-      const variables: Record<string, string> = {
-        firstName: form.firstName,
-        orderId,
-        total: `${cur} ${orderTotal.toFixed(2)}`,
-        paymentMethod: payMethod === "cod" ? "Cash on Delivery" : "Card",
-        address: `${form.address}, ${form.city}, ${form.state} ${form.zip}, ${form.country}`,
-        carrier: extSettings.shippingCarrier || "courier",
-      };
-      fetch(`${emailSettings.apiUrl.replace(/\/$/, "")}/api/send-email`, {
+      if (!smtpSettings.apiUrl || !form.email) return;
+      fetch(`${smtpSettings.apiUrl.replace(/\/$/, "")}/api/send-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          type: "order_confirmation",
           smtp: {
-            host: emailSettings.host,
-            port: emailSettings.port,
-            secure: emailSettings.secure,
-            auth: { user: emailSettings.username, pass: emailSettings.password },
+            host: smtpSettings.host,
+            port: smtpSettings.port,
+            secure: smtpSettings.secure,
+            auth: { user: smtpSettings.username, pass: smtpSettings.password },
           },
-          from: `"${emailSettings.fromName}" <${emailSettings.fromEmail}>`,
-          replyTo: emailSettings.replyTo,
+          from: `"${smtpSettings.fromName}" <${smtpSettings.fromEmail}>`,
+          replyTo: smtpSettings.replyTo,
           to: form.email,
-          subject: template.subject,
-          html: template.body,
-          variables,
+          variables: {
+            customer_name: `${form.firstName} ${form.lastName}`.trim(),
+            order_id: orderId,
+            order_total: `${cur} ${orderTotal.toFixed(2)}`,
+            store_name: storeSettings.storeName || "MagnifiScent",
+          },
         }),
       }).catch(() => {});
     } catch {
