@@ -15,6 +15,10 @@ function StarRating({ count }: { count: number }) {
   );
 }
 
+// PRODUCTS indices after update:
+// 0 = CHIC (women), 1 = Dark Angel (women), 2 = Rising Sun (women),
+// 3 = SIGMA (women), 4 = QUEST (men), 5 = Allure (women)
+
 const DEALS = [
   {
     name: "THE ICONIC DUO",
@@ -41,40 +45,40 @@ const DEALS = [
     representativeProduct: PRODUCTS[0],
   },
   {
-    name: "DARK POWER DUO",
+    name: "DARK ALLURE DUO",
     img1: PRODUCTS[1].img,
     img2: PRODUCTS[5].img,
     price: 189,
-    originalPrice: 229,
+    originalPrice: 224,
     reviews: 11,
-    desc: "Dark Angel meets NOIR — an intense, mysterious pairing for bold souls who command attention.",
+    desc: "Dark Angel meets Allure — two deeply mysterious and seductive fragrances for the bold woman who commands attention.",
     contains: [PRODUCTS[1].name, PRODUCTS[5].name],
-    savings: 40,
+    savings: 35,
     representativeProduct: PRODUCTS[1],
   },
   {
-    name: "RISING STORM SET",
+    name: "FRESH BLOOM DUO",
     img1: PRODUCTS[2].img,
-    img2: PRODUCTS[6].img,
+    img2: PRODUCTS[0].img,
     price: 139,
-    originalPrice: 160,
+    originalPrice: 164,
     reviews: 6,
-    desc: "Fresh meets aquatic — Rising Sun and STORM, the perfect daytime duo. Bright, energetic, memorable.",
-    contains: [PRODUCTS[2].name, PRODUCTS[6].name],
-    savings: 21,
+    desc: "Rising Sun and CHIC — a fresh citrus meets warm floral pairing. The perfect daytime duo for any occasion.",
+    contains: [PRODUCTS[2].name, PRODUCTS[0].name],
+    savings: 25,
     representativeProduct: PRODUCTS[2],
   },
   {
-    name: "POWER TRIO",
-    img1: PRODUCTS[4].img,
-    img2: PRODUCTS[5].img,
-    price: 249,
-    originalPrice: 299,
+    name: "WOMEN'S SIGNATURE TRIO",
+    img1: PRODUCTS[0].img,
+    img2: PRODUCTS[1].img,
+    price: 259,
+    originalPrice: 333,
     reviews: 19,
-    desc: "The ultimate men's collection — QUEST, NOIR, and STORM in one spectacular package.",
-    contains: [PRODUCTS[4].name, PRODUCTS[5].name, PRODUCTS[6].name],
-    savings: 50,
-    representativeProduct: PRODUCTS[4],
+    desc: "The ultimate women's collection — CHIC, Dark Angel, and SIGMA in one spectacular package. Own every mood.",
+    contains: [PRODUCTS[0].name, PRODUCTS[1].name, PRODUCTS[3].name],
+    savings: 74,
+    representativeProduct: PRODUCTS[0],
   },
   {
     name: "FLORAL TRIO",

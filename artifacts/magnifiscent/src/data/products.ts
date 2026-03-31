@@ -1,8 +1,9 @@
-import chicImg from "@assets/image_1774960377576.png";
-import darkAngelImg from "@assets/image_1774960421561.png";
-import risingSunImg from "@assets/image_1774960455085.png";
-import sigmaImg from "@assets/image_1774960467602.png";
-import questImg from "@assets/image_1774960352441.png";
+import allureImg from "@assets/WhatsApp_Image_2026-03-31_at_6.28.41_PM_1774963774232.jpeg";
+import chicImg from "@assets/b96aab17-baaf-4bc7-b557-0436698bc417_1774963774233.jpeg";
+import darkAngelImg from "@assets/48a8c7e7-9133-4ab7-b823-bca1fa11fbd8_1774963774233.jpeg";
+import risingSunImg from "@assets/24f4f0fb-44d5-4ce7-9983-163aded7840f_1774963774233.jpeg";
+import sigmaImg from "@assets/28597e9e-7d4f-4eb6-860d-60c4692f509f_1774963774234.jpeg";
+import questImg from "@assets/7053f792-dda5-4230-bbb5-258ac7ff5799_1774963774234.jpeg";
 
 export type Product = {
   id: number;
@@ -110,36 +111,19 @@ export const PRODUCTS: Product[] = [
   },
   {
     id: 6,
-    name: "NOIR",
-    slug: "noir",
-    img: "/noir-product.png",
-    img2: "/noir-product.png",
-    price: "$120.00",
-    priceNum: 120,
-    originalPrice: "$150.00",
-    originalPriceNum: 150,
-    reviews: 19,
+    name: "Allure",
+    slug: "allure",
+    img: allureImg,
+    img2: allureImg,
+    price: "$99.00",
+    priceNum: 99,
+    originalPrice: "$125.00",
+    originalPriceNum: 125,
+    reviews: 36,
     rating: 5,
-    category: "men",
-    desc: "A dark, smoky leather fragrance with notes of oud and black pepper. Intense and masculine, perfect for evening wear.",
-    notes: ["Oud", "Black Pepper", "Leather", "Vetiver"],
-    size: "100ml / 3.4 Fl.oz",
-  },
-  {
-    id: 7,
-    name: "STORM",
-    slug: "storm",
-    img: "/storm-product.png",
-    img2: "/storm-product.png",
-    price: "$85.00",
-    priceNum: 85,
-    originalPrice: "$105.00",
-    originalPriceNum: 105,
-    reviews: 22,
-    rating: 5,
-    category: "men",
-    desc: "Cool, energetic aquatic notes with a cedarwood base — the scent of raw power. Made for those who take on every challenge.",
-    notes: ["Sea Spray", "Cedarwood", "Grapefruit", "Musk"],
+    category: "women",
+    desc: "A seductive and passionate fragrance — deep red roses, warm spice and a smouldering musk base. For the woman who captivates without trying.",
+    notes: ["Red Rose", "Spice", "Musk", "Amber"],
     size: "100ml / 3.4 Fl.oz",
   },
 ];

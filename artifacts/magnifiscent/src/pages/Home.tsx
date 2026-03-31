@@ -34,11 +34,11 @@ const HERO_SLIDES = [
 
 /* ─── Top Categories ─── */
 const CATEGORIES = [
-  { label: "MEN", count: "3", img: "/men-banner.png", href: "/products?gender=men" },
-  { label: "WOMEN", count: "4", img: "/women-banner.png", href: "/products?gender=women" },
-  { label: "FRESH", count: "2", img: "/storm-product.png", href: "/products" },
+  { label: "MEN", count: "1", img: "/men-banner.png", href: "/products?gender=men" },
+  { label: "WOMEN", count: "5", img: "/women-banner.png", href: "/products?gender=women" },
+  { label: "FRESH", count: "2", img: "/men-banner.png", href: "/products" },
   { label: "FLORAL", count: "3", img: "/women-split.png", href: "/products" },
-  { label: "WOODY", count: "2", img: "/noir-product.png", href: "/products" },
+  { label: "WOODY", count: "2", img: "/men-split.png", href: "/products" },
   { label: "ORIENTAL", count: "3", img: "/story-bg.png", href: "/products" },
 ];
 
@@ -59,7 +59,7 @@ const REVIEWS = [
   { name: "Layla H.", rating: 5, product: "Dark Angel", text: "Dark Angel is unlike anything I've tried before. It's mysterious and alluring — perfect for evening wear. Highly recommend." },
   { name: "Omar A.", rating: 4, product: "SIGMA", text: "SIGMA has great projection and longevity. A bold scent that lasts the whole day. Premium quality at a fair price." },
   { name: "Emma R.", rating: 5, product: "Rising Sun", text: "Rising Sun is my morning go-to. Fresh, clean, and uplifting. It makes me feel confident and ready for the day." },
-  { name: "Khalid B.", rating: 5, product: "NOIR", text: "NOIR is the most sophisticated fragrance I've ever owned. The oud base is outstanding. Compliments every single time." },
+  { name: "Khalid B.", rating: 5, product: "Allure", text: "Allure is the most captivating fragrance I've gifted my wife. The red rose and amber base is outstanding. Compliments every single time." },
 ];
 
 /* ─── Deals ─── */
@@ -83,22 +83,22 @@ const DEALS = [
     desc: "CHIC and SIGMA — warm and feminine florals combined in a stunning gift set.",
   },
   {
-    name: "DARK POWER DUO",
+    name: "DARK ALLURE DUO",
     img1: PRODUCTS[1].img,
-    img2: "/noir-product.png",
+    img2: PRODUCTS[5].img,
     price: "$189.00",
-    originalPrice: "$229.00",
+    originalPrice: "$224.00",
     reviews: 11,
-    desc: "Dark Angel meets NOIR — an intense, mysterious pairing for bold souls.",
+    desc: "Dark Angel meets Allure — deeply mysterious and seductive, for the bold woman.",
   },
   {
-    name: "RISING STORM SET",
+    name: "FRESH BLOOM DUO",
     img1: PRODUCTS[2].img,
-    img2: "/storm-product.png",
+    img2: PRODUCTS[0].img,
     price: "$139.00",
-    originalPrice: "$160.00",
+    originalPrice: "$164.00",
     reviews: 6,
-    desc: "Fresh meets aquatic — Rising Sun and STORM, the perfect daytime duo.",
+    desc: "Rising Sun and CHIC — fresh citrus meets warm floral. The perfect daytime duo.",
   },
 ];
 
@@ -107,7 +107,7 @@ const INSTAGRAM_POSTS = [
   { img: PRODUCTS[0].img, likes: 241, tag: "#CHIC" },
   { img: PRODUCTS[4].img, likes: 387, tag: "#QUEST" },
   { img: PRODUCTS[1].img, likes: 192, tag: "#DarkAngel" },
-  { img: "/men-split.png", likes: 518, tag: "#MagnifiScent" },
+  { img: PRODUCTS[5].img, likes: 518, tag: "#Allure" },
   { img: PRODUCTS[2].img, likes: 164, tag: "#RisingSun" },
   { img: "/women-split.png", likes: 293, tag: "#MagnifiScent" },
 ];
@@ -325,6 +325,14 @@ export default function Home() {
           <div className="scroll-x pb-2">
             {DEALS.map((d) => <DealCard key={d.name} {...d} />)}
           </div>
+          <div className="text-center mt-8">
+            <button
+              onClick={() => navigate("/deals")}
+              className="inline-block border border-black text-black font-bold uppercase tracking-widest text-xs px-10 py-3 hover:bg-black hover:text-white transition-colors bg-transparent cursor-pointer"
+            >
+              View All Deals
+            </button>
+          </div>
         </div>
       </section>
 
@@ -333,17 +341,17 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 py-8">
           <h2 className="section-title">Shop By Gender</h2>
         </div>
-        <div className="flex flex-col md:flex-row" style={{ minHeight: 420 }}>
+        <div className="flex flex-col md:flex-row" style={{ minHeight: 294 }}>
           <button
             onClick={() => navigate("/products?gender=men")}
             className="flex-1 relative group overflow-hidden cursor-pointer border-none bg-transparent p-0 text-left"
-            style={{ minHeight: 300 }}
+            style={{ minHeight: 210 }}
           >
-            <img src="/men-split.png" alt="Men's Collection" className="w-full h-full object-cover" style={{ minHeight: 300 }} />
+            <img src="/men-split.png" alt="Men's Collection" className="w-full h-full object-cover" style={{ minHeight: 210 }} />
             <div className="absolute inset-0 bg-black/35 group-hover:bg-black/20 transition-colors duration-500" />
-            <div className="absolute inset-0 flex flex-col items-center justify-end pb-12 text-white text-center">
+            <div className="absolute inset-0 flex flex-col items-center justify-end pb-8 text-white text-center">
               <h3 className="font-bold text-4xl md:text-5xl uppercase tracking-widest mb-2" style={{ fontFamily: "Georgia, serif" }}>MEN</h3>
-              <p className="text-sm text-white/80 mb-5">3 products</p>
+              <p className="text-sm text-white/80 mb-5">1 product</p>
               <span className="inline-block border border-white text-white text-xs font-bold uppercase tracking-widest px-6 py-2 group-hover:bg-white group-hover:text-black transition-all duration-300">
                 Shop Now
               </span>
@@ -352,13 +360,13 @@ export default function Home() {
           <button
             onClick={() => navigate("/products?gender=women")}
             className="flex-1 relative group overflow-hidden cursor-pointer border-none bg-transparent p-0 text-left"
-            style={{ minHeight: 300 }}
+            style={{ minHeight: 210 }}
           >
-            <img src="/women-split.png" alt="Women's Collection" className="w-full h-full object-cover" style={{ minHeight: 300 }} />
+            <img src="/women-split.png" alt="Women's Collection" className="w-full h-full object-cover" style={{ minHeight: 210 }} />
             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-500" />
-            <div className="absolute inset-0 flex flex-col items-center justify-end pb-12 text-white text-center">
+            <div className="absolute inset-0 flex flex-col items-center justify-end pb-8 text-white text-center">
               <h3 className="font-bold text-4xl md:text-5xl uppercase tracking-widest mb-2" style={{ fontFamily: "Georgia, serif" }}>WOMEN</h3>
-              <p className="text-sm text-white/80 mb-5">4 products</p>
+              <p className="text-sm text-white/80 mb-5">5 products</p>
               <span className="inline-block border border-white text-white text-xs font-bold uppercase tracking-widest px-6 py-2 group-hover:bg-white group-hover:text-black transition-all duration-300">
                 Shop Now
               </span>
