@@ -6,7 +6,6 @@ import { api } from "@/lib/api";
 import type { ApiProduct } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
 import { useLocation, useSearch } from "wouter";
-import { PRODUCTS } from "@/data/products";
 
 function StarRating({ count }: { count: number }) {
   return (
@@ -77,13 +76,11 @@ export default function Products() {
   const initialGender = (params.get("gender") as "men" | "women" | null) || "all";
   const [filter, setFilter] = useState<"all" | "men" | "women">(initialGender as "all" | "men" | "women");
   const [, navigate] = useLocation();
-  const [allProducts, setAllProducts] = useState<ApiProduct[]>(() =>
-    PRODUCTS.map((p) => ({ ...p, stock: 100, active: true }))
-  );
+  const [allProducts, setAllProducts] = useState<ApiProduct[]>([]);
 
   useEffect(() => {
     api.products.list().then((res) => {
-      if (res.success && res.products.length > 0) {
+      if (res.success) {
         setAllProducts(res.products);
       }
     }).catch(() => {});

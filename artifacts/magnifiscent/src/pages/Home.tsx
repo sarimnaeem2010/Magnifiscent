@@ -6,7 +6,6 @@ import { PRODUCTS } from "@/data/products";
 import heroBannerImg from "@assets/sasas_1774966788321.png";
 import womenBannerImg from "@assets/Gemini_Generated_Image_91h42l91h42l91h4.png";
 import menBannerImg from "@assets/Gemini_Generated_Image_gthzqdgthzqdgthz.png";
-import type { Product } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 import { useLocation } from "wouter";
 import { api } from "@/lib/api";
@@ -162,7 +161,7 @@ function StarRating({ count }: { count: number }) {
   );
 }
 
-function ProductCard({ product }: { product: Product | ApiProduct }) {
+function ProductCard({ product }: { product: ApiProduct }) {
   const [hovered, setHovered] = useState(false);
   const { addItem } = useCart();
   const [, navigate] = useLocation();
@@ -309,7 +308,7 @@ export default function Home() {
   const [instaPosts, setInstaPosts] = useState(
     INSTAGRAM_POSTS.map((p) => ({ ...p, url: "https://instagram.com" }))
   );
-  const [liveProducts, setLiveProducts] = useState<(Product | ApiProduct)[]>(PRODUCTS);
+  const [liveProducts, setLiveProducts] = useState<ApiProduct[]>([]);
 
   useEffect(() => {
     api.content.genderBanners.get().then((res) => { if (res.success) setGenderBanners(res.banners); }).catch(() => {});
@@ -320,11 +319,11 @@ export default function Home() {
     api.content.dealImages.get().then((res) => { if (res.success) setDealImgs(res.dealImages); }).catch(() => {});
     api.content.instagramReels.get().then((res) => {
       if (res.success && res.reels.length > 0) {
-        setInstaPosts(res.reels.map((r) => ({ img: r.img || PRODUCTS[0].img, likes: r.likes, tag: r.label, label: r.label, url: r.url })));
+        setInstaPosts(res.reels.map((r) => ({ img: r.img, likes: r.likes, tag: r.label, label: r.label, url: r.url })));
       }
     }).catch(() => {});
     api.products.list().then((res) => {
-      if (res.success && res.products.length > 0) setLiveProducts(res.products);
+      if (res.success) setLiveProducts(res.products);
     }).catch(() => {});
   }, []);
 

@@ -6,7 +6,6 @@ import { useParams, useLocation } from "wouter";
 import { api } from "@/lib/api";
 import type { ApiProduct } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
-import { PRODUCTS } from "@/data/products";
 
 function StarRating({ count, size = 14 }: { count: number; size?: number }) {
   return (
@@ -73,13 +72,7 @@ export default function ProductDetail() {
     setLoading(true);
     api.products.get(params.slug).then((res) => {
       if (res.success) setProduct(res.product);
-      else {
-        const fallback = PRODUCTS.find((p) => p.slug === params.slug);
-        if (fallback) setProduct({ ...fallback, stock: 100, active: true });
-      }
     }).catch(() => {
-      const fallback = PRODUCTS.find((p) => p.slug === params.slug);
-      if (fallback) setProduct({ ...fallback, stock: 100, active: true });
     }).finally(() => setLoading(false));
 
     api.products.list().then((res) => {
