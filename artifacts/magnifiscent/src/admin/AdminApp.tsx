@@ -12,6 +12,7 @@ import { AdminDeals } from "./pages/AdminDeals";
 import { AdminSettings } from "./pages/AdminSettings";
 import { AdminMedia } from "./pages/AdminMedia";
 import { AdminInstagram } from "./pages/AdminInstagram";
+import { AdminPages } from "./pages/AdminPages";
 
 function AdminRoutes() {
   const { isAuthenticated } = useAdmin();
@@ -32,6 +33,7 @@ function AdminRoutes() {
         <Route path="/admin/settings" component={AdminSettings} />
         <Route path="/admin/media" component={AdminMedia} />
         <Route path="/admin/instagram" component={AdminInstagram} />
+        <Route path="/admin/pages" component={AdminPages} />
         <Route component={AdminDashboard} />
       </Switch>
     </AdminLayout>

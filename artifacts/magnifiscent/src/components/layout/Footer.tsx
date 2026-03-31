@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "wouter";
 import { Instagram, Facebook } from "lucide-react";
 import logoImg from "@assets/whitelogo_1774978057429.png";
 
@@ -48,11 +49,12 @@ export function Footer() {
           <div>
             <h4 className="text-sm font-bold uppercase tracking-widest mb-5 text-gray-300">Information</h4>
             <ul className="space-y-3">
-              {["About Us", "Contact Us", "Returns Policy", "Shipping Info", "Privacy Policy", "Terms of Service"].map((l) => (
-                <li key={l}>
-                  <a href="#" className="text-gray-400 text-sm hover:text-white transition-colors" style={{ textDecoration: "none" }}>{l}</a>
-                </li>
-              ))}
+              <li><Link href="/about" className="text-gray-400 text-sm hover:text-white transition-colors" style={{ textDecoration: "none" }}>About Us</Link></li>
+              <li><Link href="/contact" className="text-gray-400 text-sm hover:text-white transition-colors" style={{ textDecoration: "none" }}>Contact Us</Link></li>
+              <li><Link href="/returns" className="text-gray-400 text-sm hover:text-white transition-colors" style={{ textDecoration: "none" }}>Returns Policy</Link></li>
+              <li><Link href="/shipping" className="text-gray-400 text-sm hover:text-white transition-colors" style={{ textDecoration: "none" }}>Shipping Info</Link></li>
+              <li><Link href="/privacy" className="text-gray-400 text-sm hover:text-white transition-colors" style={{ textDecoration: "none" }}>Privacy Policy</Link></li>
+              <li><Link href="/terms" className="text-gray-400 text-sm hover:text-white transition-colors" style={{ textDecoration: "none" }}>Terms of Service</Link></li>
             </ul>
           </div>
 
