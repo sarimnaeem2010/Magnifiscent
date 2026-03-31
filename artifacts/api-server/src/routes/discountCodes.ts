@@ -72,7 +72,7 @@ router.patch("/discount-codes/:id", requireAdminAuth, async (req, res) => {
     const [updated] = await db
       .update(discountCodesTable)
       .set(update)
-      .where(eq(discountCodesTable.id, req.params.id))
+      .where(eq(discountCodesTable.id, String(req.params.id)))
       .returning();
     if (!updated) {
       res.status(404).json({ success: false, error: "Discount code not found" });
@@ -90,7 +90,7 @@ router.delete("/discount-codes/:id", requireAdminAuth, async (req, res) => {
   try {
     const [deleted] = await db
       .delete(discountCodesTable)
-      .where(eq(discountCodesTable.id, req.params.id))
+      .where(eq(discountCodesTable.id, String(req.params.id)))
       .returning();
     if (!deleted) {
       res.status(404).json({ success: false, error: "Discount code not found" });

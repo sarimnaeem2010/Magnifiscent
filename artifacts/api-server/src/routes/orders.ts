@@ -94,7 +94,7 @@ router.patch("/orders/:id/status", requireAdminAuth, async (req, res) => {
     const [updated] = await db
       .update(ordersTable)
       .set({ status })
-      .where(eq(ordersTable.id, req.params.id))
+      .where(eq(ordersTable.id, String(req.params.id)))
       .returning();
     if (!updated) {
       res.status(404).json({ success: false, error: "Order not found" });

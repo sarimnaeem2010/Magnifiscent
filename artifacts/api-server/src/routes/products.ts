@@ -43,7 +43,7 @@ router.get("/products/:slug", async (req, res) => {
 /* PATCH /api/products/:id — admin auth required; partial update of stock/active/images/etc */
 router.patch("/products/:id", requireAdminAuth, async (req, res) => {
   try {
-    const id = parseInt(req.params.id, 10);
+    const id = parseInt(String(req.params.id), 10);
     if (isNaN(id)) {
       res.status(400).json({ success: false, error: "Invalid product id" });
       return;

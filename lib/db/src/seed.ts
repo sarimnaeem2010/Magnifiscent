@@ -18,7 +18,7 @@ const PRODUCTS: schema.InsertProduct[] = CATALOG_PRODUCTS.map((p) => ({
   img2: "",
 }));
 
-const DEALS: schema.InsertDeal[] = CATALOG_DEALS.map((d) => ({ ...d }));
+const DEALS: schema.InsertDeal[] = CATALOG_DEALS.map((d) => ({ ...d, contains: [...d.contains] }));
 
 const TICKER_MESSAGES = [...CATALOG_TICKER_MESSAGES];
 

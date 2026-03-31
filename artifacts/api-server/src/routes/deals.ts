@@ -56,7 +56,7 @@ router.patch("/deals/:id", requireAdminAuth, async (req, res) => {
     const [updated] = await db
       .update(dealsTable)
       .set(update)
-      .where(eq(dealsTable.id, req.params.id))
+      .where(eq(dealsTable.id, String(req.params.id)))
       .returning();
     if (!updated) {
       res.status(404).json({ success: false, error: "Deal not found" });
@@ -74,7 +74,7 @@ router.delete("/deals/:id", requireAdminAuth, async (req, res) => {
   try {
     const [deleted] = await db
       .delete(dealsTable)
-      .where(eq(dealsTable.id, req.params.id))
+      .where(eq(dealsTable.id, String(req.params.id)))
       .returning();
     if (!deleted) {
       res.status(404).json({ success: false, error: "Deal not found" });
