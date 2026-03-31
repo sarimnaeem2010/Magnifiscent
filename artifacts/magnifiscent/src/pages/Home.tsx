@@ -239,6 +239,13 @@ function DealCard({ name, img1, img2, price, originalPrice, reviews, desc }: typ
   );
 }
 
+/* ─── helpers ─── */
+function extractReelShortcode(url: string): string | null {
+  if (!url) return null;
+  const m = url.match(/instagram\.com\/(?:reel|p)\/([A-Za-z0-9_-]+)/);
+  return m ? m[1] : null;
+}
+
 /* ─── Main Page ─── */
 export default function Home() {
   const [productFilter, setProductFilter] = useState<"all" | "men" | "women">("all");
@@ -406,53 +413,83 @@ export default function Home() {
             className="scroll-x flex gap-3 overflow-x-auto pb-3"
             style={{ scrollSnapType: "x mandatory" }}
           >
-            {instaPosts.map((post, i) => (
-              <a
-                key={i}
-                href={post.url || "https://instagram.com"}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="relative group flex-shrink-0 overflow-hidden rounded-xl block bg-gray-900"
-                style={{ width: 160, height: 260, scrollSnapAlign: "start" }}
-              >
-                {/* Product image */}
-                <img
-                  src={post.img}
-                  alt={post.label}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                {/* Dark gradient overlay top */}
-                <div
-                  className="absolute inset-0 pointer-events-none"
-                  style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.1) 45%, rgba(0,0,0,0.55) 100%)" }}
-                />
-                {/* Bold label at top */}
-                <div className="absolute top-0 left-0 right-0 px-3 pt-3">
-                  <p
-                    className="text-white leading-tight uppercase"
-                    style={{ fontSize: 18, fontWeight: 900, fontFamily: "Impact, Arial Black, sans-serif", letterSpacing: 0.5, lineHeight: 1.1, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}
-                  >
-                    {post.label}
-                  </p>
-                </div>
-                {/* Play button center */}
-                <div className="absolute inset-0 flex items-center justify-center">
+            {instaPosts.map((post, i) => {
+              const shortcode = extractReelShortcode(post.url);
+              return (
+                <a
+                  key={i}
+                  href={post.url || "https://instagram.com"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="relative group flex-shrink-0 overflow-hidden rounded-xl block bg-gray-900"
+                  style={{ width: 160, height: 260, scrollSnapAlign: "start" }}
+                >
+                  {/* Thumbnail: embedded reel OR static product image */}
+                  {shortcode ? (
+                    <div
+                      className="absolute inset-0 overflow-hidden"
+                      style={{ pointerEvents: "none" }}
+                    >
+                      <iframe
+                        src={`https://www.instagram.com/reel/${shortcode}/embed/`}
+                        style={{
+                          width: 320,
+                          height: 520,
+                          transform: "scale(0.5)",
+                          transformOrigin: "top left",
+                          border: "none",
+                          display: "block",
+                        }}
+                        scrolling="no"
+                        allowFullScreen
+                        title={post.label}
+                      />
+                    </div>
+                  ) : (
+                    <img
+                      src={post.img}
+                      alt={post.label}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  )}
+                  {/* Dark gradient overlay */}
                   <div
-                    className="flex items-center justify-center rounded-full transition-transform group-hover:scale-110"
-                    style={{ width: 44, height: 44, background: "rgba(255,255,255,0.22)", backdropFilter: "blur(4px)", border: "2px solid rgba(255,255,255,0.55)" }}
-                  >
-                    <svg width="16" height="18" viewBox="0 0 16 18" fill="none">
-                      <path d="M2 1.5L14 9L2 16.5V1.5Z" fill="white" />
-                    </svg>
+                    className="absolute inset-0 pointer-events-none"
+                    style={{ background: shortcode
+                      ? "linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0) 35%, rgba(0,0,0,0.45) 100%)"
+                      : "linear-gradient(180deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.1) 45%, rgba(0,0,0,0.55) 100%)"
+                    }}
+                  />
+                  {/* Bold label at top */}
+                  <div className="absolute top-0 left-0 right-0 px-3 pt-3 pointer-events-none">
+                    <p
+                      className="text-white leading-tight uppercase"
+                      style={{ fontSize: 18, fontWeight: 900, fontFamily: "Impact, Arial Black, sans-serif", letterSpacing: 0.5, lineHeight: 1.1, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}
+                    >
+                      {post.label}
+                    </p>
                   </div>
-                </div>
-                {/* Likes at bottom */}
-                <div className="absolute bottom-0 left-0 right-0 px-3 pb-3 flex items-center gap-1.5">
-                  <Instagram size={12} className="text-white/80" />
-                  <span className="text-white/80 text-xs font-semibold">♥ {post.likes}</span>
-                </div>
-              </a>
-            ))}
+                  {/* Play button — only when showing static image */}
+                  {!shortcode && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div
+                        className="flex items-center justify-center rounded-full transition-transform group-hover:scale-110"
+                        style={{ width: 44, height: 44, background: "rgba(255,255,255,0.22)", backdropFilter: "blur(4px)", border: "2px solid rgba(255,255,255,0.55)" }}
+                      >
+                        <svg width="16" height="18" viewBox="0 0 16 18" fill="none">
+                          <path d="M2 1.5L14 9L2 16.5V1.5Z" fill="white" />
+                        </svg>
+                      </div>
+                    </div>
+                  )}
+                  {/* Likes at bottom */}
+                  <div className="absolute bottom-0 left-0 right-0 px-3 pb-3 flex items-center gap-1.5 pointer-events-none">
+                    <Instagram size={12} className="text-white/80" />
+                    <span className="text-white/80 text-xs font-semibold">♥ {post.likes}</span>
+                  </div>
+                </a>
+              );
+            })}
           </div>
           <div className="text-center mt-5">
             <a
