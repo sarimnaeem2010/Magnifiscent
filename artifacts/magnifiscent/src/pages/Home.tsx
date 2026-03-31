@@ -230,13 +230,13 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 py-8">
           <h2 className="section-title">Shop By Gender</h2>
         </div>
-        <div className="flex flex-col md:flex-row" style={{ minHeight: 160 }}>
+        <div className="flex flex-col md:flex-row" style={{ minHeight: 80 }}>
           <button
             onClick={() => navigate("/products?gender=men")}
             className="flex-1 relative group overflow-hidden cursor-pointer border-none bg-transparent p-0 text-left"
-            style={{ minHeight: 140 }}
+            style={{ minHeight: 70 }}
           >
-            <img src="/men-split.png" alt="Men's Collection" className="w-full h-full object-cover" style={{ minHeight: 140 }} />
+            <img src="/men-split.png" alt="Men's Collection" className="w-full h-full object-cover" style={{ minHeight: 70 }} />
             <div className="absolute inset-0 bg-black/35 group-hover:bg-black/20 transition-colors duration-500" />
             <div className="absolute inset-0 flex flex-col items-center justify-end pb-5 text-white text-center">
               <h3 className="font-bold text-3xl md:text-4xl uppercase tracking-widest mb-1" style={{ fontFamily: "Georgia, serif" }}>MEN</h3>
@@ -249,9 +249,9 @@ export default function Home() {
           <button
             onClick={() => navigate("/products?gender=women")}
             className="flex-1 relative group overflow-hidden cursor-pointer border-none bg-transparent p-0 text-left"
-            style={{ minHeight: 140 }}
+            style={{ minHeight: 70 }}
           >
-            <img src="/women-split.png" alt="Women's Collection" className="w-full h-full object-cover" style={{ minHeight: 140 }} />
+            <img src="/women-split.png" alt="Women's Collection" className="w-full h-full object-cover" style={{ minHeight: 70 }} />
             <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-500" />
             <div className="absolute inset-0 flex flex-col items-center justify-end pb-5 text-white text-center">
               <h3 className="font-bold text-3xl md:text-4xl uppercase tracking-widest mb-1" style={{ fontFamily: "Georgia, serif" }}>WOMEN</h3>
