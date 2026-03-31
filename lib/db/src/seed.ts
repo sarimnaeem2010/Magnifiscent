@@ -5,13 +5,6 @@ import { CATALOG_PRODUCTS, CATALOG_DEALS, CATALOG_TICKER_MESSAGES } from "./cata
 
 const { Pool } = pg;
 
-if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL must be set");
-}
-
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-const db = drizzle(pool, { schema });
-
 const PRODUCTS: schema.InsertProduct[] = CATALOG_PRODUCTS.map((p) => ({
   ...p,
   img: "",
@@ -22,7 +15,6 @@ const DEALS: schema.InsertDeal[] = CATALOG_DEALS.map((d) => ({ ...d, contains: [
 
 const TICKER_MESSAGES = [...CATALOG_TICKER_MESSAGES];
 
-/* ─── Default Email Toggles ─── */
 const DEFAULT_EMAIL_TOGGLES: Record<string, boolean> = {
   order_confirmation: true,
   order_shipped: true,
@@ -33,7 +25,6 @@ const DEFAULT_EMAIL_TOGGLES: Record<string, boolean> = {
   low_stock_alert: false,
 };
 
-/* ─── Default Policy Pages ─── */
 const POLICY_PAGES: schema.InsertPolicyPage[] = [
   {
     key: "returns",
@@ -217,10 +208,11 @@ Last updated: 2025`,
   },
 ];
 
-async function seed() {
+type DrizzleDb = ReturnType<typeof drizzle<typeof schema>>;
+
+export async function seedDatabase(db: DrizzleDb): Promise<void> {
   console.log("Seeding database...");
 
-  /* Products */
   const existingProducts = await db.select({ id: schema.productsTable.id }).from(schema.productsTable);
   if (existingProducts.length === 0) {
     await db.insert(schema.productsTable).values(PRODUCTS);
@@ -229,7 +221,6 @@ async function seed() {
     console.log(`Products already seeded (${existingProducts.length} found), skipping`);
   }
 
-  /* Deals */
   const existingDeals = await db.select({ id: schema.dealsTable.id }).from(schema.dealsTable);
   if (existingDeals.length === 0) {
     await db.insert(schema.dealsTable).values(DEALS);
@@ -238,7 +229,6 @@ async function seed() {
     console.log(`Deals already seeded (${existingDeals.length} found), skipping`);
   }
 
-  /* Store Settings */
   const existingSettings = await db.select({ id: schema.storeSettingsTable.id }).from(schema.storeSettingsTable);
   if (existingSettings.length === 0) {
     await db.insert(schema.storeSettingsTable).values({ id: 1 });
@@ -247,7 +237,6 @@ async function seed() {
     console.log("Store settings already seeded, skipping");
   }
 
-  /* Extended Settings */
   const existingExtended = await db.select({ id: schema.extendedSettingsTable.id }).from(schema.extendedSettingsTable);
   if (existingExtended.length === 0) {
     await db.insert(schema.extendedSettingsTable).values({ id: 1 });
@@ -256,7 +245,6 @@ async function seed() {
     console.log("Extended settings already seeded, skipping");
   }
 
-  /* Payment Settings */
   const existingPayment = await db.select({ id: schema.paymentSettingsTable.id }).from(schema.paymentSettingsTable);
   if (existingPayment.length === 0) {
     await db.insert(schema.paymentSettingsTable).values({ id: 1 });
@@ -265,7 +253,6 @@ async function seed() {
     console.log("Payment settings already seeded, skipping");
   }
 
-  /* Email Config */
   const existingEmail = await db.select({ id: schema.emailConfigTable.id }).from(schema.emailConfigTable);
   if (existingEmail.length === 0) {
     await db.insert(schema.emailConfigTable).values({
@@ -278,7 +265,6 @@ async function seed() {
     console.log("Email config already seeded, skipping");
   }
 
-  /* Gender Banners */
   const existingBanners = await db.select({ id: schema.genderBannersTable.id }).from(schema.genderBannersTable);
   if (existingBanners.length === 0) {
     await db.insert(schema.genderBannersTable).values({ id: 1 });
@@ -287,7 +273,6 @@ async function seed() {
     console.log("Gender banners already seeded, skipping");
   }
 
-  /* Home Headings */
   const existingHeadings = await db.select({ id: schema.homeHeadingsTable.id }).from(schema.homeHeadingsTable);
   if (existingHeadings.length === 0) {
     await db.insert(schema.homeHeadingsTable).values({ id: 1 });
@@ -296,7 +281,6 @@ async function seed() {
     console.log("Home headings already seeded, skipping");
   }
 
-  /* Ticker Messages */
   const existingTicker = await db.select({ id: schema.tickerMessagesTable.id }).from(schema.tickerMessagesTable);
   if (existingTicker.length === 0) {
     await db.insert(schema.tickerMessagesTable).values(
@@ -307,7 +291,6 @@ async function seed() {
     console.log("Ticker messages already seeded, skipping");
   }
 
-  /* Policy Pages */
   const existingPolicies = await db.select({ id: schema.policyPagesTable.id }).from(schema.policyPagesTable);
   if (existingPolicies.length === 0) {
     await db.insert(schema.policyPagesTable).values(POLICY_PAGES);
@@ -317,10 +300,18 @@ async function seed() {
   }
 
   console.log("Seeding complete.");
-  await pool.end();
 }
 
-seed().catch((err) => {
-  console.error("Seed failed:", err);
-  process.exit(1);
-});
+if (process.argv[1] && process.argv[1].includes("seed")) {
+  if (!process.env.DATABASE_URL) {
+    throw new Error("DATABASE_URL must be set");
+  }
+  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  const db = drizzle(pool, { schema });
+  seedDatabase(db)
+    .then(() => pool.end())
+    .catch((err) => {
+      console.error("Seed failed:", err);
+      process.exit(1);
+    });
+}
