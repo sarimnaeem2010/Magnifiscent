@@ -96,7 +96,7 @@ function ProductCard({ product }: { product: Product }) {
 
   return (
     <div
-      className="product-card flex-shrink-0 w-[200px] md:w-[230px] cursor-pointer"
+      className="cursor-pointer"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onClick={() => navigate(`/products/${product.slug}`)}
@@ -113,7 +113,7 @@ function ProductCard({ product }: { product: Product }) {
           src={product.img2}
           alt={product.name}
           className="w-full h-full object-cover absolute inset-0"
-          style={{ opacity: hovered ? 1 : 0, transition: "opacity 0.4s ease", filter: "brightness(0.95) saturate(1.05)" }}
+          style={{ opacity: hovered ? 1 : 0, transition: "opacity 0.4s ease" }}
         />
         <button
           className="quickshop-btn"
@@ -124,13 +124,15 @@ function ProductCard({ product }: { product: Product }) {
         </button>
       </div>
       <div className="pt-3 pb-2">
+        <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-1">
+          {product.category.toUpperCase()}
+        </p>
         <div className="flex items-center gap-1 mb-1">
           <StarRating count={product.rating} />
           <span className="text-gray-400 text-xs ml-1">({product.reviews})</span>
         </div>
-        <h3 className="font-semibold text-sm text-gray-900 hover:text-gray-600 transition-colors mb-1">
-          {product.name}
-        </h3>
+        <h3 className="font-bold text-sm text-gray-900 mb-1">{product.name}</h3>
+        <p className="text-xs text-gray-500 leading-snug mb-2 line-clamp-2">{product.desc}</p>
         <div className="flex items-center gap-2">
           <span className="text-sm font-bold text-gray-900">{product.price}</span>
           <span className="text-xs text-gray-400 line-through">{product.originalPrice}</span>
