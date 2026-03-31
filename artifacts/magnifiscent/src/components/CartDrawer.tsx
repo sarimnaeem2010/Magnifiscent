@@ -2,12 +2,25 @@ import React, { useEffect, useState } from "react";
 import { X, Plus, Minus, ShoppingBag } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useLocation } from "wouter";
+import { getExtendedSettings, getStoreFrontSettings } from "@/data/liveData";
 
 export function CartDrawer() {
   const { items, isOpen, closeCart, removeItem, updateQty, total, count } = useCart();
   const [, navigate] = useLocation();
   const [visible, setVisible] = useState(false);
   const [mounted, setMounted] = useState(false);
+
+  const ext = getExtendedSettings();
+  const store = getStoreFrontSettings();
+  const cur = store.currency || "Rs.";
+  const freeShippingThreshold = store.freeShippingThreshold ?? 100;
+  const shippingRate = ext.shippingRate ?? 200;
+  const taxRate = ext.taxRate ?? 0;
+  const showTax = ext.showTaxInCart && taxRate > 0;
+
+  const shipping = items.length === 0 ? 0 : total >= freeShippingThreshold ? 0 : shippingRate;
+  const taxAmount = showTax && items.length > 0 ? total * (taxRate / 100) : 0;
+  const cartTotal = total + shipping + taxAmount;
 
   useEffect(() => {
     if (isOpen) {
@@ -118,7 +131,7 @@ export function CartDrawer() {
                         </button>
                       </div>
                       <p className="font-bold text-sm text-gray-900">
-                        Rs. {(product.priceNum * qty).toFixed(2)}
+                        {cur} {(product.priceNum * qty).toFixed(2)}
                       </p>
                     </div>
                   </div>
@@ -130,24 +143,39 @@ export function CartDrawer() {
 
         {/* Footer */}
         {items.length > 0 && (
-          <div className="px-6 py-5 border-t border-gray-100 space-y-3">
+          <div className="px-6 py-5 border-t border-gray-100 space-y-2.5">
             <div className="flex justify-between text-sm font-medium text-gray-700">
               <span>Subtotal</span>
-              <span>Rs. {total.toFixed(2)}</span>
+              <span>{cur} {total.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-xs text-gray-400">
               <span>Shipping</span>
-              <span>{total >= 100 ? "Free" : "Calculated at checkout"}</span>
+              <span>
+                {shipping === 0
+                  ? total >= freeShippingThreshold ? "Free" : "Free"
+                  : `${cur} ${shipping.toFixed(2)}`}
+              </span>
             </div>
-            <div className="flex justify-between font-bold text-gray-900 pt-1 border-t border-gray-100">
+            {total < freeShippingThreshold && shipping > 0 && (
+              <p className="text-[11px] text-gray-400">
+                Add {cur} {(freeShippingThreshold - total).toFixed(2)} more for free shipping
+              </p>
+            )}
+            {showTax && taxAmount > 0 && (
+              <div className="flex justify-between text-xs text-gray-500">
+                <span>Tax ({taxRate}%)</span>
+                <span>{cur} {taxAmount.toFixed(2)}</span>
+              </div>
+            )}
+            <div className="flex justify-between font-bold text-gray-900 pt-1.5 border-t border-gray-100">
               <span>Total</span>
-              <span>Rs. {total.toFixed(2)}</span>
+              <span>{cur} {cartTotal.toFixed(2)}</span>
             </div>
             <button
               onClick={() => { closeCart(); navigate("/checkout"); }}
               className="w-full bg-black text-white font-bold uppercase tracking-widest text-xs py-4 hover:bg-gray-800 transition-colors mt-2"
             >
-              Checkout — Rs. {total.toFixed(2)}
+              Checkout — {cur} {cartTotal.toFixed(2)}
             </button>
             <button
               onClick={() => { closeCart(); navigate("/products"); }}
