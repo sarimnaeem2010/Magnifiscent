@@ -1,8 +1,92 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useAdmin } from "../AdminContext";
 import type { StoreSettings } from "../AdminContext";
-import { Check, Eye, EyeOff, X } from "lucide-react";
+import { Check, Eye, EyeOff, X, Download, Upload } from "lucide-react";
 import { getPaymentSettings, savePaymentSettings, type PaymentSettings, getTickerMessages, saveTickerMessages } from "@/data/liveData";
+
+const STORE_KEYS = [
+  "admin_orders", "admin_products", "admin_deals", "admin_settings",
+  "admin_hero_slides", "admin_gender_banners", "admin_notes_images",
+  "admin_deal_images", "admin_instagram_reels", "admin_home_headings",
+  "admin_payment_settings", "admin_ticker_messages",
+];
+
+function DataBackup() {
+  const [importStatus, setImportStatus] = useState<"idle" | "ok" | "err">("idle");
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const handleExport = () => {
+    const snapshot: Record<string, string | null> = {};
+    STORE_KEYS.forEach((k) => { snapshot[k] = localStorage.getItem(k); });
+    const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `magnifiscent-data-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target?.result as string) as Record<string, string | null>;
+        Object.entries(data).forEach(([k, v]) => {
+          if (STORE_KEYS.includes(k)) {
+            if (v === null) localStorage.removeItem(k);
+            else localStorage.setItem(k, v);
+          }
+        });
+        setImportStatus("ok");
+        setTimeout(() => { window.location.reload(); }, 1200);
+      } catch {
+        setImportStatus("err");
+        setTimeout(() => setImportStatus("idle"), 3000);
+      }
+    };
+    reader.readAsText(file);
+    if (fileRef.current) fileRef.current.value = "";
+  };
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
+      <div className="pb-2 border-b border-gray-100">
+        <h2 className="text-sm font-semibold text-gray-700">Data Backup & Restore</h2>
+        <p className="text-xs text-gray-400 mt-0.5">
+          Export all store data to a file, then import it on the live site to sync your settings, products, deals, and media.
+        </p>
+      </div>
+      <div className="flex flex-col sm:flex-row gap-3">
+        <button
+          onClick={handleExport}
+          className="flex items-center justify-center gap-2 flex-1 px-4 py-3 text-sm font-bold text-white rounded-lg border-none cursor-pointer transition-colors"
+          style={{ background: "#111827" }}
+        >
+          <Download size={15} />
+          Export Data (Download)
+        </button>
+        <label
+          className="flex items-center justify-center gap-2 flex-1 px-4 py-3 text-sm font-bold rounded-lg border-2 border-dashed cursor-pointer transition-colors"
+          style={{
+            color: importStatus === "ok" ? "#10b981" : importStatus === "err" ? "#ef4444" : "#374151",
+            borderColor: importStatus === "ok" ? "#10b981" : importStatus === "err" ? "#ef4444" : "#d1d5db",
+            background: importStatus === "ok" ? "#f0fdf4" : importStatus === "err" ? "#fef2f2" : "#f9fafb",
+          }}
+        >
+          <Upload size={15} />
+          {importStatus === "ok" ? "Imported! Reloading…" : importStatus === "err" ? "Invalid file" : "Import Data (Upload)"}
+          <input ref={fileRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
+        </label>
+      </div>
+      <p className="text-xs text-gray-400 leading-relaxed">
+        <strong>How to sync:</strong> Export on this (dev) site → open your live site's admin → go to Settings → Import the downloaded file.
+      </p>
+    </div>
+  );
+}
 
 function Field({ label, value, onChange, type = "text", placeholder = "" }: {
   label: string; value: string | number; onChange: (v: string) => void;
@@ -246,6 +330,9 @@ export function AdminSettings() {
           </button>
         </div>
       </div>
+
+      {/* Data Backup */}
+      <DataBackup />
 
       {/* Actions */}
       <div className="flex items-center justify-between gap-4">
