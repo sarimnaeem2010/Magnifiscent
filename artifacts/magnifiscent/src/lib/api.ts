@@ -1,4 +1,4 @@
-const API_BASE = "/api";
+const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "/api";
 
 function getToken(): string {
   return sessionStorage.getItem("admin_api_token") ?? "";
@@ -106,7 +106,6 @@ export type ApiStoreSettings = {
   instagramUrl: string;
   twitterUrl: string;
   facebookUrl: string;
-  adminPassword: string;
 };
 
 export type ApiExtendedSettings = {

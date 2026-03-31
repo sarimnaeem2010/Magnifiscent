@@ -52,8 +52,11 @@ export function AdminSettings() {
   const [form, setForm] = useState<StoreSettings>({ ...settings });
   const [saved, setSaved] = useState(false);
   const [showPw, setShowPw] = useState(false);
+  const [currentPw, setCurrentPw] = useState("");
+  const [newPw, setNewPw] = useState("");
   const [confirmPw, setConfirmPw] = useState("");
   const [pwError, setPwError] = useState("");
+  const [pwSuccess, setPwSuccess] = useState(false);
 
   const [payment, setPayment] = useState<ApiPaymentSettings>({ cod: true, card: true });
   const [paymentSaved, setPaymentSaved] = useState(false);
@@ -154,20 +157,23 @@ export function AdminSettings() {
   };
 
   const handleSave = async () => {
-    if (form.adminPassword !== settings.adminPassword) {
-      if (form.adminPassword !== confirmPw) {
-        setPwError("Passwords do not match.");
-        return;
-      }
-      if (form.adminPassword.length < 6) {
-        setPwError("Password must be at least 6 characters.");
-        return;
-      }
-    }
-    setPwError("");
     setSettings(form);
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
+  };
+
+  const handleChangePassword = async () => {
+    setPwError("");
+    if (!currentPw) { setPwError("Enter your current password."); return; }
+    if (!newPw || newPw.length < 6) { setPwError("New password must be at least 6 characters."); return; }
+    if (newPw !== confirmPw) { setPwError("Passwords do not match."); return; }
+    try {
+      const res = await api.admin.changePassword(currentPw, newPw);
+      if (!res.success) { setPwError((res as { error?: string }).error || "Failed to change password."); return; }
+      setCurrentPw(""); setNewPw(""); setConfirmPw("");
+      setPwSuccess(true);
+      setTimeout(() => setPwSuccess(false), 3000);
+    } catch { setPwError("Failed to change password. Please try again."); }
   };
 
   const togglePayment = async (key: keyof ApiPaymentSettings) => {
@@ -229,14 +235,24 @@ export function AdminSettings() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
         <h2 className="text-sm font-semibold text-gray-700 pb-2 border-b border-gray-100">Admin Password</h2>
         <div>
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Current Password</label>
+          <input
+            type={showPw ? "text" : "password"}
+            className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+            value={currentPw}
+            onChange={(e) => { setCurrentPw(e.target.value); setPwError(""); }}
+            placeholder="Enter current password"
+          />
+        </div>
+        <div>
           <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">New Password</label>
           <div className="relative">
             <input
               type={showPw ? "text" : "password"}
               className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 pr-10"
-              value={form.adminPassword}
-              onChange={(e) => { setForm((f) => ({ ...f, adminPassword: e.target.value })); setPwError(""); }}
-              placeholder="Enter new password"
+              value={newPw}
+              onChange={(e) => { setNewPw(e.target.value); setPwError(""); }}
+              placeholder="Enter new password (min. 6 chars)"
             />
             <button
               type="button"
@@ -247,19 +263,24 @@ export function AdminSettings() {
             </button>
           </div>
         </div>
-        {form.adminPassword !== settings.adminPassword && (
-          <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Confirm Password</label>
-            <input
-              type={showPw ? "text" : "password"}
-              className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-              value={confirmPw}
-              onChange={(e) => { setConfirmPw(e.target.value); setPwError(""); }}
-              placeholder="Confirm new password"
-            />
-          </div>
-        )}
+        <div>
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Confirm New Password</label>
+          <input
+            type={showPw ? "text" : "password"}
+            className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+            value={confirmPw}
+            onChange={(e) => { setConfirmPw(e.target.value); setPwError(""); }}
+            placeholder="Confirm new password"
+          />
+        </div>
         {pwError && <p className="text-red-500 text-xs">{pwError}</p>}
+        {pwSuccess && <p className="text-green-600 text-xs font-semibold">✓ Password changed successfully</p>}
+        <button
+          onClick={handleChangePassword}
+          className="px-5 py-2 bg-gray-900 text-white text-xs font-bold rounded-lg hover:bg-gray-700 transition-colors border-none cursor-pointer"
+        >
+          Change Password
+        </button>
       </div>
 
       {/* Payment Methods */}

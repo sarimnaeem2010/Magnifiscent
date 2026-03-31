@@ -9,7 +9,7 @@ import { requireAdminAuth } from "../middleware/auth.js";
 
 const router = Router();
 
-/* GET /api/settings — public; returns all three settings tables merged */
+/* GET /api/settings — public; returns settings (adminPassword excluded from store) */
 router.get("/settings", async (_req, res) => {
   try {
     const [[store], [extended], [payment]] = await Promise.all([
@@ -17,10 +17,11 @@ router.get("/settings", async (_req, res) => {
       db.select().from(extendedSettingsTable).limit(1),
       db.select().from(paymentSettingsTable).limit(1),
     ]);
+    const storePublic = store ? (({ adminPassword: _pw, ...rest }) => rest)(store) : null;
     res.json({
       success: true,
       settings: {
-        store: store ?? null,
+        store: storePublic,
         extended: extended ?? null,
         payment: payment ?? null,
       },

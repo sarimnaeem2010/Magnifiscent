@@ -54,7 +54,6 @@ const DEFAULT_SETTINGS: StoreSettings = {
   instagramUrl: "https://instagram.com/magnifiscent",
   twitterUrl: "https://twitter.com/magnifiscent",
   facebookUrl: "https://facebook.com/magnifiscent",
-  adminPassword: "admin123",
 };
 
 export function AdminProvider({ children }: { children: React.ReactNode }) {

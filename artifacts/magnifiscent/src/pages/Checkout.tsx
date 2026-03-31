@@ -16,7 +16,6 @@ const DEFAULT_STORE: ApiStoreSettings = {
   instagramUrl: "",
   twitterUrl: "",
   facebookUrl: "",
-  adminPassword: "",
 };
 const DEFAULT_EXT: ApiExtendedSettings = {
   seoTitle: "",
@@ -130,30 +129,46 @@ export default function Checkout() {
     }).catch(() => {});
   }
 
+  const [submitError, setSubmitError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setSubmitError("");
+    setSubmitting(true);
     const orderId = `MS-${Date.now().toString(36).toUpperCase()}`;
     const now = new Date().toISOString();
 
-    await api.orders.create({
-      id: orderId,
-      customer: {
-        name: `${form.firstName} ${form.lastName}`.trim(),
-        email: form.email,
-        phone: form.phone,
-        address: [form.address, form.city, form.state, form.zip, form.country].filter(Boolean).join(", "),
-      },
-      items: items.map((i) => ({
-        productId: i.product.id,
-        productName: i.product.name,
-        qty: i.qty,
-        price: i.product.priceNum,
-      })),
-      total: orderTotal,
-      status: "Pending",
-      date: now,
-      paymentMethod: payMethod === "cod" ? "Cash on Delivery" : "Card",
-    }).catch(() => {});
+    try {
+      const res = await api.orders.create({
+        id: orderId,
+        customer: {
+          name: `${form.firstName} ${form.lastName}`.trim(),
+          email: form.email,
+          phone: form.phone,
+          address: [form.address, form.city, form.state, form.zip, form.country].filter(Boolean).join(", "),
+        },
+        items: items.map((i) => ({
+          productId: i.product.id,
+          productName: i.product.name,
+          qty: i.qty,
+          price: i.product.priceNum,
+        })),
+        total: orderTotal,
+        status: "Pending",
+        date: now,
+        paymentMethod: payMethod === "cod" ? "Cash on Delivery" : "Card",
+      });
+      if (!res.success) {
+        setSubmitError("Failed to place your order. Please try again.");
+        setSubmitting(false);
+        return;
+      }
+    } catch {
+      setSubmitError("Network error. Please check your connection and try again.");
+      setSubmitting(false);
+      return;
+    }
 
     clearCart();
     fireOrderConfirmationEmail(orderId);
@@ -466,11 +481,18 @@ export default function Checkout() {
                 )}
               </div>
 
+              {submitError && (
+                <p className="text-red-600 text-sm font-medium text-center">{submitError}</p>
+              )}
+
               <button
                 type="submit"
-                className="w-full bg-black text-white font-bold uppercase tracking-widest text-sm py-4 hover:bg-gray-800 transition-colors border-none cursor-pointer"
+                disabled={submitting}
+                className="w-full bg-black text-white font-bold uppercase tracking-widest text-sm py-4 hover:bg-gray-800 transition-colors border-none cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {payMethod === "cod"
+                {submitting
+                  ? "Placing Order..."
+                  : payMethod === "cod"
                   ? `Place Order (COD) — ${cur} ${orderTotal.toFixed(2)}`
                   : `Pay Now — ${cur} ${orderTotal.toFixed(2)}`}
               </button>
