@@ -593,6 +593,15 @@ export function saveEmailApiUrl(url: string): void {
   localStorage.setItem("admin_email_api_url", url);
 }
 
+/* ─── Email Admin API Key (stored locally — used for Bearer token auth) ─── */
+export function getEmailAdminKey(): string {
+  return localStorage.getItem("admin_email_api_key") ?? "";
+}
+
+export function saveEmailAdminKey(key: string): void {
+  localStorage.setItem("admin_email_api_key", key);
+}
+
 /* ─── Email Templates ─── */
 export type EmailTemplateKey =
   | "order_confirmation"

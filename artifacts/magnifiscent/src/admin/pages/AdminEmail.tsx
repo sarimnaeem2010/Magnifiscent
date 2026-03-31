@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import {
   getEmailApiUrl, saveEmailApiUrl,
+  getEmailAdminKey, saveEmailAdminKey,
   getEmailLog, addEmailLog, type EmailLogEntry,
   DEFAULT_EMAIL_TEMPLATES, type EmailTemplateKey, type EmailTemplate, type EmailTemplates,
   DEFAULT_EMAIL_TOGGLES, type EmailToggles,
@@ -101,6 +102,8 @@ export function AdminEmail() {
   const [activeTab, setActiveTab] = useState<Tab>("smtp");
   const [apiUrl, setApiUrl] = useState(() => getEmailApiUrl());
   const [apiUrlDraft, setApiUrlDraft] = useState(() => getEmailApiUrl());
+  const [adminKey, setAdminKey] = useState(() => getEmailAdminKey());
+  const [adminKeyDraft, setAdminKeyDraft] = useState(() => getEmailAdminKey());
   const [loadStatus, setLoadStatus] = useState<"idle" | "loading" | "loaded" | "error">("idle");
 
   // SMTP form state (populated from API)
@@ -130,11 +133,14 @@ export function AdminEmail() {
   // Log state
   const [emailLog, setEmailLog] = useState<EmailLogEntry[]>(() => getEmailLog());
 
-  const loadFromServer = useCallback(async (url: string) => {
+  const loadFromServer = useCallback(async (url: string, key?: string) => {
     if (!url.trim()) return;
+    const authKey = key !== undefined ? key : adminKey;
     setLoadStatus("loading");
     try {
-      const res = await fetch(`${url.replace(/\/$/, "")}/api/email-config`);
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (authKey) headers["Authorization"] = `Bearer ${authKey}`;
+      const res = await fetch(`${url.replace(/\/$/, "")}/api/email-config`, { headers });
       const data = await res.json();
       if (res.ok && data.success && data.config) {
         const { smtp: serverSmtp, toggles: serverToggles, templates: serverTemplates } = data.config;
@@ -156,10 +162,19 @@ export function AdminEmail() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleSaveApiUrl = () => {
-    const trimmed = apiUrlDraft.trim();
-    setApiUrl(trimmed);
-    saveEmailApiUrl(trimmed);
-    if (trimmed) loadFromServer(trimmed);
+    const trimmedUrl = apiUrlDraft.trim();
+    const trimmedKey = adminKeyDraft.trim();
+    setApiUrl(trimmedUrl);
+    setAdminKey(trimmedKey);
+    saveEmailApiUrl(trimmedUrl);
+    saveEmailAdminKey(trimmedKey);
+    if (trimmedUrl) loadFromServer(trimmedUrl, trimmedKey);
+  };
+
+  const authHeaders = (): Record<string, string> => {
+    const h: Record<string, string> = { "Content-Type": "application/json" };
+    if (adminKey) h["Authorization"] = `Bearer ${adminKey}`;
+    return h;
   };
 
   const handleSaveSmtp = async () => {
@@ -169,7 +184,7 @@ export function AdminEmail() {
     try {
       const res = await fetch(`${apiUrl.replace(/\/$/, "")}/api/email-config`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: authHeaders(),
         body: JSON.stringify({ smtp }),
       });
       const data = await res.json();
@@ -191,7 +206,7 @@ export function AdminEmail() {
     try {
       const res = await fetch(`${apiUrl.replace(/\/$/, "")}/api/email-config`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: authHeaders(),
         body: JSON.stringify({ toggles }),
       });
       const data = await res.json();
@@ -209,7 +224,7 @@ export function AdminEmail() {
     try {
       const res = await fetch(`${apiUrl.replace(/\/$/, "")}/api/email-config`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: authHeaders(),
         body: JSON.stringify({ templates }),
       });
       const data = await res.json();
@@ -306,7 +321,7 @@ export function AdminEmail() {
 
           {/* API URL card — must be set first */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
-            <h2 className="text-sm font-semibold text-gray-700 pb-2 border-b border-gray-100">API Server URL</h2>
+            <h2 className="text-sm font-semibold text-gray-700 pb-2 border-b border-gray-100">API Server Connection</h2>
             <div className="flex gap-3">
               <input
                 type="url"
@@ -316,20 +331,31 @@ export function AdminEmail() {
                 onChange={(e) => setApiUrlDraft(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") handleSaveApiUrl(); }}
               />
-              <button onClick={handleSaveApiUrl}
-                className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white rounded-lg border-none cursor-pointer transition-colors"
-                style={{ background: loadStatus === "loaded" ? "#10b981" : "#111827" }}>
-                {loadStatus === "loading" ? <RefreshCw size={13} className="animate-spin" /> : loadStatus === "loaded" ? <Check size={13} /> : null}
-                {loadStatus === "loaded" ? "Connected" : loadStatus === "loading" ? "Connecting…" : "Connect"}
-              </button>
             </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Admin API Key</label>
+              <input
+                type="password"
+                className="w-full px-3 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                placeholder="Paste your SESSION_SECRET or ADMIN_API_KEY here"
+                value={adminKeyDraft}
+                onChange={(e) => setAdminKeyDraft(e.target.value)}
+                onKeyDown={(e) => { if (e.key === "Enter") handleSaveApiUrl(); }}
+              />
+              <p className="text-xs text-gray-400 mt-1">Must match the <code className="text-xs bg-gray-100 px-1 rounded">SESSION_SECRET</code> (or <code className="text-xs bg-gray-100 px-1 rounded">ADMIN_API_KEY</code>) env var on the API server. This key is never sent to customers.</p>
+            </div>
+            <button onClick={handleSaveApiUrl}
+              className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-white rounded-lg border-none cursor-pointer transition-colors"
+              style={{ background: loadStatus === "loaded" ? "#10b981" : "#111827" }}>
+              {loadStatus === "loading" ? <RefreshCw size={13} className="animate-spin" /> : loadStatus === "loaded" ? <Check size={13} /> : null}
+              {loadStatus === "loaded" ? "Connected" : loadStatus === "loading" ? "Connecting…" : "Connect & Load Config"}
+            </button>
             {loadStatus === "error" && (
-              <p className="text-xs text-amber-600 flex items-center gap-1.5"><AlertCircle size={12} /> Could not connect. Check the URL and ensure the API server is running.</p>
+              <p className="text-xs text-amber-600 flex items-center gap-1.5"><AlertCircle size={12} /> Could not connect. Check the URL, ensure the API server is running, and verify the API key matches.</p>
             )}
             {loadStatus === "loaded" && (
               <p className="text-xs text-green-600">Connected to API server. SMTP settings loaded.</p>
             )}
-            <p className="text-xs text-gray-400">Your Express/nodemailer API server URL. SMTP credentials will be stored server-side.</p>
           </div>
 
           {noApiUrl && (

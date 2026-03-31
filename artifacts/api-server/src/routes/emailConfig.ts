@@ -5,9 +5,28 @@ import { fileURLToPath } from "node:url";
 
 const router = Router();
 
-const CONFIG_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../data");
+/*
+ * Config file: <api-server-root>/data/email-config.json
+ * At runtime, import.meta.url is artifacts/api-server/dist/index.mjs
+ * path.dirname → artifacts/api-server/dist
+ * ../data      → artifacts/api-server/data   ✓
+ */
+const CONFIG_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../data");
 const CONFIG_PATH = path.join(CONFIG_DIR, "email-config.json");
 
+/* ── Auth helper ────────────────────────────────────────────────────────── */
+function getAdminKey(): string {
+  return process.env.ADMIN_API_KEY || process.env.SESSION_SECRET || "";
+}
+
+function isAuthorized(req: { headers: Record<string, string | string[] | undefined> }): boolean {
+  const key = getAdminKey();
+  if (!key) return true; // no key configured → open (dev mode only)
+  const authHeader = req.headers["authorization"] ?? "";
+  return authHeader === `Bearer ${key}`;
+}
+
+/* ── Types ───────────────────────────────────────────────────────────────── */
 export type ServerSmtpSettings = {
   host: string;
   port: number;
@@ -67,8 +86,12 @@ async function writeConfig(config: EmailConfig): Promise<void> {
   await writeFile(CONFIG_PATH, JSON.stringify(config, null, 2), "utf-8");
 }
 
-/* GET /api/email-config — returns config with password masked */
-router.get("/email-config", async (_req, res) => {
+/* GET /api/email-config — requires admin auth; returns config with password masked */
+router.get("/email-config", async (req, res) => {
+  if (!isAuthorized(req)) {
+    res.status(401).json({ success: false, error: "Unauthorized" });
+    return;
+  }
   try {
     const config = await readConfig();
     const safeConfig = {
@@ -84,8 +107,12 @@ router.get("/email-config", async (_req, res) => {
   }
 });
 
-/* POST /api/email-config — saves full config (admin use only) */
+/* POST /api/email-config — requires admin auth; saves full config */
 router.post("/email-config", async (req, res) => {
+  if (!isAuthorized(req)) {
+    res.status(401).json({ success: false, error: "Unauthorized" });
+    return;
+  }
   try {
     const { smtp, toggles, templates } = req.body;
     const existing = await readConfig();
@@ -96,7 +123,7 @@ router.post("/email-config", async (req, res) => {
       templates: templates !== undefined ? templates : existing.templates,
     };
 
-    // If password is the masked value, keep the existing password
+    // If password is the masked placeholder, keep the existing password
     if (updated.smtp && updated.smtp.password === "••••••••" && existing.smtp) {
       updated.smtp.password = existing.smtp.password;
     }
