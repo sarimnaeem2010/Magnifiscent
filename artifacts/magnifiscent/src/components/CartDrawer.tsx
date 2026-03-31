@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { X, Plus, Minus, ShoppingBag } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useLocation } from "wouter";
@@ -6,8 +6,23 @@ import { useLocation } from "wouter";
 export function CartDrawer() {
   const { items, isOpen, closeCart, removeItem, updateQty, total, count } = useCart();
   const [, navigate] = useLocation();
+  const [visible, setVisible] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (isOpen) {
+      setMounted(true);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => setVisible(true));
+      });
+    } else {
+      setVisible(false);
+      const t = setTimeout(() => setMounted(false), 350);
+      return () => clearTimeout(t);
+    }
+  }, [isOpen]);
+
+  if (!mounted) return null;
 
   return (
     <>
@@ -15,13 +30,22 @@ export function CartDrawer() {
       <div
         className="fixed inset-0 bg-black/40 z-[100]"
         onClick={closeCart}
-        style={{ backdropFilter: "blur(2px)" }}
+        style={{
+          backdropFilter: "blur(2px)",
+          opacity: visible ? 1 : 0,
+          transition: "opacity 0.35s ease",
+        }}
       />
 
       {/* Drawer */}
       <div
         className="fixed top-0 right-0 h-full bg-white z-[101] flex flex-col"
-        style={{ width: "min(400px, 100vw)", boxShadow: "-4px 0 30px rgba(0,0,0,0.15)" }}
+        style={{
+          width: "min(400px, 100vw)",
+          boxShadow: "-4px 0 30px rgba(0,0,0,0.15)",
+          transform: visible ? "translateX(0)" : "translateX(100%)",
+          transition: "transform 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+        }}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">

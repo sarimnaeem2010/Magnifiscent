@@ -26,6 +26,7 @@ const DEALS = [
     desc: "QUEST and CHIC — two signature fragrances paired together in one exclusive combo. One bold, one floral.",
     contains: [PRODUCTS[4].name, PRODUCTS[0].name],
     savings: 29,
+    representativeProduct: PRODUCTS[4],
   },
   {
     name: "FLORAL DREAM PACK",
@@ -37,6 +38,7 @@ const DEALS = [
     desc: "CHIC and SIGMA — warm and feminine florals combined in a stunning gift set. Perfect for gifting.",
     contains: [PRODUCTS[0].name, PRODUCTS[3].name],
     savings: 45,
+    representativeProduct: PRODUCTS[0],
   },
   {
     name: "DARK POWER DUO",
@@ -48,6 +50,7 @@ const DEALS = [
     desc: "Dark Angel meets NOIR — an intense, mysterious pairing for bold souls who command attention.",
     contains: [PRODUCTS[1].name, PRODUCTS[5].name],
     savings: 40,
+    representativeProduct: PRODUCTS[1],
   },
   {
     name: "RISING STORM SET",
@@ -59,6 +62,7 @@ const DEALS = [
     desc: "Fresh meets aquatic — Rising Sun and STORM, the perfect daytime duo. Bright, energetic, memorable.",
     contains: [PRODUCTS[2].name, PRODUCTS[6].name],
     savings: 21,
+    representativeProduct: PRODUCTS[2],
   },
   {
     name: "POWER TRIO",
@@ -70,6 +74,7 @@ const DEALS = [
     desc: "The ultimate men's collection — QUEST, NOIR, and STORM in one spectacular package.",
     contains: [PRODUCTS[4].name, PRODUCTS[5].name, PRODUCTS[6].name],
     savings: 50,
+    representativeProduct: PRODUCTS[4],
   },
   {
     name: "FLORAL TRIO",
@@ -81,6 +86,7 @@ const DEALS = [
     desc: "Three floral masterpieces — CHIC, SIGMA, and Rising Sun — for the woman who embraces every mood.",
     contains: [PRODUCTS[0].name, PRODUCTS[3].name, PRODUCTS[2].name],
     savings: 50,
+    representativeProduct: PRODUCTS[0],
   },
 ];
 
@@ -106,7 +112,7 @@ function DealCard({ deal }: { deal: typeof DEALS[0] }) {
           style={{ transform: hovered ? "translateY(0)" : "translateY(100%)", transition: "transform 0.3s ease" }}
           onClick={(e) => {
             e.stopPropagation();
-            if (PRODUCTS[4]) addItem(PRODUCTS[4]);
+            addItem(deal.representativeProduct);
           }}
         >
           Quick Add
