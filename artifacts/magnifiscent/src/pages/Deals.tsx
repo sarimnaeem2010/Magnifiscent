@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Star } from "lucide-react";
 import { PRODUCTS } from "@/data/products";
-import { useAdminDealMap } from "@/data/liveData";
+import { useAdminDealMap, getDealCustomImages } from "@/data/liveData";
 import { useCart } from "@/context/CartContext";
 
 function StarRating({ count }: { count: number }) {
@@ -94,25 +94,17 @@ const BASE_DEALS = [
 type DealWithPrice = typeof BASE_DEALS[0] & { savings: number };
 
 function DealCard({ deal }: { deal: DealWithPrice }) {
-  const [hovered, setHovered] = useState(false);
   const { addItem } = useCart();
   const discount = Math.round(((deal.originalPrice - deal.price) / deal.originalPrice) * 100);
 
   return (
-    <div
-      className="product-card cursor-pointer"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
+    <div className="product-card cursor-pointer">
       <div className="relative overflow-hidden bg-gray-50" style={{ aspectRatio: "3/4" }}>
         <span className="sale-badge">{discount}% OFF</span>
-        <img src={deal.img1} alt={deal.name} className="w-full h-full object-cover absolute inset-0"
-          style={{ opacity: hovered ? 0 : 1, transition: "opacity 0.4s ease" }} />
-        <img src={deal.img2} alt={deal.name} className="w-full h-full object-cover absolute inset-0"
-          style={{ opacity: hovered ? 1 : 0, transition: "opacity 0.4s ease" }} />
+        <img src={deal.img1} alt={deal.name} className="product-img-main w-full h-full object-cover" />
+        <img src={deal.img2} alt={deal.name} className="product-img-alt w-full h-full object-cover" />
         <button
           className="quickshop-btn"
-          style={{ transform: hovered ? "translateY(0)" : "translateY(100%)", transition: "transform 0.3s ease" }}
           onClick={(e) => {
             e.stopPropagation();
             addItem(deal.representativeProduct);
@@ -145,6 +137,7 @@ function DealCard({ deal }: { deal: DealWithPrice }) {
 
 export default function Deals() {
   const adminDealMap = useAdminDealMap();
+  const dealImgs = getDealCustomImages();
 
   const activeDeals: DealWithPrice[] = BASE_DEALS
     .filter((d) => {
@@ -155,7 +148,14 @@ export default function Deals() {
       const admin = adminDealMap.get(d.id);
       const price = admin ? admin.price : d.price;
       const originalPrice = admin ? admin.originalPrice : d.originalPrice;
-      return { ...d, price, originalPrice, savings: originalPrice - price };
+      const customImg = dealImgs[d.id];
+      return {
+        ...d,
+        img1: customImg || d.img1,
+        price,
+        originalPrice,
+        savings: originalPrice - price,
+      };
     });
 
   return (
