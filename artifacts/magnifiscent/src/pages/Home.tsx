@@ -226,41 +226,43 @@ export default function Home() {
       </section>
 
       {/* ── Shop By Gender ── */}
-      <section className="border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <h2 className="section-title">Shop By Gender</h2>
-        </div>
-        <div className="flex flex-col md:flex-row" style={{ minHeight: 16 }}>
-          <button
-            onClick={() => navigate("/products?gender=men")}
-            className="flex-1 relative group overflow-hidden cursor-pointer border-none bg-transparent p-0 text-left"
-            style={{ minHeight: 14 }}
-          >
-            <img src="/men-split.png" alt="Men's Collection" className="w-full h-full object-cover" style={{ minHeight: 14 }} />
-            <div className="absolute inset-0 bg-black/35 group-hover:bg-black/20 transition-colors duration-500" />
-            <div className="absolute inset-0 flex flex-col items-center justify-end pb-5 text-white text-center">
-              <h3 className="font-bold text-3xl md:text-4xl uppercase tracking-widest mb-1" style={{ fontFamily: "Georgia, serif" }}>MEN</h3>
-              <p className="text-sm text-white/80 mb-3">1 product</p>
-              <span className="inline-block border border-white text-white text-xs font-bold uppercase tracking-widest px-6 py-2 group-hover:bg-white group-hover:text-black transition-all duration-300">
-                Shop Now
-              </span>
-            </div>
-          </button>
-          <button
-            onClick={() => navigate("/products?gender=women")}
-            className="flex-1 relative group overflow-hidden cursor-pointer border-none bg-transparent p-0 text-left"
-            style={{ minHeight: 14 }}
-          >
-            <img src="/women-split.png" alt="Women's Collection" className="w-full h-full object-cover" style={{ minHeight: 14 }} />
-            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors duration-500" />
-            <div className="absolute inset-0 flex flex-col items-center justify-end pb-5 text-white text-center">
-              <h3 className="font-bold text-3xl md:text-4xl uppercase tracking-widest mb-1" style={{ fontFamily: "Georgia, serif" }}>WOMEN</h3>
-              <p className="text-sm text-white/80 mb-3">5 products</p>
-              <span className="inline-block border border-white text-white text-xs font-bold uppercase tracking-widest px-6 py-2 group-hover:bg-white group-hover:text-black transition-all duration-300">
-                Shop Now
-              </span>
-            </div>
-          </button>
+      <section className="py-10 border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="section-title text-center">Shop By Gender</h2>
+          <div className="flex flex-col md:flex-row gap-4 mt-6">
+            <button
+              onClick={() => navigate("/products?gender=men")}
+              className="flex-1 group cursor-pointer border-none bg-transparent p-0 text-left"
+            >
+              <div className="overflow-hidden" style={{ height: 300 }}>
+                <img
+                  src="/men-split.png"
+                  alt="Men's Collection"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+              <div className="text-center mt-3">
+                <p className="font-bold text-base uppercase tracking-widest text-gray-900">MEN</p>
+                <p className="text-sm text-gray-400 mt-0.5">1 product</p>
+              </div>
+            </button>
+            <button
+              onClick={() => navigate("/products?gender=women")}
+              className="flex-1 group cursor-pointer border-none bg-transparent p-0 text-left"
+            >
+              <div className="overflow-hidden" style={{ height: 300 }}>
+                <img
+                  src="/women-split.png"
+                  alt="Women's Collection"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+              </div>
+              <div className="text-center mt-3">
+                <p className="font-bold text-base uppercase tracking-widest text-gray-900">WOMEN</p>
+                <p className="text-sm text-gray-400 mt-0.5">5 products</p>
+              </div>
+            </button>
+          </div>
         </div>
       </section>
 
