@@ -785,3 +785,24 @@ export function getStoreFrontSettings(): { freeShippingThreshold: number; curren
   } catch {}
   return { freeShippingThreshold: 100, currency: "Rs.", storeName: "MagnifiScent" };
 }
+
+
+/* ─── Order persistence (storefront → admin panel) ─── */
+export type NewOrderPayload = {
+  id: string;
+  customer: { name: string; email: string; phone: string; address: string };
+  items: Array<{ productId: number; productName: string; qty: number; price: number }>;
+  total: number;
+  status: "Pending";
+  date: string;
+  paymentMethod: string;
+};
+
+export function saveNewOrder(order: NewOrderPayload): void {
+  try {
+    const stored = localStorage.getItem("admin_orders");
+    const existing = stored ? JSON.parse(stored) : [];
+    existing.unshift(order);
+    localStorage.setItem("admin_orders", JSON.stringify(existing));
+  } catch { /* silently ignore — never block checkout */ }
+}

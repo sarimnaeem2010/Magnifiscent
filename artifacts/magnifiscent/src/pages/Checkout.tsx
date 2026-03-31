@@ -4,7 +4,7 @@ import { Footer } from "@/components/layout/Footer";
 import { ChevronRight, Shield, Lock, Truck, Tag } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useLocation } from "wouter";
-import { getPaymentSettings, getExtendedSettings, getStoreFrontSettings, applyDiscountCode, getEmailApiUrl } from "@/data/liveData";
+import { getPaymentSettings, getExtendedSettings, getStoreFrontSettings, applyDiscountCode, getEmailApiUrl, saveNewOrder } from "@/data/liveData";
 
 export default function Checkout() {
   const { items, total, clearCart } = useCart();
@@ -83,6 +83,29 @@ export default function Checkout() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const orderId = `MS-${Date.now().toString(36).toUpperCase()}`;
+    const now = new Date().toISOString();
+
+    // Save the order to admin_orders localStorage so it appears in the admin panel
+    saveNewOrder({
+      id: orderId,
+      customer: {
+        name: `${form.firstName} ${form.lastName}`.trim(),
+        email: form.email,
+        phone: form.phone,
+        address: [form.address, form.city, form.state, form.zip, form.country].filter(Boolean).join(", "),
+      },
+      items: items.map((i) => ({
+        productId: i.product.id,
+        productName: i.product.name,
+        qty: i.qty,
+        price: i.product.priceNum,
+      })),
+      total: orderTotal,
+      status: "Pending",
+      date: now,
+      paymentMethod: payMethod === "cod" ? "Cash on Delivery" : "Card",
+    });
+
     clearCart();
     fireOrderConfirmationEmail(orderId);
     setStep("success");
