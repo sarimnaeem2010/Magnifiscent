@@ -1,100 +1,12 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useAdmin } from "../AdminContext";
 import type { StoreSettings } from "../AdminContext";
-import { Check, Eye, EyeOff, X, Download, Upload, Plus } from "lucide-react";
+import { Check, Eye, EyeOff, X, Plus } from "lucide-react";
+import { api } from "@/lib/api";
+import type { ApiExtendedSettings, ApiPaymentSettings, ApiDiscountCode } from "@/lib/api";
 import {
-  getPaymentSettings, savePaymentSettings, type PaymentSettings,
-  getTickerMessages, saveTickerMessages,
-  getExtendedSettings, saveExtendedSettings, type ExtendedSettings,
-  getDiscountCodes, saveDiscountCodes, type DiscountCode,
+  DEFAULT_EXTENDED_SETTINGS, DEFAULT_TICKER_MESSAGES,
 } from "@/data/liveData";
-
-const STORE_KEYS = [
-  "admin_orders", "admin_products", "admin_deals", "admin_settings",
-  "admin_hero_slides", "admin_gender_banners", "admin_notes_images",
-  "admin_deal_images", "admin_instagram_reels", "admin_home_headings",
-  "admin_payment_settings", "admin_ticker_messages",
-  "admin_extended_settings", "admin_discount_codes",
-  "admin_policy_pages",
-  "admin_email_settings", "admin_email_templates", "admin_email_log",
-];
-
-function DataBackup() {
-  const [importStatus, setImportStatus] = useState<"idle" | "ok" | "err">("idle");
-  const fileRef = useRef<HTMLInputElement>(null);
-
-  const handleExport = () => {
-    const snapshot: Record<string, string | null> = {};
-    STORE_KEYS.forEach((k) => { snapshot[k] = localStorage.getItem(k); });
-    const blob = new Blob([JSON.stringify(snapshot, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `magnifiscent-data-${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      try {
-        const data = JSON.parse(ev.target?.result as string) as Record<string, string | null>;
-        Object.entries(data).forEach(([k, v]) => {
-          if (STORE_KEYS.includes(k)) {
-            if (v === null) localStorage.removeItem(k);
-            else localStorage.setItem(k, v);
-          }
-        });
-        setImportStatus("ok");
-        setTimeout(() => { window.location.reload(); }, 1200);
-      } catch {
-        setImportStatus("err");
-        setTimeout(() => setImportStatus("idle"), 3000);
-      }
-    };
-    reader.readAsText(file);
-    if (fileRef.current) fileRef.current.value = "";
-  };
-
-  return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
-      <div className="pb-2 border-b border-gray-100">
-        <h2 className="text-sm font-semibold text-gray-700">Data Backup & Restore</h2>
-        <p className="text-xs text-gray-400 mt-0.5">
-          Export all store data to a file, then import it on the live site to sync your settings, products, deals, and media.
-        </p>
-      </div>
-      <div className="flex flex-col sm:flex-row gap-3">
-        <button
-          onClick={handleExport}
-          className="flex items-center justify-center gap-2 flex-1 px-4 py-3 text-sm font-bold text-white rounded-lg border-none cursor-pointer transition-colors"
-          style={{ background: "#111827" }}
-        >
-          <Download size={15} />
-          Export Data (Download)
-        </button>
-        <label
-          className="flex items-center justify-center gap-2 flex-1 px-4 py-3 text-sm font-bold rounded-lg border-2 border-dashed cursor-pointer transition-colors"
-          style={{
-            color: importStatus === "ok" ? "#10b981" : importStatus === "err" ? "#ef4444" : "#374151",
-            borderColor: importStatus === "ok" ? "#10b981" : importStatus === "err" ? "#ef4444" : "#d1d5db",
-            background: importStatus === "ok" ? "#f0fdf4" : importStatus === "err" ? "#fef2f2" : "#f9fafb",
-          }}
-        >
-          <Upload size={15} />
-          {importStatus === "ok" ? "Imported! Reloading…" : importStatus === "err" ? "Invalid file" : "Import Data (Upload)"}
-          <input ref={fileRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
-        </label>
-      </div>
-      <p className="text-xs text-gray-400 leading-relaxed">
-        <strong>How to sync:</strong> Export on this (dev) site → open your live site's admin → go to Settings → Import the downloaded file.
-      </p>
-    </div>
-  );
-}
 
 function Field({ label, value, onChange, type = "text", placeholder = "" }: {
   label: string; value: string | number; onChange: (v: string) => void;
@@ -142,42 +54,69 @@ export function AdminSettings() {
   const [showPw, setShowPw] = useState(false);
   const [confirmPw, setConfirmPw] = useState("");
   const [pwError, setPwError] = useState("");
-  const [payment, setPayment] = useState<PaymentSettings>(() => getPaymentSettings());
+
+  const [payment, setPayment] = useState<ApiPaymentSettings>({ cod: true, card: true });
   const [paymentSaved, setPaymentSaved] = useState(false);
-  const [ticker, setTicker] = useState<string[]>(() => getTickerMessages());
+
+  const [ticker, setTicker] = useState<string[]>([...DEFAULT_TICKER_MESSAGES]);
   const [tickerSaved, setTickerSaved] = useState(false);
-  const [ext, setExt] = useState<ExtendedSettings>(() => getExtendedSettings());
+
+  const [ext, setExt] = useState<ApiExtendedSettings>({ ...DEFAULT_EXTENDED_SETTINGS });
   const [extSaved, setExtSaved] = useState(false);
-  const [discountCodes, setDiscountCodes] = useState<DiscountCode[]>(() => getDiscountCodes());
+
+  const [discountCodes, setDiscountCodes] = useState<ApiDiscountCode[]>([]);
   const [dcSaved, setDcSaved] = useState(false);
+
+  useEffect(() => {
+    setForm({ ...settings });
+  }, [settings]);
+
+  useEffect(() => {
+    api.settings.get().then((res) => {
+      if (!res.success) return;
+      if (res.settings.payment) setPayment(res.settings.payment);
+      if (res.settings.extended) setExt({ ...DEFAULT_EXTENDED_SETTINGS, ...res.settings.extended });
+    }).catch(() => {});
+
+    api.content.tickerMessages.get().then((res) => {
+      if (res.success && res.messages.length > 0) setTicker(res.messages);
+    }).catch(() => {});
+
+    api.discountCodes.list().then((res) => {
+      if (res.success) setDiscountCodes(res.codes);
+    }).catch(() => {});
+  }, []);
 
   const update = (field: keyof StoreSettings) => (val: string) => {
     setForm((f) => ({ ...f, [field]: field === "freeShippingThreshold" ? parseFloat(val) || 0 : val }));
   };
 
-  const updateExt = (field: keyof ExtendedSettings) => (val: string | boolean | number) => {
+  const updateExt = (field: keyof ApiExtendedSettings) => (val: string | boolean | number) => {
     setExt((e) => ({ ...e, [field]: val }));
   };
 
-  const saveExt = () => {
-    saveExtendedSettings(ext);
+  const saveExt = async () => {
+    await api.settings.put({ extended: ext }).catch(() => {});
     setExtSaved(true);
     setTimeout(() => setExtSaved(false), 2500);
   };
 
   const addDiscountCode = () => {
-    const newCode: DiscountCode = {
+    const newCode: ApiDiscountCode = {
       id: Date.now().toString(),
       code: "",
       type: "percent",
       value: 10,
+      minOrder: 0,
+      maxUses: 0,
+      usedCount: 0,
       active: true,
       expiry: "",
     };
     setDiscountCodes((prev) => [...prev, newCode]);
   };
 
-  const updateDiscountCode = (id: string, field: keyof DiscountCode, val: string | boolean | number) => {
+  const updateDiscountCode = (id: string, field: keyof ApiDiscountCode, val: string | boolean | number) => {
     setDiscountCodes((prev) =>
       prev.map((c) => (c.id === id ? { ...c, [field]: val } : c))
     );
@@ -187,13 +126,34 @@ export function AdminSettings() {
     setDiscountCodes((prev) => prev.filter((c) => c.id !== id));
   };
 
-  const saveDc = () => {
-    saveDiscountCodes(discountCodes);
+  const saveDc = async () => {
+    const existingIds = new Set<string>();
+    try {
+      const res = await api.discountCodes.list();
+      if (res.success) res.codes.forEach((c) => existingIds.add(c.id));
+    } catch {}
+
+    for (const code of discountCodes) {
+      if (!code.code.trim()) continue;
+      if (existingIds.has(code.id)) {
+        await api.discountCodes.patch(code.id, code).catch(() => {});
+      } else {
+        await api.discountCodes.create(code).catch(() => {});
+      }
+    }
+
+    const currentIds = new Set(discountCodes.map((c) => c.id));
+    for (const id of existingIds) {
+      if (!currentIds.has(id)) {
+        await api.discountCodes.delete(id).catch(() => {});
+      }
+    }
+
     setDcSaved(true);
     setTimeout(() => setDcSaved(false), 2500);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (form.adminPassword !== settings.adminPassword) {
       if (form.adminPassword !== confirmPw) {
         setPwError("Passwords do not match.");
@@ -210,11 +170,11 @@ export function AdminSettings() {
     setTimeout(() => setSaved(false), 2500);
   };
 
-  const togglePayment = (key: keyof PaymentSettings) => {
+  const togglePayment = async (key: keyof ApiPaymentSettings) => {
     const next = { ...payment, [key]: !payment[key] };
     if (!next.cod && !next.card) return;
     setPayment(next);
-    savePaymentSettings(next);
+    await api.settings.put({ payment: next }).catch(() => {});
     setPaymentSaved(true);
     setTimeout(() => setPaymentSaved(false), 2000);
   };
@@ -231,23 +191,18 @@ export function AdminSettings() {
     if (ticker.length > 1) setTicker((prev) => prev.filter((_, i) => i !== idx));
   };
 
-  const saveTicker = () => {
+  const saveTicker = async () => {
     const cleaned = ticker.map((m) => m.trim()).filter(Boolean);
     if (cleaned.length === 0) return;
-    saveTickerMessages(cleaned);
+    await api.content.tickerMessages.put(cleaned).catch(() => {});
     setTicker(cleaned);
     setTickerSaved(true);
     setTimeout(() => setTickerSaved(false), 2500);
   };
 
   const handleReset = () => {
-    if (window.confirm("This will clear all admin data (orders, products, settings) and reset to defaults. Continue?")) {
-      localStorage.removeItem("admin_orders");
-      localStorage.removeItem("admin_products");
-      localStorage.removeItem("admin_deals");
-      localStorage.removeItem("admin_settings");
+    if (window.confirm("This will log you out and reset the admin session. Continue?")) {
       logout();
-      window.location.reload();
     }
   };
 
@@ -380,7 +335,7 @@ export function AdminSettings() {
         </div>
       </div>
 
-      {/* ═══ SEO ═══ */}
+      {/* SEO */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
         <div className="flex items-center justify-between pb-2 border-b border-gray-100">
           <div>
@@ -406,7 +361,7 @@ export function AdminSettings() {
         </button>
       </div>
 
-      {/* ═══ Shipping ═══ */}
+      {/* Shipping */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
         <div className="flex items-center justify-between pb-2 border-b border-gray-100">
           <div>
@@ -425,7 +380,7 @@ export function AdminSettings() {
         </button>
       </div>
 
-      {/* ═══ Taxes ═══ */}
+      {/* Taxes */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
         <div className="pb-2 border-b border-gray-100">
           <h2 className="text-sm font-semibold text-gray-700">Tax Settings</h2>
@@ -443,7 +398,7 @@ export function AdminSettings() {
         </button>
       </div>
 
-      {/* ═══ Discount Codes ═══ */}
+      {/* Discount Codes */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
         <div className="flex items-center justify-between pb-2 border-b border-gray-100">
           <div>
@@ -541,7 +496,7 @@ export function AdminSettings() {
         </div>
       </div>
 
-      {/* ═══ Analytics ═══ */}
+      {/* Analytics */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
         <div className="pb-2 border-b border-gray-100">
           <h2 className="text-sm font-semibold text-gray-700">Analytics & Tracking</h2>
@@ -554,7 +509,7 @@ export function AdminSettings() {
         </button>
       </div>
 
-      {/* ═══ Maintenance Mode ═══ */}
+      {/* Maintenance Mode */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
         <div className="pb-2 border-b border-gray-100">
           <h2 className="text-sm font-semibold text-gray-700">Maintenance Mode</h2>
@@ -586,16 +541,13 @@ export function AdminSettings() {
         </button>
       </div>
 
-      {/* Data Backup */}
-      <DataBackup />
-
       {/* Actions */}
       <div className="flex items-center justify-between gap-4">
         <button
           onClick={handleReset}
           className="px-4 py-2.5 text-sm font-semibold text-red-600 border border-red-200 rounded-lg hover:bg-red-50 bg-transparent cursor-pointer transition-colors"
         >
-          Reset All Data
+          Sign Out
         </button>
         <button
           onClick={handleSave}

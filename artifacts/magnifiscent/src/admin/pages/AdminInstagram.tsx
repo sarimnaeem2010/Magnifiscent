@@ -1,9 +1,8 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Plus, Trash2, ImageIcon, Save, CheckCircle2, Instagram } from "lucide-react";
-import { getInstagramReels, saveInstagramReels, type InstagramReel } from "@/data/liveData";
+import { api } from "@/lib/api";
 import { PRODUCTS } from "@/data/products";
-
-const SEED_VERSION = "2";
+import type { InstagramReel } from "@/data/liveData";
 
 const DEFAULT_REELS: InstagramReel[] = [
   { id: "d1", url: "https://instagram.com", img: PRODUCTS[0].img, label: "NEW LAUNCH",   likes: 241 },
@@ -19,23 +18,6 @@ const DEFAULT_REELS: InstagramReel[] = [
   { id: "r3", url: "https://www.instagram.com/magnifiscent24/reel/DDopYO1No5-/", img: PRODUCTS[5].img, label: "ALLURE",     likes: 87  },
   { id: "r4", url: "https://www.instagram.com/magnifiscent24/reel/DB4DwTrsDT_/", img: PRODUCTS[4].img, label: "QUEST",      likes: 201 },
 ];
-
-function seedIfEmpty(): InstagramReel[] {
-  const version = localStorage.getItem("admin_instagram_seed_v");
-  const saved = getInstagramReels();
-  if (version === SEED_VERSION && saved.length > 0) return saved;
-  if (saved.length === 0) {
-    localStorage.setItem("admin_instagram_seed_v", SEED_VERSION);
-    saveInstagramReels(DEFAULT_REELS);
-    return DEFAULT_REELS;
-  }
-  const existingIds = new Set(saved.map((r) => r.id));
-  const toAdd = DEFAULT_REELS.filter((r) => !existingIds.has(r.id));
-  const merged = [...saved, ...toAdd];
-  localStorage.setItem("admin_instagram_seed_v", SEED_VERSION);
-  saveInstagramReels(merged);
-  return merged;
-}
 
 function compressImage(file: File, maxW: number, maxH: number, quality = 0.8): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -64,16 +46,32 @@ function compressImage(file: File, maxW: number, maxH: number, quality = 0.8): P
 const EMPTY_FORM = { url: "", label: "", likes: "", img: "" };
 
 export function AdminInstagram() {
-  const [reels, setReels] = useState<InstagramReel[]>(() => seedIfEmpty());
+  const [reels, setReels] = useState<InstagramReel[]>([]);
+  const [loaded, setLoaded] = useState(false);
   const [saved, setSaved] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [compressing, setCompressing] = useState(false);
   const imgRef = useRef<HTMLInputElement>(null);
 
-  const persist = (next: InstagramReel[]) => {
+  useEffect(() => {
+    api.content.instagramReels.get().then((res) => {
+      if (res.success && res.reels.length > 0) {
+        setReels(res.reels);
+      } else {
+        setReels(DEFAULT_REELS);
+        api.content.instagramReels.put(DEFAULT_REELS).catch(() => {});
+      }
+    }).catch(() => {
+      setReels(DEFAULT_REELS);
+    }).finally(() => {
+      setLoaded(true);
+    });
+  }, []);
+
+  const persist = async (next: InstagramReel[]) => {
     setReels(next);
-    saveInstagramReels(next);
+    await api.content.instagramReels.put(next).catch(() => {});
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -114,15 +112,14 @@ export function AdminInstagram() {
     setReels((prev) => prev.map((r) => r.id === id ? { ...r, url: val } : r));
   };
 
-  const handleSaveEdits = () => {
-    saveInstagramReels(reels);
+  const handleSaveEdits = async () => {
+    await api.content.instagramReels.put(reels).catch(() => {});
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
 
   return (
     <div className="space-y-5 max-w-4xl">
-      {/* Header bar */}
       <div className="flex items-center gap-3 bg-white rounded-xl px-5 py-4 shadow-sm border border-gray-100">
         <Instagram size={18} className="text-pink-500" />
         <div>
@@ -148,12 +145,10 @@ export function AdminInstagram() {
         </div>
       </div>
 
-      {/* Add form */}
       {showForm && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
           <h3 className="text-sm font-semibold text-gray-800 mb-4">New Reel Card</h3>
           <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-5">
-            {/* Thumbnail upload */}
             <div>
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Thumbnail</p>
               <div
@@ -187,7 +182,6 @@ export function AdminInstagram() {
               </div>
             </div>
 
-            {/* Fields */}
             <div className="space-y-3">
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">
@@ -244,13 +238,15 @@ export function AdminInstagram() {
         </div>
       )}
 
-      {/* Reels list */}
-      {reels.length === 0 && !showForm ? (
+      {!loaded ? (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 py-8 text-center">
+          <p className="text-xs text-gray-400">Loading reels…</p>
+        </div>
+      ) : reels.length === 0 && !showForm ? (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 py-16 text-center">
           <Instagram size={32} className="text-gray-200 mx-auto mb-3" />
           <p className="text-sm text-gray-400 font-medium">No reel cards yet</p>
           <p className="text-xs text-gray-300 mt-1">Click "Add Reel" to create your first card</p>
-          <p className="text-xs text-gray-300 mt-1">When empty, the homepage shows default product images</p>
         </div>
       ) : (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">

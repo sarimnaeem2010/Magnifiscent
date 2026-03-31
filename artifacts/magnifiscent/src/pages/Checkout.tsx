@@ -1,28 +1,72 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { ChevronRight, Shield, Lock, Truck, Tag } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useLocation } from "wouter";
-import { getPaymentSettings, getExtendedSettings, getStoreFrontSettings, applyDiscountCode, getEmailApiUrl, saveNewOrder } from "@/data/liveData";
+import { api } from "@/lib/api";
+import type { ApiPaymentSettings, ApiExtendedSettings, ApiStoreSettings } from "@/lib/api";
+
+const DEFAULT_STORE: ApiStoreSettings = {
+  storeName: "MagnifiScent",
+  email: "hello@magnifiscent.com",
+  phone: "",
+  currency: "Rs.",
+  freeShippingThreshold: 2500,
+  instagramUrl: "",
+  twitterUrl: "",
+  facebookUrl: "",
+  adminPassword: "",
+};
+const DEFAULT_EXT: ApiExtendedSettings = {
+  seoTitle: "",
+  seoDescription: "",
+  seoOgImage: "",
+  shippingRate: 200,
+  shippingCarrier: "",
+  taxRate: 0,
+  showTaxInCart: false,
+  ga4Id: "",
+  fbPixelId: "",
+  maintenanceMode: false,
+  maintenanceMessage: "",
+};
 
 export default function Checkout() {
   const { items, total, clearCart } = useCart();
   const [, navigate] = useLocation();
   const [step, setStep] = useState<"form" | "success">("form");
-  const paymentSettings = getPaymentSettings();
-  const extSettings = getExtendedSettings();
-  const storeSettings = getStoreFrontSettings();
-  const cur = storeSettings.currency || "Rs.";
 
+  const [paymentSettings, setPaymentSettings] = useState<ApiPaymentSettings>({ cod: true, card: true });
+  const [extSettings, setExtSettings] = useState<ApiExtendedSettings>(DEFAULT_EXT);
+  const [storeSettings, setStoreSettings] = useState<ApiStoreSettings>(DEFAULT_STORE);
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
+
+  useEffect(() => {
+    api.settings.get().then((res) => {
+      if (res.success) {
+        if (res.settings.payment) setPaymentSettings(res.settings.payment);
+        if (res.settings.extended) setExtSettings({ ...DEFAULT_EXT, ...res.settings.extended });
+        if (res.settings.store) setStoreSettings({ ...DEFAULT_STORE, ...res.settings.store });
+      }
+    }).catch(() => {}).finally(() => setSettingsLoaded(true));
+  }, []);
+
+  const cur = storeSettings.currency || "Rs.";
   const availableMethods: ("card" | "cod")[] = [];
   if (paymentSettings.card) availableMethods.push("card");
   if (paymentSettings.cod) availableMethods.push("cod");
 
-  const [payMethod, setPayMethod] = useState<"card" | "cod">(availableMethods[0] ?? "cod");
+  const [payMethod, setPayMethod] = useState<"card" | "cod">("cod");
+
+  useEffect(() => {
+    if (availableMethods.length > 0 && !availableMethods.includes(payMethod)) {
+      setPayMethod(availableMethods[0]);
+    }
+  }, [paymentSettings]);
 
   const shippingRate = extSettings.shippingRate ?? 200;
-  const freeShippingThreshold = storeSettings.freeShippingThreshold ?? 100;
+  const freeShippingThreshold = storeSettings.freeShippingThreshold ?? 2500;
   const taxRate = extSettings.taxRate ?? 0;
   const showTax = extSettings.showTaxInCart && taxRate > 0;
 
@@ -30,6 +74,7 @@ export default function Checkout() {
   const [appliedDiscount, setAppliedDiscount] = useState(0);
   const [discountMsg, setDiscountMsg] = useState("");
   const [discountValid, setDiscountValid] = useState<boolean | null>(null);
+  const [applyingDiscount, setApplyingDiscount] = useState(false);
 
   const shipping = total >= freeShippingThreshold ? 0 : shippingRate;
   const taxAmount = showTax ? (total - appliedDiscount) * (taxRate / 100) : 0;
@@ -45,12 +90,20 @@ export default function Checkout() {
     setForm((f) => ({ ...f, [field]: value }));
   }
 
-  function handleApplyDiscount() {
+  async function handleApplyDiscount() {
     if (!discountInput.trim()) return;
-    const result = applyDiscountCode(discountInput, total);
-    setDiscountValid(result.valid);
-    setDiscountMsg(result.message);
-    setAppliedDiscount(result.valid ? result.discount : 0);
+    setApplyingDiscount(true);
+    try {
+      const result = await api.discountCodes.apply(discountInput.trim(), total);
+      setDiscountValid(result.valid);
+      setDiscountMsg(result.message);
+      setAppliedDiscount(result.valid ? result.discount : 0);
+    } catch {
+      setDiscountValid(false);
+      setDiscountMsg("Could not verify discount code. Please try again.");
+    } finally {
+      setApplyingDiscount(false);
+    }
   }
 
   function handleRemoveDiscount() {
@@ -61,11 +114,8 @@ export default function Checkout() {
   }
 
   function fireOrderConfirmationEmail(orderId: string) {
-    const apiUrl = getEmailApiUrl();
-    if (!apiUrl || !form.email) return;
-    // Send only business context — the server resolves SMTP config, toggles,
-    // and templates from its own server-side storage. No credentials in transit.
-    fetch(`${apiUrl.replace(/\/$/, "")}/api/send-email`, {
+    if (!form.email) return;
+    fetch("/api/send-email", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -80,13 +130,12 @@ export default function Checkout() {
     }).catch(() => {});
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const orderId = `MS-${Date.now().toString(36).toUpperCase()}`;
     const now = new Date().toISOString();
 
-    // Save the order to admin_orders localStorage so it appears in the admin panel
-    saveNewOrder({
+    await api.orders.create({
       id: orderId,
       customer: {
         name: `${form.firstName} ${form.lastName}`.trim(),
@@ -104,7 +153,7 @@ export default function Checkout() {
       status: "Pending",
       date: now,
       paymentMethod: payMethod === "cod" ? "Cash on Delivery" : "Card",
-    });
+    }).catch(() => {});
 
     clearCart();
     fireOrderConfirmationEmail(orderId);
@@ -165,7 +214,6 @@ export default function Checkout() {
     <div className="min-h-screen bg-white text-gray-900">
       <Header />
 
-      {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 py-4">
         <nav className="flex items-center gap-1 text-xs text-gray-400">
           <button onClick={() => navigate("/")} className="hover:text-black bg-transparent border-none cursor-pointer text-gray-400">Home</button>
@@ -182,7 +230,6 @@ export default function Checkout() {
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-10">
 
-            {/* Left: Form */}
             <div className="space-y-8">
               {/* Contact */}
               <div>
@@ -230,7 +277,7 @@ export default function Checkout() {
                 </div>
               </div>
 
-              {/* Shipping */}
+              {/* Shipping Address */}
               <div>
                 <h2 className="font-bold text-sm uppercase tracking-widest text-gray-900 mb-5 pb-3 border-b border-gray-100">
                   Shipping Address
@@ -406,9 +453,10 @@ export default function Checkout() {
                       <button
                         type="button"
                         onClick={handleApplyDiscount}
+                        disabled={applyingDiscount}
                         className="px-5 py-3 bg-black text-white text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors border-none cursor-pointer"
                       >
-                        Apply
+                        {applyingDiscount ? "…" : "Apply"}
                       </button>
                     </div>
                     {discountValid === false && (

@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Star, Minus, Plus, ChevronRight, Package, RotateCcw, Shield } from "lucide-react";
 import { useParams, useLocation } from "wouter";
-import { getLiveProductBySlug, getLiveRelated } from "@/data/liveData";
-import type { LiveProduct } from "@/data/liveData";
+import { api } from "@/lib/api";
+import type { ApiProduct } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
+import { PRODUCTS } from "@/data/products";
 
 function StarRating({ count, size = 14 }: { count: number; size?: number }) {
   return (
@@ -17,7 +18,7 @@ function StarRating({ count, size = 14 }: { count: number; size?: number }) {
   );
 }
 
-function RelatedCard({ product }: { product: LiveProduct }) {
+function RelatedCard({ product }: { product: ApiProduct }) {
   const [hovered, setHovered] = useState(false);
   const [, navigate] = useLocation();
   const { addItem } = useCart();
@@ -61,12 +62,44 @@ function RelatedCard({ product }: { product: LiveProduct }) {
 export default function ProductDetail() {
   const params = useParams<{ slug: string }>();
   const [, navigate] = useLocation();
-  const productOrUndef = getLiveProductBySlug(params.slug);
   const { addItem } = useCart();
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
+  const [product, setProduct] = useState<ApiProduct | null>(null);
+  const [allProducts, setAllProducts] = useState<ApiProduct[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  if (!productOrUndef) {
+  useEffect(() => {
+    setLoading(true);
+    api.products.get(params.slug).then((res) => {
+      if (res.success) setProduct(res.product);
+      else {
+        const fallback = PRODUCTS.find((p) => p.slug === params.slug);
+        if (fallback) setProduct({ ...fallback, stock: 100, active: true });
+      }
+    }).catch(() => {
+      const fallback = PRODUCTS.find((p) => p.slug === params.slug);
+      if (fallback) setProduct({ ...fallback, stock: 100, active: true });
+    }).finally(() => setLoading(false));
+
+    api.products.list().then((res) => {
+      if (res.success) setAllProducts(res.products);
+    }).catch(() => {});
+  }, [params.slug]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white">
+        <Header />
+        <div className="max-w-7xl mx-auto px-4 py-20 text-center">
+          <p className="text-gray-400">Loading…</p>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!product) {
     return (
       <div className="min-h-screen bg-white">
         <Header />
@@ -84,22 +117,19 @@ export default function ProductDetail() {
     );
   }
 
-  const product = productOrUndef;
-  const related = getLiveRelated(product);
+  const related = allProducts.filter((p) => p.id !== product.id && p.category === product.category).slice(0, 6);
+  const discount = Math.round(((product.originalPriceNum - product.priceNum) / product.originalPriceNum) * 100);
 
   function handleAddToCart() {
-    addItem(product, qty);
+    addItem(product!, qty);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   }
-
-  const discount = Math.round(((product.originalPriceNum - product.priceNum) / product.originalPriceNum) * 100);
 
   return (
     <div className="min-h-screen bg-white text-gray-900">
       <Header />
 
-      {/* Breadcrumb */}
       <div className="max-w-7xl mx-auto px-4 py-4">
         <nav className="flex items-center gap-1 text-xs text-gray-400">
           <button onClick={() => navigate("/")} className="hover:text-black transition-colors bg-transparent border-none cursor-pointer text-gray-400">Home</button>
@@ -110,10 +140,8 @@ export default function ProductDetail() {
         </nav>
       </div>
 
-      {/* Product Section */}
       <div className="max-w-7xl mx-auto px-4 pb-16">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16">
-          {/* Image */}
           <div className="relative">
             <div className="sticky top-28">
               <div className="relative overflow-hidden bg-gray-50" style={{ aspectRatio: "3/4" }}>
@@ -128,12 +156,9 @@ export default function ProductDetail() {
             </div>
           </div>
 
-          {/* Info */}
           <div className="pt-2">
-            {/* Category */}
             <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">{product.category}'s Perfume</p>
 
-            {/* Name */}
             <h1
               className="font-bold text-3xl md:text-4xl uppercase tracking-wide text-gray-900 mb-4"
               style={{ fontFamily: "Georgia, serif" }}
@@ -141,23 +166,19 @@ export default function ProductDetail() {
               {product.name}
             </h1>
 
-            {/* Rating */}
             <div className="flex items-center gap-2 mb-4">
               <StarRating count={product.rating} size={16} />
               <span className="text-sm text-gray-600 font-medium">{product.reviews} reviews</span>
             </div>
 
-            {/* Price */}
             <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-100">
               <span className="text-2xl font-bold text-gray-900">{product.price}</span>
               <span className="text-base text-gray-400 line-through">{product.originalPrice}</span>
               <span className="bg-red-600 text-white text-xs font-bold px-2 py-0.5">{discount}% OFF</span>
             </div>
 
-            {/* Description */}
             <p className="text-gray-600 text-sm leading-relaxed mb-6">{product.desc}</p>
 
-            {/* Scent Notes */}
             <div className="mb-6">
               <h3 className="font-bold text-xs uppercase tracking-widest text-gray-900 mb-3">Scent Notes</h3>
               <div className="flex flex-wrap gap-2">
@@ -172,7 +193,6 @@ export default function ProductDetail() {
               </div>
             </div>
 
-            {/* Quantity + Add to Cart */}
             <div className="flex items-stretch gap-3 mb-6">
               <div className="flex items-center border border-gray-300" style={{ minWidth: 110 }}>
                 <button
@@ -201,15 +221,13 @@ export default function ProductDetail() {
               </button>
             </div>
 
-            {/* Buy Now */}
             <button
-              onClick={() => { addItem(product, qty); navigate("/checkout"); }}
+              onClick={() => { addItem(product!, qty); navigate("/checkout"); }}
               className="w-full h-12 font-bold uppercase tracking-widest text-xs border-2 border-black text-black hover:bg-black hover:text-white transition-all duration-200 bg-transparent cursor-pointer mb-8"
             >
               Buy Now
             </button>
 
-            {/* Trust Badges */}
             <div className="grid grid-cols-3 gap-4 pt-6 border-t border-gray-100">
               {[
                 { icon: Package, label: "Free shipping", sub: "On orders over Rs. 100" },
@@ -227,7 +245,6 @@ export default function ProductDetail() {
         </div>
       </div>
 
-      {/* You May Also Like */}
       {related.length > 0 && (
         <section className="py-10 border-t border-gray-100">
           <div className="max-w-7xl mx-auto px-4">

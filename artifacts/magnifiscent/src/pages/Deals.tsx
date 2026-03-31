@@ -3,7 +3,8 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Star } from "lucide-react";
 import { PRODUCTS } from "@/data/products";
-import { useAdminDealMap, getDealCustomImages } from "@/data/liveData";
+import { api } from "@/lib/api";
+import type { ApiDeal } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
 
 function StarRating({ count }: { count: number }) {
@@ -136,8 +137,15 @@ function DealCard({ deal }: { deal: DealWithPrice }) {
 }
 
 export default function Deals() {
-  const adminDealMap = useAdminDealMap();
-  const dealImgs = getDealCustomImages();
+  const [apiDeals, setApiDeals] = useState<ApiDeal[]>([]);
+  const [dealImgs, setDealImgs] = useState<Record<string, { img1?: string; img2?: string }>>({});
+
+  useEffect(() => {
+    api.deals.list().then((res) => { if (res.success) setApiDeals(res.deals); }).catch(() => {});
+    api.content.dealImages.get().then((res) => { if (res.success) setDealImgs(res.dealImages); }).catch(() => {});
+  }, []);
+
+  const adminDealMap = new Map<string, ApiDeal>(apiDeals.map((d) => [d.id, d]));
 
   const activeDeals: DealWithPrice[] = BASE_DEALS
     .filter((d) => {

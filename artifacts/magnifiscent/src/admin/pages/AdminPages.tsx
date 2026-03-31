@@ -1,11 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FileText, Save, RotateCcw } from "lucide-react";
-import {
-  getPolicyPages,
-  savePolicyPages,
-  DEFAULT_POLICY_PAGES,
-} from "@/data/liveData";
+import { DEFAULT_POLICY_PAGES } from "@/data/liveData";
 import type { PolicyPages } from "@/data/liveData";
+import { api } from "@/lib/api";
 
 type PageKey = keyof PolicyPages;
 
@@ -18,8 +15,19 @@ const PAGE_TABS: { key: PageKey; label: string; icon: string }[] = [
 
 export function AdminPages() {
   const [activeTab, setActiveTab] = useState<PageKey>("returns");
-  const [pages, setPages] = useState<PolicyPages>(() => getPolicyPages());
+  const [pages, setPages] = useState<PolicyPages>({ ...DEFAULT_POLICY_PAGES });
   const [saved, setSaved] = useState<PageKey | null>(null);
+
+  useEffect(() => {
+    api.content.policyPages.get().then((res) => {
+      if (!res.success || !res.pages?.length) return;
+      const loaded: Partial<PolicyPages> = {};
+      res.pages.forEach((p) => {
+        loaded[p.key as PageKey] = { title: p.title, content: p.content };
+      });
+      setPages((prev) => ({ ...prev, ...loaded }));
+    }).catch(() => {});
+  }, []);
 
   function handleChange(key: PageKey, field: "title" | "content", value: string) {
     setPages((prev) => ({
@@ -28,20 +36,24 @@ export function AdminPages() {
     }));
   }
 
-  function handleSave(key: PageKey) {
-    savePolicyPages(pages);
+  async function handleSave(key: PageKey) {
+    const pagesData: Record<string, { title: string; content: string }> = {};
+    Object.entries(pages).forEach(([k, v]) => { pagesData[k] = v; });
+    await api.content.policyPages.put(pagesData).catch(() => {});
     setSaved(key);
     setTimeout(() => setSaved(null), 2000);
   }
 
-  function handleReset(key: PageKey) {
+  async function handleReset(key: PageKey) {
     if (!window.confirm(`Reset "${PAGE_TABS.find((t) => t.key === key)?.label}" to default content? This cannot be undone.`)) return;
     const reset: PolicyPages = {
       ...pages,
       [key]: { ...DEFAULT_POLICY_PAGES[key] },
     };
     setPages(reset);
-    savePolicyPages(reset);
+    const pagesData: Record<string, { title: string; content: string }> = {};
+    Object.entries(reset).forEach(([k, v]) => { pagesData[k] = v; });
+    await api.content.policyPages.put(pagesData).catch(() => {});
     setSaved(key);
     setTimeout(() => setSaved(null), 2000);
   }
@@ -50,7 +62,6 @@ export function AdminPages() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center gap-3">
         <FileText size={22} className="text-gray-700" />
         <div>
@@ -61,7 +72,6 @@ export function AdminPages() {
         </div>
       </div>
 
-      {/* Tab bar */}
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
         <div className="flex border-b border-gray-200 overflow-x-auto">
           {PAGE_TABS.map((tab) => (
@@ -81,7 +91,6 @@ export function AdminPages() {
           ))}
         </div>
 
-        {/* Editor */}
         <div className="p-6 space-y-5">
           <div>
             <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">
@@ -115,7 +124,6 @@ export function AdminPages() {
             />
           </div>
 
-          {/* Actions */}
           <div className="flex items-center gap-3 pt-1">
             <button
               onClick={() => handleSave(activeTab)}
@@ -150,7 +158,6 @@ export function AdminPages() {
         </div>
       </div>
 
-      {/* Info card */}
       <div className="bg-blue-50 border border-blue-100 rounded-xl p-5">
         <h4 className="text-xs font-bold uppercase tracking-widest text-blue-700 mb-2">How it works</h4>
         <ul className="text-xs text-blue-600 space-y-1.5 leading-relaxed">

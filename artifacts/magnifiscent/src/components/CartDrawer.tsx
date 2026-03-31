@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { X, Plus, Minus, ShoppingBag } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useLocation } from "wouter";
-import { getExtendedSettings, getStoreFrontSettings } from "@/data/liveData";
+import { api } from "@/lib/api";
 
 export function CartDrawer() {
   const { items, isOpen, closeCart, removeItem, updateQty, total, count } = useCart();
@@ -10,13 +10,27 @@ export function CartDrawer() {
   const [visible, setVisible] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  const ext = getExtendedSettings();
-  const store = getStoreFrontSettings();
-  const cur = store.currency || "Rs.";
-  const freeShippingThreshold = store.freeShippingThreshold ?? 100;
-  const shippingRate = ext.shippingRate ?? 200;
-  const taxRate = ext.taxRate ?? 0;
-  const showTax = ext.showTaxInCart && taxRate > 0;
+  const [cur, setCur] = useState("Rs.");
+  const [freeShippingThreshold, setFreeShippingThreshold] = useState(2500);
+  const [shippingRate, setShippingRate] = useState(200);
+  const [taxRate, setTaxRate] = useState(0);
+  const [showTax, setShowTax] = useState(false);
+
+  useEffect(() => {
+    api.settings.get().then((res) => {
+      if (!res.success) return;
+      if (res.settings.store) {
+        setCur(res.settings.store.currency || "Rs.");
+        setFreeShippingThreshold(res.settings.store.freeShippingThreshold ?? 2500);
+      }
+      if (res.settings.extended) {
+        setShippingRate(res.settings.extended.shippingRate ?? 200);
+        const tr = res.settings.extended.taxRate ?? 0;
+        setTaxRate(tr);
+        setShowTax(res.settings.extended.showTaxInCart && tr > 0);
+      }
+    }).catch(() => {});
+  }, []);
 
   const shipping = items.length === 0 ? 0 : total >= freeShippingThreshold ? 0 : shippingRate;
   const taxAmount = showTax && items.length > 0 ? total * (taxRate / 100) : 0;
@@ -39,7 +53,6 @@ export function CartDrawer() {
 
   return (
     <>
-      {/* Backdrop */}
       <div
         className="fixed inset-0 bg-black/40 z-[100]"
         onClick={closeCart}
@@ -50,7 +63,6 @@ export function CartDrawer() {
         }}
       />
 
-      {/* Drawer */}
       <div
         className="fixed top-0 right-0 h-full bg-white z-[101] flex flex-col"
         style={{
@@ -60,7 +72,6 @@ export function CartDrawer() {
           transition: "transform 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
         }}
       >
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
           <div className="flex items-center gap-2">
             <ShoppingBag size={18} className="text-gray-700" />
@@ -76,7 +87,6 @@ export function CartDrawer() {
           </button>
         </div>
 
-        {/* Items */}
         <div className="flex-1 overflow-y-auto px-6 py-4">
           {items.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center gap-4 text-gray-400">
@@ -141,7 +151,6 @@ export function CartDrawer() {
           )}
         </div>
 
-        {/* Footer */}
         {items.length > 0 && (
           <div className="px-6 py-5 border-t border-gray-100 space-y-2.5">
             <div className="flex justify-between text-sm font-medium text-gray-700">

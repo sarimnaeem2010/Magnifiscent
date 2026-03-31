@@ -1,15 +1,13 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Trash2, Plus, ImageIcon, ChevronUp, ChevronDown, Save, CheckCircle2, Type } from "lucide-react";
-import {
-  getHeroSlides, saveHeroSlides,
-  getGenderBanners, saveGenderBanners,
-  getNotesImages, saveNotesImages,
-  getHomeHeadings, saveHomeHeadings,
-  DEFAULT_HOME_HEADINGS,
-  type HeroSlide, type GenderBanners, type NotesImages, type HomeHeadings,
-} from "@/data/liveData";
+import { api } from "@/lib/api";
+import { DEFAULT_HOME_HEADINGS, type HomeHeadings } from "@/data/liveData";
 
 const NOTE_LABELS = ["FLORAL", "FRESH", "WOODY", "MUSKY", "ORIENTAL", "AQUATIC"];
+
+type HeroSlide = { id: string; src: string; alt: string };
+type GenderBanners = { men: string; women: string };
+type NotesImages = Record<string, string>;
 
 function compressImage(file: File, maxW: number, maxH: number, quality = 0.75): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -36,7 +34,6 @@ function compressImage(file: File, maxW: number, maxH: number, quality = 0.75): 
   });
 }
 
-/* ─── Shared Save Button ─── */
 function SaveButton({ dirty, saved, onSave }: { dirty: boolean; saved: boolean; onSave: () => void }) {
   return (
     <button
@@ -58,7 +55,6 @@ function SaveButton({ dirty, saved, onSave }: { dirty: boolean; saved: boolean; 
   );
 }
 
-/* ─── Upload Box ─── */
 function UploadBox({
   label, src, onUpload, onRemove, aspect = "16/5",
   maxW = 1200, maxH = 800, quality = 0.75,
@@ -128,11 +124,16 @@ function UploadBox({
   );
 }
 
-/* ─── Hero Slides Manager ─── */
 function HeroSlidesManager() {
-  const [slides, setSlides] = useState<HeroSlide[]>(() => getHeroSlides());
+  const [slides, setSlides] = useState<HeroSlide[]>([]);
   const [dirty, setDirty] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    api.content.heroSlides.get().then((res) => {
+      if (res.success) setSlides(res.slides);
+    }).catch(() => {});
+  }, []);
 
   const mutate = (updated: HeroSlide[]) => {
     setSlides(updated);
@@ -140,8 +141,8 @@ function HeroSlidesManager() {
     setSaved(false);
   };
 
-  const handleSave = () => {
-    saveHeroSlides(slides);
+  const handleSave = async () => {
+    await api.content.heroSlides.put(slides).catch(() => {});
     setDirty(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
@@ -231,11 +232,16 @@ function HeroSlidesManager() {
   );
 }
 
-/* ─── Gender Banners Manager ─── */
 function GenderBannersManager() {
-  const [banners, setBanners] = useState<GenderBanners>(() => getGenderBanners());
+  const [banners, setBanners] = useState<GenderBanners>({ men: "", women: "" });
   const [dirty, setDirty] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    api.content.genderBanners.get().then((res) => {
+      if (res.success) setBanners(res.banners);
+    }).catch(() => {});
+  }, []);
 
   const update = (key: "men" | "women", src: string) => {
     setBanners((prev) => ({ ...prev, [key]: src }));
@@ -243,8 +249,8 @@ function GenderBannersManager() {
     setSaved(false);
   };
 
-  const handleSave = () => {
-    saveGenderBanners(banners);
+  const handleSave = async () => {
+    await api.content.genderBanners.put(banners.men, banners.women).catch(() => {});
     setDirty(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
@@ -281,11 +287,16 @@ function GenderBannersManager() {
   );
 }
 
-/* ─── Notes Images Manager ─── */
 function NotesImagesManager() {
-  const [imgs, setImgs] = useState<NotesImages>(() => getNotesImages());
+  const [imgs, setImgs] = useState<NotesImages>({});
   const [dirty, setDirty] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    api.content.notesImages.get().then((res) => {
+      if (res.success) setImgs(res.notesImages);
+    }).catch(() => {});
+  }, []);
 
   const update = (label: string, src: string) => {
     setImgs((prev) => ({ ...prev, [label]: src }));
@@ -293,8 +304,8 @@ function NotesImagesManager() {
     setSaved(false);
   };
 
-  const handleSave = () => {
-    saveNotesImages(imgs);
+  const handleSave = async () => {
+    await api.content.notesImages.put(imgs).catch(() => {});
     setDirty(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
@@ -326,7 +337,6 @@ function NotesImagesManager() {
   );
 }
 
-/* ─── Headings Manager ─── */
 const HEADING_FIELDS: { key: keyof HomeHeadings; label: string; hint: string }[] = [
   { key: "deals", label: "Deals & Combo — heading", hint: "Main heading for the deals section" },
   { key: "dealsSubtitle", label: "Deals & Combo — subtext", hint: "Smaller text below the heading" },
@@ -345,9 +355,17 @@ const HEADING_FIELDS: { key: keyof HomeHeadings; label: string; hint: string }[]
 ];
 
 function HeadingsManager() {
-  const [headings, setHeadings] = useState<HomeHeadings>(() => getHomeHeadings());
+  const [headings, setHeadings] = useState<HomeHeadings>({ ...DEFAULT_HOME_HEADINGS });
   const [dirty, setDirty] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    api.content.homeHeadings.get().then((res) => {
+      if (res.success && res.headings) {
+        setHeadings({ ...DEFAULT_HOME_HEADINGS, ...res.headings });
+      }
+    }).catch(() => {});
+  }, []);
 
   const update = (key: keyof HomeHeadings, val: string) => {
     setHeadings((prev) => ({ ...prev, [key]: val }));
@@ -355,8 +373,8 @@ function HeadingsManager() {
     setSaved(false);
   };
 
-  const handleSave = () => {
-    saveHomeHeadings(headings);
+  const handleSave = async () => {
+    await api.content.homeHeadings.put(headings as Record<string, string>).catch(() => {});
     setDirty(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
@@ -404,7 +422,6 @@ function HeadingsManager() {
   );
 }
 
-/* ─── Main Page ─── */
 export function AdminMedia() {
   return (
     <div className="space-y-6">

@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Star } from "lucide-react";
-import { getActiveProducts } from "@/data/liveData";
-import type { LiveProduct } from "@/data/liveData";
+import { api } from "@/lib/api";
+import type { ApiProduct } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
 import { useLocation, useSearch } from "wouter";
+import { PRODUCTS } from "@/data/products";
 
 function StarRating({ count }: { count: number }) {
   return (
@@ -17,7 +18,7 @@ function StarRating({ count }: { count: number }) {
   );
 }
 
-function ProductCard({ product }: { product: LiveProduct }) {
+function ProductCard({ product }: { product: ApiProduct }) {
   const [hovered, setHovered] = useState(false);
   const { addItem } = useCart();
   const [, navigate] = useLocation();
@@ -76,7 +77,17 @@ export default function Products() {
   const initialGender = (params.get("gender") as "men" | "women" | null) || "all";
   const [filter, setFilter] = useState<"all" | "men" | "women">(initialGender as "all" | "men" | "women");
   const [, navigate] = useLocation();
-  const [allProducts] = useState(() => getActiveProducts());
+  const [allProducts, setAllProducts] = useState<ApiProduct[]>(() =>
+    PRODUCTS.map((p) => ({ ...p, stock: 100, active: true }))
+  );
+
+  useEffect(() => {
+    api.products.list().then((res) => {
+      if (res.success && res.products.length > 0) {
+        setAllProducts(res.products);
+      }
+    }).catch(() => {});
+  }, []);
 
   useEffect(() => {
     const p = new URLSearchParams(search);
@@ -90,7 +101,6 @@ export default function Products() {
     <div className="min-h-screen bg-white text-gray-900">
       <Header />
 
-      {/* Page Banner */}
       <div className="bg-gray-50 border-b border-gray-100 py-10">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Our Collection</p>
@@ -104,7 +114,6 @@ export default function Products() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-10">
-        {/* Filter Tabs */}
         <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
           <div className="flex items-center border border-gray-200">
             {(["all", "men", "women"] as const).map((f, i) => (
@@ -128,7 +137,6 @@ export default function Products() {
           <p className="text-sm text-gray-400">{filtered.length} products</p>
         </div>
 
-        {/* Product Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
           {filtered.map((p) => (
             <ProductCard key={p.id} product={p} />

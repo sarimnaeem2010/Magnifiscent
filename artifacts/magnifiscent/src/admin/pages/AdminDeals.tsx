@@ -1,8 +1,8 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useAdmin } from "../AdminContext";
 import type { DealAdmin } from "../AdminContext";
 import { Pencil, X, Check, ImageIcon, Trash2 } from "lucide-react";
-import { getDealCustomImages, saveDealCustomImages } from "@/data/liveData";
+import { api } from "@/lib/api";
 
 function compressImage(file: File, maxW: number, maxH: number, quality = 0.75): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -33,31 +33,41 @@ function DealImageSlot({
   slot,
   currentImg,
   label,
+  allImages,
+  onUpdate,
 }: {
   dealId: string;
   slot: "img1" | "img2";
   currentImg: string;
   label: string;
+  allImages: Record<string, { img1?: string; img2?: string }>;
+  onUpdate: (imgs: Record<string, { img1?: string; img2?: string }>) => void;
 }) {
   const ref = useRef<HTMLInputElement>(null);
   const [src, setSrc] = useState(currentImg);
 
   const handleUpload = async (file: File) => {
     const b64 = await compressImage(file, 400, 400, 0.75);
-    const all = getDealCustomImages();
-    all[dealId] = { ...all[dealId], [slot]: b64 };
-    saveDealCustomImages(all);
+    const updated = { ...allImages, [dealId]: { ...allImages[dealId], [slot]: b64 } };
+    await api.content.dealImages.put(updated).catch(() => {});
+    onUpdate(updated);
     setSrc(b64);
   };
 
-  const handleRemove = (e: React.MouseEvent) => {
+  const handleRemove = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    const all = getDealCustomImages();
-    if (all[dealId]) {
-      delete (all[dealId] as Record<string, string | undefined>)[slot];
-      if (!all[dealId].img1 && !all[dealId].img2) delete all[dealId];
+    const updated = { ...allImages };
+    if (updated[dealId]) {
+      const entry = { ...updated[dealId] };
+      delete (entry as Record<string, string | undefined>)[slot];
+      if (!entry.img1 && !entry.img2) {
+        delete updated[dealId];
+      } else {
+        updated[dealId] = entry;
+      }
     }
-    saveDealCustomImages(all);
+    await api.content.dealImages.put(updated).catch(() => {});
+    onUpdate(updated);
     setSrc("");
   };
 
@@ -106,7 +116,13 @@ export function AdminDeals() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editPrice, setEditPrice] = useState("");
   const [editOriginal, setEditOriginal] = useState("");
-  const dealImgs = getDealCustomImages();
+  const [dealImgs, setDealImgs] = useState<Record<string, { img1?: string; img2?: string }>>({});
+
+  useEffect(() => {
+    api.content.dealImages.get().then((res) => {
+      if (res.success) setDealImgs(res.dealImages);
+    }).catch(() => {});
+  }, []);
 
   const startEdit = (d: DealAdmin) => {
     setEditingId(d.id);
@@ -161,13 +177,12 @@ export function AdminDeals() {
             <tbody className="divide-y divide-gray-50">
               {deals.map((d) => {
                 const isEditing = editingId === d.id;
-                const custom = dealImgs[d.id] || {};
                 return (
                   <tr key={d.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-4 py-3">
                       <div className="flex items-end gap-2">
-                        <DealImageSlot dealId={d.id} slot="img1" currentImg={custom.img1 || ""} label="Static" />
-                        <DealImageSlot dealId={d.id} slot="img2" currentImg={custom.img2 || ""} label="Hover" />
+                        <DealImageSlot dealId={d.id} slot="img1" currentImg={dealImgs[d.id]?.img1 || ""} label="Static" allImages={dealImgs} onUpdate={setDealImgs} />
+                        <DealImageSlot dealId={d.id} slot="img2" currentImg={dealImgs[d.id]?.img2 || ""} label="Hover" allImages={dealImgs} onUpdate={setDealImgs} />
                       </div>
                     </td>
                     <td className="px-4 py-3 font-semibold text-gray-900">{d.name}</td>

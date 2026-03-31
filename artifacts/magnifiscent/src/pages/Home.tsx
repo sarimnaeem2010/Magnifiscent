@@ -3,18 +3,16 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Star, Instagram } from "lucide-react";
 import { PRODUCTS } from "@/data/products";
-import { getActiveProducts } from "@/data/liveData";
 import heroBannerImg from "@assets/sasas_1774966788321.png";
 import womenBannerImg from "@assets/Gemini_Generated_Image_91h42l91h42l91h4.png";
 import menBannerImg from "@assets/Gemini_Generated_Image_gthzqdgthzqdgthz.png";
 import type { Product } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 import { useLocation } from "wouter";
-import {
-  getHeroSlides, getGenderBanners, getNotesImages, getInstagramReels, getHomeHeadings,
-  getDealCustomImages,
-  type HeroSlide,
-} from "@/data/liveData";
+import { api } from "@/lib/api";
+import type { ApiProduct } from "@/lib/api";
+import { DEFAULT_HOME_HEADINGS } from "@/data/liveData";
+import type { HomeHeadings, HeroSlide } from "@/data/liveData";
 
 /* ─── Notes ─── */
 const NOTES = [
@@ -94,8 +92,14 @@ const INSTAGRAM_POSTS = [
 
 /* ─── Hero Slider ─── */
 function HeroBanner() {
-  const [slides] = useState<HeroSlide[]>(() => getHeroSlides().filter((s) => s.src));
+  const [slides, setSlides] = useState<HeroSlide[]>([]);
   const [activeIdx, setActiveIdx] = useState(0);
+
+  useEffect(() => {
+    api.content.heroSlides.get().then((res) => {
+      if (res.success) setSlides(res.slides.filter((s) => s.src));
+    }).catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (slides.length <= 1) return;
@@ -158,7 +162,7 @@ function StarRating({ count }: { count: number }) {
   );
 }
 
-function ProductCard({ product }: { product: Product }) {
+function ProductCard({ product }: { product: Product | ApiProduct }) {
   const [hovered, setHovered] = useState(false);
   const { addItem } = useCart();
   const [, navigate] = useLocation();
@@ -298,17 +302,32 @@ export default function Home() {
   const [productFilter, setProductFilter] = useState<"all" | "men" | "women">("all");
   const [activeReel, setActiveReel] = useState<string | null>(null);
   const [, navigate] = useLocation();
-  const genderBanners = getGenderBanners();
-  const notesImgs = getNotesImages();
-  const headings = getHomeHeadings();
-  const dealImgs = getDealCustomImages();
-  const instaPosts = (() => {
-    const reels = getInstagramReels();
-    if (reels.length > 0) return reels.map((r) => ({ img: r.img || PRODUCTS[0].img, likes: r.likes, tag: r.label, label: r.label, url: r.url }));
-    return INSTAGRAM_POSTS.map((p) => ({ ...p, url: "https://instagram.com" }));
-  })();
+  const [genderBanners, setGenderBanners] = useState<{ men: string; women: string }>({ men: "", women: "" });
+  const [notesImgs, setNotesImgs] = useState<Record<string, string>>({});
+  const [headings, setHeadings] = useState<HomeHeadings>({ ...DEFAULT_HOME_HEADINGS });
+  const [dealImgs, setDealImgs] = useState<Record<string, { img1?: string; img2?: string }>>({});
+  const [instaPosts, setInstaPosts] = useState(
+    INSTAGRAM_POSTS.map((p) => ({ ...p, url: "https://instagram.com" }))
+  );
+  const [liveProducts, setLiveProducts] = useState<(Product | ApiProduct)[]>(PRODUCTS);
 
-  const [liveProducts] = useState(() => getActiveProducts());
+  useEffect(() => {
+    api.content.genderBanners.get().then((res) => { if (res.success) setGenderBanners(res.banners); }).catch(() => {});
+    api.content.notesImages.get().then((res) => { if (res.success) setNotesImgs(res.notesImages); }).catch(() => {});
+    api.content.homeHeadings.get().then((res) => {
+      if (res.success && res.headings) setHeadings({ ...DEFAULT_HOME_HEADINGS, ...res.headings });
+    }).catch(() => {});
+    api.content.dealImages.get().then((res) => { if (res.success) setDealImgs(res.dealImages); }).catch(() => {});
+    api.content.instagramReels.get().then((res) => {
+      if (res.success && res.reels.length > 0) {
+        setInstaPosts(res.reels.map((r) => ({ img: r.img || PRODUCTS[0].img, likes: r.likes, tag: r.label, label: r.label, url: r.url })));
+      }
+    }).catch(() => {});
+    api.products.list().then((res) => {
+      if (res.success && res.products.length > 0) setLiveProducts(res.products);
+    }).catch(() => {});
+  }, []);
+
   const filteredProducts = productFilter === "all"
     ? liveProducts
     : liveProducts.filter((p) => p.category === productFilter);

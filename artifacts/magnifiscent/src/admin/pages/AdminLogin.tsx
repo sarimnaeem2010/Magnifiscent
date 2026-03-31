@@ -8,15 +8,18 @@ export function AdminLogin() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-    setTimeout(() => {
-      const ok = login(password);
+    try {
+      const ok = await login(password);
       if (!ok) setError("Incorrect password. Please try again.");
+    } catch {
+      setError("Connection error. Please try again.");
+    } finally {
       setLoading(false);
-    }, 300);
+    }
   };
 
   return (

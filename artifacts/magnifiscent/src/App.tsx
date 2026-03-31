@@ -12,11 +12,26 @@ import Checkout from "@/pages/Checkout";
 import Deals from "@/pages/Deals";
 import PolicyPage from "@/pages/PolicyPage";
 import { AdminApp } from "@/admin/AdminApp";
-import { useEffect } from "react";
-import { getExtendedSettings } from "@/data/liveData";
+import { useEffect, useState } from "react";
+import { api } from "@/lib/api";
+import type { ApiExtendedSettings } from "@/lib/api";
 import logoImg from "@assets/whitelogo_1774978057429.png";
 
 const queryClient = new QueryClient();
+
+const DEFAULT_EXT: ApiExtendedSettings = {
+  seoTitle: "",
+  seoDescription: "",
+  seoOgImage: "",
+  shippingRate: 200,
+  shippingCarrier: "",
+  taxRate: 0,
+  showTaxInCart: false,
+  ga4Id: "",
+  fbPixelId: "",
+  maintenanceMode: false,
+  maintenanceMessage: "",
+};
 
 function ScrollToTop() {
   const [location] = useLocation();
@@ -40,9 +55,8 @@ function setOrClearMeta(selector: string, attr: string, val: string, fallback: s
   el.content = val || fallback;
 }
 
-function StorefrontEffects() {
+function StorefrontEffects({ ext }: { ext: ApiExtendedSettings }) {
   useEffect(() => {
-    const ext = getExtendedSettings();
     const defaultTitle = "MagnifiScent — Premium Eau de Parfum";
     const defaultDesc = "Discover MagnifiScent's collection of premium Eau de Parfum fragrances.";
 
@@ -78,7 +92,8 @@ function StorefrontEffects() {
     } else if (!ext.fbPixelId && existingPixel) {
       existingPixel.remove();
     }
-  }, []);
+  }, [ext]);
+
   return null;
 }
 
@@ -107,12 +122,12 @@ function AdminWrapper() {
   return <AdminApp />;
 }
 
-function StorefrontRouter() {
+function StorefrontRouter({ ext }: { ext: ApiExtendedSettings }) {
   const [location] = useLocation();
   return (
     <CartProvider>
       <ScrollToTop />
-      <StorefrontEffects />
+      <StorefrontEffects ext={ext} />
       <CartDrawer />
       <div key={location} className="page-transition">
         <Switch>
@@ -136,14 +151,26 @@ function StorefrontRouter() {
 
 function RootRouter() {
   const [location] = useLocation();
+  const [ext, setExt] = useState<ApiExtendedSettings>(DEFAULT_EXT);
+  const [extLoaded, setExtLoaded] = useState(false);
+
+  useEffect(() => {
+    api.settings.get().then((res) => {
+      if (res.success && res.settings.extended) {
+        setExt({ ...DEFAULT_EXT, ...res.settings.extended });
+      }
+    }).catch(() => {}).finally(() => setExtLoaded(true));
+  }, []);
+
   if (location === "/admin" || location.startsWith("/admin/")) {
     return <AdminWrapper />;
   }
-  const ext = getExtendedSettings();
-  if (ext.maintenanceMode) {
+
+  if (extLoaded && ext.maintenanceMode) {
     return <MaintenancePage message={ext.maintenanceMessage} />;
   }
-  return <StorefrontRouter />;
+
+  return <StorefrontRouter ext={ext} />;
 }
 
 function App() {
