@@ -167,7 +167,14 @@ function initDeals(): DealAdmin[] {
 
 function initSettings(): StoreSettings {
   const stored = localStorage.getItem("admin_settings");
-  if (stored) return JSON.parse(stored);
+  if (stored) {
+    const parsed: StoreSettings = JSON.parse(stored);
+    if (parsed.currency === "$" || parsed.currency === "Rs" || !parsed.currency) {
+      parsed.currency = "Rs.";
+      localStorage.setItem("admin_settings", JSON.stringify(parsed));
+    }
+    return parsed;
+  }
   localStorage.setItem("admin_settings", JSON.stringify(DEFAULT_SETTINGS));
   return DEFAULT_SETTINGS;
 }

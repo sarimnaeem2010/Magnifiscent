@@ -224,7 +224,8 @@ function Modal({ title, onClose, onSave, form, setForm }: {
 }
 
 export function AdminProducts() {
-  const { products, setProducts } = useAdmin();
+  const { products, setProducts, settings } = useAdmin();
+  const cur = settings.currency || "Rs.";
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [form, setForm] = useState<ProductForm>(emptyForm);
@@ -274,9 +275,9 @@ export function AdminProducts() {
                 name: form.name,
                 category: form.category,
                 priceNum,
-                price: `Rs. ${priceNum.toFixed(2)}`,
+                price: `${cur} ${priceNum.toFixed(2)}`,
                 originalPriceNum: origNum,
-                originalPrice: `Rs. ${origNum.toFixed(2)}`,
+                originalPrice: `${cur} ${origNum.toFixed(2)}`,
                 stock,
                 desc: form.desc,
                 notes,
@@ -299,9 +300,9 @@ export function AdminProducts() {
           img2: form.img2 || form.img || "/women-split.png",
           category: form.category,
           priceNum,
-          price: `Rs. ${priceNum.toFixed(2)}`,
+          price: `${cur} ${priceNum.toFixed(2)}`,
           originalPriceNum: origNum,
-          originalPrice: `Rs. ${origNum.toFixed(2)}`,
+          originalPrice: `${cur} ${origNum.toFixed(2)}`,
           stock,
           desc: form.desc,
           notes,

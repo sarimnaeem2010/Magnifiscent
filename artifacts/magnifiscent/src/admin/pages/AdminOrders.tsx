@@ -72,7 +72,7 @@ function OrderDetailPanel({ order, onClose, onStatusChange }: {
                     <p className="font-medium text-gray-900">{item.productName}</p>
                     <p className="text-xs text-gray-400">Qty: {item.qty}</p>
                   </div>
-                  <p className="font-semibold">Rs. {(item.price * item.qty).toFixed(2)}</p>
+                  <p className="font-semibold">{cur} {(item.price * item.qty).toFixed(2)}</p>
                 </div>
               ))}
             </div>
@@ -82,15 +82,15 @@ function OrderDetailPanel({ order, onClose, onStatusChange }: {
           <div className="bg-gray-50 rounded-xl p-4">
             <div className="flex justify-between text-sm text-gray-500 mb-1">
               <span>Subtotal</span>
-              <span>Rs. {order.total.toFixed(2)}</span>
+              <span>{cur} {order.total.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-sm text-gray-500 mb-2">
               <span>Shipping</span>
-              <span className="text-green-600">{order.total >= 100 ? "Free" : "Rs. 9.99"}</span>
+              <span className="text-green-600">{order.total >= 100 ? "Free" : `${cur} 9.99`}</span>
             </div>
             <div className="flex justify-between font-bold text-gray-900 border-t border-gray-200 pt-2">
               <span>Total</span>
-              <span>Rs. {(order.total + (order.total >= 100 ? 0 : 9.99)).toFixed(2)}</span>
+              <span>{cur} {(order.total + (order.total >= 100 ? 0 : 9.99)).toFixed(2)}</span>
             </div>
             <p className="text-xs text-gray-400 mt-2">Payment: {order.paymentMethod}</p>
           </div>
@@ -101,7 +101,8 @@ function OrderDetailPanel({ order, onClose, onStatusChange }: {
 }
 
 export function AdminOrders() {
-  const { orders, setOrders } = useAdmin();
+  const { orders, setOrders, settings } = useAdmin();
+  const cur = settings.currency || "Rs.";
   const [filter, setFilter] = useState<OrderStatus | "All">("All");
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Order | null>(null);

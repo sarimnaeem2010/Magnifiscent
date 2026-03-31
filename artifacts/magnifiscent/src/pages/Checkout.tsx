@@ -303,7 +303,7 @@ export default function Checkout() {
                 type="submit"
                 className="w-full bg-black text-white font-bold uppercase tracking-widest text-sm py-4 hover:bg-gray-800 transition-colors border-none cursor-pointer"
               >
-                {payMethod === "cod" ? `Place Order (COD) — $${orderTotal.toFixed(2)}` : `Pay Now — $${orderTotal.toFixed(2)}`}
+                {payMethod === "cod" ? `Place Order (COD) — Rs. ${orderTotal.toFixed(2)}` : `Pay Now — Rs. ${orderTotal.toFixed(2)}`}
               </button>
 
               <div className="flex items-center justify-center gap-2 text-xs text-gray-400">
@@ -335,7 +335,7 @@ export default function Checkout() {
                         <p className="text-xs text-gray-400">{product.category}</p>
                       </div>
                       <p className="font-bold text-xs text-gray-900 flex-shrink-0">
-                        ${(product.priceNum * qty).toFixed(2)}
+                        Rs. {(product.priceNum * qty).toFixed(2)}
                       </p>
                     </div>
                   ))}
@@ -343,18 +343,18 @@ export default function Checkout() {
                 <div className="px-6 pb-6 pt-4 border-t border-gray-100 space-y-3">
                   <div className="flex justify-between text-sm text-gray-600">
                     <span>Subtotal</span>
-                    <span>${total.toFixed(2)}</span>
+                    <span>Rs. {total.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-sm text-gray-600">
                     <span>Shipping</span>
-                    <span className={shipping === 0 ? "text-green-600 font-medium" : ""}>{shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}</span>
+                    <span className={shipping === 0 ? "text-green-600 font-medium" : ""}>{shipping === 0 ? "Free" : `Rs. ${shipping.toFixed(2)}`}</span>
                   </div>
                   {shipping === 0 && (
                     <p className="text-xs text-green-600">🎉 You qualify for free shipping!</p>
                   )}
                   <div className="flex justify-between font-bold text-gray-900 pt-3 border-t border-gray-100">
                     <span>Total</span>
-                    <span>${orderTotal.toFixed(2)}</span>
+                    <span>Rs. {orderTotal.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
