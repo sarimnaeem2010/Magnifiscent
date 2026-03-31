@@ -522,11 +522,13 @@ export default function Home() {
                   className="relative group flex-shrink-0 overflow-hidden rounded-xl bg-gray-900 p-0 border-none cursor-pointer"
                   style={{ width: 160, height: 260, scrollSnapAlign: "start" }}
                 >
-                  <img
-                    src={post.img}
-                    alt={post.label}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
+                  {post.img && (
+                    <img
+                      src={post.img}
+                      alt={post.label}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  )}
                   <div
                     className="absolute inset-0 pointer-events-none"
                     style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.1) 45%, rgba(0,0,0,0.55) 100%)" }}

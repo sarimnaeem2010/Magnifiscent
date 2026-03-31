@@ -9,8 +9,8 @@ import { requireAdminAuth } from "../middleware/auth.js";
 
 const router = Router();
 
-/* GET /api/settings — admin auth required; returns all three settings tables merged */
-router.get("/settings", requireAdminAuth, async (_req, res) => {
+/* GET /api/settings — public; returns all three settings tables merged */
+router.get("/settings", async (_req, res) => {
   try {
     const [[store], [extended], [payment]] = await Promise.all([
       db.select().from(storeSettingsTable).limit(1),
