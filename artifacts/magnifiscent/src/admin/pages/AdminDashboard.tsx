@@ -1,7 +1,6 @@
-import React, { useMemo, useRef, useState, useLayoutEffect } from "react";
+import React, { useMemo, useState } from "react";
 import { useAdmin } from "../AdminContext";
 import { ShoppingBag, DollarSign, Clock, Package } from "lucide-react";
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 
 function StatCard({ label, value, sub, icon: Icon, color }: {
   label: string; value: string; sub: string; icon: React.ElementType; color: string;
@@ -22,32 +21,107 @@ function StatCard({ label, value, sub, icon: Icon, color }: {
   );
 }
 
-function ChartContainer({ chartData }: { chartData: { date: string; revenue: number }[] }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [width, setWidth] = useState(600);
+function RevenueChart({ data }: { data: { date: string; revenue: number }[] }) {
+  const [tooltip, setTooltip] = useState<{ x: number; y: number; date: string; revenue: number } | null>(null);
 
-  useLayoutEffect(() => {
-    if (ref.current) setWidth(ref.current.offsetWidth);
-  }, []);
+  const W = 680;
+  const H = 180;
+  const padL = 48;
+  const padR = 12;
+  const padT = 12;
+  const padB = 28;
+
+  const innerW = W - padL - padR;
+  const innerH = H - padT - padB;
+
+  const maxRev = Math.max(...data.map((d) => d.revenue), 1);
+  const step = innerW / (data.length - 1 || 1);
+
+  const points = data.map((d, i) => ({
+    x: padL + i * step,
+    y: padT + innerH - (d.revenue / maxRev) * innerH,
+    ...d,
+  }));
+
+  const polyline = points.map((p) => `${p.x},${p.y}`).join(" ");
+  const fillPath =
+    `M ${points[0].x},${padT + innerH} ` +
+    points.map((p) => `L ${p.x},${p.y}`).join(" ") +
+    ` L ${points[points.length - 1].x},${padT + innerH} Z`;
+
+  const yTicks = [0, 0.25, 0.5, 0.75, 1].map((f) => ({
+    val: Math.round(maxRev * f),
+    y: padT + innerH - f * innerH,
+  }));
 
   return (
-    <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-      <h2 className="text-sm font-semibold text-gray-700 mb-4">Revenue — Last 7 Days</h2>
-      <div ref={ref} style={{ width: "100%", overflowX: "auto" }}>
-        <AreaChart width={width} height={200} data={chartData} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
-          <defs>
-            <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#111827" stopOpacity={0.15} />
-              <stop offset="95%" stopColor="#111827" stopOpacity={0} />
-            </linearGradient>
-          </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-          <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
-          <YAxis tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${v}`} />
-          <Tooltip formatter={(v: number) => [`$${v}`, "Revenue"]} contentStyle={{ fontSize: 12 }} />
-          <Area type="monotone" dataKey="revenue" stroke="#111827" strokeWidth={2} fill="url(#revGrad)" />
-        </AreaChart>
-      </div>
+    <div className="relative w-full overflow-x-auto">
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        width="100%"
+        style={{ display: "block", minWidth: 320 }}
+        onMouseLeave={() => setTooltip(null)}
+      >
+        <defs>
+          <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#111827" stopOpacity={0.12} />
+            <stop offset="100%" stopColor="#111827" stopOpacity={0} />
+          </linearGradient>
+        </defs>
+
+        {yTicks.map((t) => (
+          <g key={t.y}>
+            <line x1={padL} y1={t.y} x2={W - padR} y2={t.y} stroke="#f1f5f9" strokeWidth={1} />
+            <text x={padL - 6} y={t.y + 4} textAnchor="end" fontSize={10} fill="#9ca3af">
+              ${t.val}
+            </text>
+          </g>
+        ))}
+
+        <path d={fillPath} fill="url(#areaGrad)" />
+
+        <polyline
+          points={polyline}
+          fill="none"
+          stroke="#111827"
+          strokeWidth={2}
+          strokeLinejoin="round"
+          strokeLinecap="round"
+        />
+
+        {points.map((p, i) => (
+          <g key={i}>
+            <text x={p.x} y={H - 6} textAnchor="middle" fontSize={10} fill="#9ca3af">
+              {p.date}
+            </text>
+            <circle
+              cx={p.x}
+              cy={p.y}
+              r={14}
+              fill="transparent"
+              style={{ cursor: "pointer" }}
+              onMouseEnter={() => setTooltip({ x: p.x, y: p.y, date: p.date, revenue: p.revenue })}
+            />
+            {tooltip && tooltip.date === p.date && (
+              <circle cx={p.x} cy={p.y} r={4} fill="#111827" />
+            )}
+          </g>
+        ))}
+      </svg>
+
+      {tooltip && (
+        <div
+          className="absolute pointer-events-none bg-gray-900 text-white text-xs rounded px-2.5 py-1.5 shadow-lg"
+          style={{
+            left: `calc(${(tooltip.x / W) * 100}% - 40px)`,
+            top: `calc(${(tooltip.y / H) * 100}% - 40px)`,
+            whiteSpace: "nowrap",
+          }}
+        >
+          <div className="font-semibold">{tooltip.date}</div>
+          <div>${tooltip.revenue.toFixed(2)}</div>
+        </div>
+      )}
     </div>
   );
 }
@@ -90,7 +164,6 @@ export function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard label="Total Revenue" value={`$${stats.total.toLocaleString()}`} sub="All time" icon={DollarSign} color="#10b981" />
         <StatCard label="Total Orders" value={String(orders.length)} sub={`${stats.delivered} delivered`} icon={ShoppingBag} color="#3b82f6" />
@@ -98,10 +171,11 @@ export function AdminDashboard() {
         <StatCard label="Products" value={String(products.length)} sub={`${products.filter((p) => p.active).length} active`} icon={Package} color="#8b5cf6" />
       </div>
 
-      {/* Chart */}
-      <ChartContainer chartData={chartData} />
+      <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+        <h2 className="text-sm font-semibold text-gray-700 mb-4">Revenue — Last 7 Days</h2>
+        <RevenueChart data={chartData} />
+      </div>
 
-      {/* Recent Orders */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-100">
           <h2 className="text-sm font-semibold text-gray-700">Recent Orders</h2>
