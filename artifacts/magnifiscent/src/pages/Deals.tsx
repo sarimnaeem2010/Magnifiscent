@@ -3,6 +3,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Star } from "lucide-react";
 import { PRODUCTS } from "@/data/products";
+import { useAdminDealMap } from "@/data/liveData";
 import { useCart } from "@/context/CartContext";
 
 function StarRating({ count }: { count: number }) {
@@ -15,8 +16,9 @@ function StarRating({ count }: { count: number }) {
   );
 }
 
-const DEALS = [
+const BASE_DEALS = [
   {
+    id: "iconic-duo",
     name: "THE ICONIC DUO",
     img1: PRODUCTS[4].img,
     img2: PRODUCTS[0].img,
@@ -25,10 +27,10 @@ const DEALS = [
     reviews: 14,
     desc: "QUEST and CHIC — two signature fragrances paired together in one exclusive combo. One bold, one floral.",
     contains: [PRODUCTS[4].name, PRODUCTS[0].name],
-    savings: 29,
     representativeProduct: PRODUCTS[4],
   },
   {
+    id: "floral-dream",
     name: "FLORAL DREAM PACK",
     img1: PRODUCTS[0].img,
     img2: PRODUCTS[3].img,
@@ -37,10 +39,10 @@ const DEALS = [
     reviews: 8,
     desc: "CHIC and SIGMA — warm and feminine florals combined in a stunning gift set. Perfect for gifting.",
     contains: [PRODUCTS[0].name, PRODUCTS[3].name],
-    savings: 45,
     representativeProduct: PRODUCTS[0],
   },
   {
+    id: "dark-allure",
     name: "DARK ALLURE DUO",
     img1: PRODUCTS[1].img,
     img2: PRODUCTS[5].img,
@@ -49,10 +51,10 @@ const DEALS = [
     reviews: 11,
     desc: "Dark Angel meets Allure — two deeply mysterious and seductive fragrances for the bold woman who commands attention.",
     contains: [PRODUCTS[1].name, PRODUCTS[5].name],
-    savings: 35,
     representativeProduct: PRODUCTS[1],
   },
   {
+    id: "fresh-bloom",
     name: "FRESH BLOOM DUO",
     img1: PRODUCTS[2].img,
     img2: PRODUCTS[0].img,
@@ -61,10 +63,10 @@ const DEALS = [
     reviews: 6,
     desc: "Rising Sun and CHIC — a fresh citrus meets warm floral pairing. The perfect daytime duo for any occasion.",
     contains: [PRODUCTS[2].name, PRODUCTS[0].name],
-    savings: 25,
     representativeProduct: PRODUCTS[2],
   },
   {
+    id: "womens-trio",
     name: "WOMEN'S SIGNATURE TRIO",
     img1: PRODUCTS[0].img,
     img2: PRODUCTS[1].img,
@@ -73,10 +75,10 @@ const DEALS = [
     reviews: 19,
     desc: "The ultimate women's collection — CHIC, Dark Angel, and SIGMA in one spectacular package. Own every mood.",
     contains: [PRODUCTS[0].name, PRODUCTS[1].name, PRODUCTS[3].name],
-    savings: 74,
     representativeProduct: PRODUCTS[0],
   },
   {
+    id: "floral-trio",
     name: "FLORAL TRIO",
     img1: PRODUCTS[0].img,
     img2: PRODUCTS[3].img,
@@ -85,12 +87,13 @@ const DEALS = [
     reviews: 22,
     desc: "Three floral masterpieces — CHIC, SIGMA, and Rising Sun — for the woman who embraces every mood.",
     contains: [PRODUCTS[0].name, PRODUCTS[3].name, PRODUCTS[2].name],
-    savings: 50,
     representativeProduct: PRODUCTS[0],
   },
 ];
 
-function DealCard({ deal }: { deal: typeof DEALS[0] }) {
+type DealWithPrice = typeof BASE_DEALS[0] & { savings: number };
+
+function DealCard({ deal }: { deal: DealWithPrice }) {
   const [hovered, setHovered] = useState(false);
   const { addItem } = useCart();
   const discount = Math.round(((deal.originalPrice - deal.price) / deal.originalPrice) * 100);
@@ -141,6 +144,20 @@ function DealCard({ deal }: { deal: typeof DEALS[0] }) {
 }
 
 export default function Deals() {
+  const adminDealMap = useAdminDealMap();
+
+  const activeDeals: DealWithPrice[] = BASE_DEALS
+    .filter((d) => {
+      const admin = adminDealMap.get(d.id);
+      return admin ? admin.active : true;
+    })
+    .map((d) => {
+      const admin = adminDealMap.get(d.id);
+      const price = admin ? admin.price : d.price;
+      const originalPrice = admin ? admin.originalPrice : d.originalPrice;
+      return { ...d, price, originalPrice, savings: originalPrice - price };
+    });
+
   return (
     <div className="min-h-screen bg-white text-gray-900">
       <Header />
@@ -159,11 +176,15 @@ export default function Deals() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-10">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
-          {DEALS.map((d) => (
-            <DealCard key={d.name} deal={d} />
-          ))}
-        </div>
+        {activeDeals.length === 0 ? (
+          <p className="text-center text-gray-400 py-20">No active deals at the moment. Check back soon!</p>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
+            {activeDeals.map((d) => (
+              <DealCard key={d.id} deal={d} />
+            ))}
+          </div>
+        )}
       </div>
 
       <Footer />

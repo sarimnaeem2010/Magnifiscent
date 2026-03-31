@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Star } from "lucide-react";
-import { PRODUCTS } from "@/data/products";
-import type { Product } from "@/data/products";
+import { getActiveProducts } from "@/data/liveData";
+import type { LiveProduct } from "@/data/liveData";
 import { useCart } from "@/context/CartContext";
 import { useLocation, useSearch } from "wouter";
 
@@ -17,7 +17,7 @@ function StarRating({ count }: { count: number }) {
   );
 }
 
-function ProductCard({ product }: { product: Product }) {
+function ProductCard({ product }: { product: LiveProduct }) {
   const [hovered, setHovered] = useState(false);
   const { addItem } = useCart();
   const [, navigate] = useLocation();
@@ -76,6 +76,7 @@ export default function Products() {
   const initialGender = (params.get("gender") as "men" | "women" | null) || "all";
   const [filter, setFilter] = useState<"all" | "men" | "women">(initialGender as "all" | "men" | "women");
   const [, navigate] = useLocation();
+  const [allProducts] = useState(() => getActiveProducts());
 
   useEffect(() => {
     const p = new URLSearchParams(search);
@@ -83,7 +84,7 @@ export default function Products() {
     setFilter(g === "men" ? "men" : g === "women" ? "women" : "all");
   }, [search]);
 
-  const filtered = filter === "all" ? PRODUCTS : PRODUCTS.filter((p) => p.category === filter);
+  const filtered = filter === "all" ? allProducts : allProducts.filter((p) => p.category === filter);
 
   return (
     <div className="min-h-screen bg-white text-gray-900">
@@ -120,7 +121,7 @@ export default function Products() {
                   borderRight: i < 2 ? "1px solid #e5e7eb" : "none",
                 }}
               >
-                {f === "all" ? `All (${PRODUCTS.length})` : `${f.charAt(0).toUpperCase() + f.slice(1)} (${PRODUCTS.filter((p) => p.category === f).length})`}
+                {f === "all" ? `All (${allProducts.length})` : `${f.charAt(0).toUpperCase() + f.slice(1)} (${allProducts.filter((p) => p.category === f).length})`}
               </button>
             ))}
           </div>

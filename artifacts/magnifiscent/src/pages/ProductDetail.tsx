@@ -3,8 +3,8 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Star, Minus, Plus, ChevronRight, Package, RotateCcw, Shield } from "lucide-react";
 import { useParams, useLocation } from "wouter";
-import { getProduct, getRelated } from "@/data/products";
-import type { Product } from "@/data/products";
+import { getLiveProductBySlug, getLiveRelated } from "@/data/liveData";
+import type { LiveProduct } from "@/data/liveData";
 import { useCart } from "@/context/CartContext";
 
 function StarRating({ count, size = 14 }: { count: number; size?: number }) {
@@ -17,7 +17,7 @@ function StarRating({ count, size = 14 }: { count: number; size?: number }) {
   );
 }
 
-function RelatedCard({ product }: { product: Product }) {
+function RelatedCard({ product }: { product: LiveProduct }) {
   const [hovered, setHovered] = useState(false);
   const [, navigate] = useLocation();
   const { addItem } = useCart();
@@ -61,7 +61,7 @@ function RelatedCard({ product }: { product: Product }) {
 export default function ProductDetail() {
   const params = useParams<{ slug: string }>();
   const [, navigate] = useLocation();
-  const product = getProduct(params.slug);
+  const product = getLiveProductBySlug(params.slug);
   const { addItem } = useCart();
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
@@ -84,7 +84,7 @@ export default function ProductDetail() {
     );
   }
 
-  const related = getRelated(product);
+  const related = getLiveRelated(product);
 
   function handleAddToCart() {
     addItem(product, qty);
