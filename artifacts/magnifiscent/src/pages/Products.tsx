@@ -134,19 +134,17 @@ export default function Products() {
           ))}
         </div>
 
-        {filter !== "all" && (
-          <div className="text-center mt-10">
-            <button
-              onClick={() => {
-                setFilter("all");
-                navigate("/products");
-              }}
-              className="inline-block border border-black text-black font-bold uppercase tracking-widest text-xs px-10 py-3 hover:bg-black hover:text-white transition-colors bg-transparent cursor-pointer"
-            >
-              View All Products
-            </button>
-          </div>
-        )}
+        <div className="text-center mt-10">
+          <button
+            onClick={() => {
+              setFilter("all");
+              navigate("/products");
+            }}
+            className="inline-block border border-black text-black font-bold uppercase tracking-widest text-xs px-10 py-3 hover:bg-black hover:text-white transition-colors bg-transparent cursor-pointer"
+          >
+            View All Products
+          </button>
+        </div>
       </div>
 
       <Footer />

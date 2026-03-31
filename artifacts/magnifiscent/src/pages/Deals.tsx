@@ -15,10 +15,6 @@ function StarRating({ count }: { count: number }) {
   );
 }
 
-// PRODUCTS indices after update:
-// 0 = CHIC (women), 1 = Dark Angel (women), 2 = Rising Sun (women),
-// 3 = SIGMA (women), 4 = QUEST (men), 5 = Allure (women)
-
 const DEALS = [
   {
     name: "THE ICONIC DUO",

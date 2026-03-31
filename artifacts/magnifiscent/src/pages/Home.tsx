@@ -327,10 +327,10 @@ export default function Home() {
           </div>
           <div className="text-center mt-8">
             <button
-              onClick={() => navigate("/deals")}
+              onClick={() => navigate("/products")}
               className="inline-block border border-black text-black font-bold uppercase tracking-widest text-xs px-10 py-3 hover:bg-black hover:text-white transition-colors bg-transparent cursor-pointer"
             >
-              View All Deals
+              View All Products
             </button>
           </div>
         </div>
