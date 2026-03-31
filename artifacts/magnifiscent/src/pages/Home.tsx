@@ -75,12 +75,14 @@ const DEALS = [
 
 /* ─── Instagram Posts ─── */
 const INSTAGRAM_POSTS = [
-  { img: PRODUCTS[0].img, likes: 241, tag: "#CHIC" },
-  { img: PRODUCTS[4].img, likes: 387, tag: "#QUEST" },
-  { img: PRODUCTS[1].img, likes: 192, tag: "#DarkAngel" },
-  { img: PRODUCTS[5].img, likes: 518, tag: "#Allure" },
-  { img: PRODUCTS[2].img, likes: 164, tag: "#RisingSun" },
-  { img: "/women-split.png", likes: 293, tag: "#MagnifiScent" },
+  { img: PRODUCTS[0].img, likes: 241, tag: "#CHIC", label: "NEW LAUNCH" },
+  { img: PRODUCTS[4].img, likes: 387, tag: "#QUEST", label: "LONG LASTING" },
+  { img: PRODUCTS[1].img, likes: 192, tag: "#DarkAngel", label: "DARK ANGEL" },
+  { img: PRODUCTS[5].img, likes: 518, tag: "#Allure", label: "ALLURE" },
+  { img: PRODUCTS[2].img, likes: 164, tag: "#RisingSun", label: "RISING SUN" },
+  { img: PRODUCTS[3].img, likes: 203, tag: "#SIGMA", label: "SIGMA" },
+  { img: PRODUCTS[0].img, likes: 391, tag: "#CHIC", label: "BEST SELLER" },
+  { img: PRODUCTS[4].img, likes: 276, tag: "#QUEST", label: "FOR HIM" },
 ];
 
 /* ─── Hero Slider ─── */
@@ -389,42 +391,72 @@ export default function Home() {
       <section className="py-10 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-6">
-            <div className="flex items-center justify-center gap-2 mb-1">
-              <Instagram size={20} className="text-gray-600" />
-              <h2 className="section-title mb-0">Follow Us on Instagram</h2>
-            </div>
-            <a
-              href="https://instagram.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-gray-500 hover:text-black transition-colors"
-              style={{ textDecoration: "none" }}
-            >
-              @magnifiscent
-            </a>
+            <h2 className="section-title mb-1">Scent That Spreads</h2>
+            <p className="text-sm text-gray-400 italic">Everyone's favourite MagnifiScent Fragrances</p>
           </div>
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+          <div
+            className="scroll-x flex gap-3 overflow-x-auto pb-3"
+            style={{ scrollSnapType: "x mandatory" }}
+          >
             {INSTAGRAM_POSTS.map((post, i) => (
               <a
                 key={i}
                 href="https://instagram.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="relative group aspect-square overflow-hidden block bg-gray-100"
+                className="relative group flex-shrink-0 overflow-hidden rounded-xl block bg-gray-900"
+                style={{ width: 160, height: 260, scrollSnapAlign: "start" }}
               >
+                {/* Product image */}
                 <img
                   src={post.img}
-                  alt={post.tag}
+                  alt={post.label}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors duration-300 flex flex-col items-center justify-center">
-                  <Instagram size={20} className="text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 mb-1" />
-                  <span className="text-white text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    ♥ {post.likes}
-                  </span>
+                {/* Dark gradient overlay top */}
+                <div
+                  className="absolute inset-0 pointer-events-none"
+                  style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.1) 45%, rgba(0,0,0,0.55) 100%)" }}
+                />
+                {/* Bold label at top */}
+                <div className="absolute top-0 left-0 right-0 px-3 pt-3">
+                  <p
+                    className="text-white leading-tight uppercase"
+                    style={{ fontSize: 18, fontWeight: 900, fontFamily: "Impact, Arial Black, sans-serif", letterSpacing: 0.5, lineHeight: 1.1, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}
+                  >
+                    {post.label}
+                  </p>
+                </div>
+                {/* Play button center */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div
+                    className="flex items-center justify-center rounded-full transition-transform group-hover:scale-110"
+                    style={{ width: 44, height: 44, background: "rgba(255,255,255,0.22)", backdropFilter: "blur(4px)", border: "2px solid rgba(255,255,255,0.55)" }}
+                  >
+                    <svg width="16" height="18" viewBox="0 0 16 18" fill="none">
+                      <path d="M2 1.5L14 9L2 16.5V1.5Z" fill="white" />
+                    </svg>
+                  </div>
+                </div>
+                {/* Likes at bottom */}
+                <div className="absolute bottom-0 left-0 right-0 px-3 pb-3 flex items-center gap-1.5">
+                  <Instagram size={12} className="text-white/80" />
+                  <span className="text-white/80 text-xs font-semibold">♥ {post.likes}</span>
                 </div>
               </a>
             ))}
+          </div>
+          <div className="text-center mt-5">
+            <a
+              href="https://instagram.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-700 hover:text-black transition-colors border border-gray-200 px-6 py-2.5 rounded-full hover:border-gray-400"
+              style={{ textDecoration: "none" }}
+            >
+              <Instagram size={14} />
+              Follow @magnifiscent
+            </a>
           </div>
         </div>
       </section>
