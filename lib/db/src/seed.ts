@@ -1,6 +1,7 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
 import * as schema from "./schema/index.js";
+import { CATALOG_PRODUCTS, CATALOG_DEALS, CATALOG_TICKER_MESSAGES } from "./catalog.js";
 
 const { Pool } = pg;
 
@@ -11,140 +12,26 @@ if (!process.env.DATABASE_URL) {
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const db = drizzle(pool, { schema });
 
-/* ─── Products ─── */
-const PRODUCTS: schema.InsertProduct[] = [
-  {
-    id: 1,
-    name: "CHIC",
-    slug: "chic",
-    img: "",
-    img2: "",
-    price: "Rs. 89.00",
-    priceNum: 89,
-    originalPrice: "Rs. 110.00",
-    originalPriceNum: 110,
-    reviews: 42,
-    rating: 5,
-    category: "women",
-    desc: "A warm floral fragrance with golden rose and soft jasmine notes, feminine and unforgettable. Perfect for the confident woman who embraces her femininity.",
-    notes: ["Rose", "Jasmine", "Musk", "Vanilla"],
-    size: "100ml / 3.4 Fl.oz",
-    stock: 20,
-    active: true,
-  },
-  {
-    id: 2,
-    name: "Dark Angel",
-    slug: "dark-angel",
-    img: "",
-    img2: "",
-    price: "Rs. 109.00",
-    priceNum: 109,
-    originalPrice: "Rs. 135.00",
-    originalPriceNum: 135,
-    reviews: 27,
-    rating: 5,
-    category: "women",
-    desc: "Mysterious and exotic — black amber, oud and vanilla create an irresistible dark allure. For the woman who commands every room she enters.",
-    notes: ["Black Amber", "Oud", "Vanilla", "Sandalwood"],
-    size: "100ml / 3.4 Fl.oz",
-    stock: 20,
-    active: true,
-  },
-  {
-    id: 3,
-    name: "Rising Sun",
-    slug: "rising-sun",
-    img: "",
-    img2: "",
-    price: "Rs. 75.00",
-    priceNum: 75,
-    originalPrice: "Rs. 95.00",
-    originalPriceNum: 95,
-    reviews: 18,
-    rating: 5,
-    category: "women",
-    desc: "Fresh citrus and green notes that feel like the first light of a new day. Bright, uplifting and effortlessly elegant.",
-    notes: ["Bergamot", "Lemon", "Green Tea", "White Musk"],
-    size: "100ml / 3.4 Fl.oz",
-    stock: 20,
-    active: true,
-  },
-  {
-    id: 4,
-    name: "SIGMA",
-    slug: "sigma",
-    img: "",
-    img2: "",
-    price: "Rs. 95.00",
-    priceNum: 95,
-    originalPrice: "Rs. 120.00",
-    originalPriceNum: 120,
-    reviews: 31,
-    rating: 4,
-    category: "women",
-    desc: "Warm amber and spice in a bottle — a bold, long-lasting statement scent. For those who never go unnoticed.",
-    notes: ["Amber", "Spice", "Patchouli", "Cedarwood"],
-    size: "100ml / 3.4 Fl.oz",
-    stock: 20,
-    active: true,
-  },
-  {
-    id: 5,
-    name: "QUEST",
-    slug: "quest",
-    img: "",
-    img2: "",
-    price: "Rs. 89.00",
-    priceNum: 89,
-    originalPrice: "Rs. 115.00",
-    originalPriceNum: 115,
-    reviews: 54,
-    rating: 5,
-    category: "men",
-    desc: "Bold and adventurous — deep blue aquatics and mountain freshness for the modern explorer. A signature scent for the man who lives boldly.",
-    notes: ["Blue Aquatic", "Mountain Cedar", "Bergamot", "Ambroxan"],
-    size: "100ml / 3.4 Fl.oz",
-    stock: 20,
-    active: true,
-  },
-  {
-    id: 6,
-    name: "Allure",
-    slug: "allure",
-    img: "",
-    img2: "",
-    price: "Rs. 99.00",
-    priceNum: 99,
-    originalPrice: "Rs. 125.00",
-    originalPriceNum: 125,
-    reviews: 36,
-    rating: 5,
-    category: "women",
-    desc: "A seductive and passionate fragrance — deep red roses, warm spice and a smouldering musk base. For the woman who captivates without trying.",
-    notes: ["Red Rose", "Spice", "Musk", "Amber"],
-    size: "100ml / 3.4 Fl.oz",
-    stock: 20,
-    active: true,
-  },
-];
+const PRODUCTS: schema.InsertProduct[] = CATALOG_PRODUCTS.map((p) => ({
+  ...p,
+  img: "",
+  img2: "",
+}));
 
-/* ─── Default Deals ─── */
-const DEALS: schema.InsertDeal[] = [
-  { id: "iconic-duo", name: "The Iconic Duo", contains: ["QUEST", "CHIC"], price: 149, originalPrice: 178, active: true, discount: 16 },
-  { id: "floral-dream", name: "Floral Dream Pack", contains: ["CHIC", "SIGMA"], price: 159, originalPrice: 204, active: true, discount: 22 },
-  { id: "dark-allure", name: "Dark Allure Duo", contains: ["Dark Angel", "Allure"], price: 189, originalPrice: 224, active: true, discount: 16 },
-  { id: "fresh-bloom", name: "Fresh Bloom Duo", contains: ["Rising Sun", "CHIC"], price: 139, originalPrice: 164, active: true, discount: 15 },
-  { id: "womens-trio", name: "Women's Signature Trio", contains: ["CHIC", "Dark Angel", "SIGMA"], price: 259, originalPrice: 333, active: true, discount: 22 },
-  { id: "floral-trio", name: "Floral Trio", contains: ["CHIC", "SIGMA", "Rising Sun"], price: 239, originalPrice: 289, active: true, discount: 17 },
-];
+const DEALS: schema.InsertDeal[] = CATALOG_DEALS.map((d) => ({ ...d }));
 
-/* ─── Default Ticker Messages ─── */
-const TICKER_MESSAGES = [
-  "FREE SHIPPING ON ORDERS ABOVE Rs. 100",
-  "20 DAYS RETURN & REFUND POLICY",
-  "100% AUTHENTIC FRAGRANCES",
-];
+const TICKER_MESSAGES = [...CATALOG_TICKER_MESSAGES];
+
+/* ─── Default Email Toggles ─── */
+const DEFAULT_EMAIL_TOGGLES: Record<string, boolean> = {
+  order_confirmation: true,
+  order_shipped: true,
+  order_delivered: false,
+  abandoned_cart: false,
+  welcome_email: false,
+  new_order_alert: true,
+  low_stock_alert: false,
+};
 
 /* ─── Default Policy Pages ─── */
 const POLICY_PAGES: schema.InsertPolicyPage[] = [
@@ -329,17 +216,6 @@ For any queries regarding these terms, please contact us at hello@magnifiscent.c
 Last updated: 2025`,
   },
 ];
-
-/* ─── Default Email Toggles ─── */
-const DEFAULT_EMAIL_TOGGLES: Record<string, boolean> = {
-  order_confirmation: true,
-  order_shipped: true,
-  order_delivered: false,
-  abandoned_cart: false,
-  welcome_email: false,
-  new_order_alert: true,
-  low_stock_alert: false,
-};
 
 async function seed() {
   console.log("Seeding database...");
