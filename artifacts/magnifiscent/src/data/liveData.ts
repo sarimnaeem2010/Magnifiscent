@@ -650,6 +650,39 @@ export function addEmailLog(entry: Omit<EmailLogEntry, "id">): void {
   localStorage.setItem("admin_email_log", JSON.stringify(log.slice(0, 50)));
 }
 
+/* ─── Email Notification Toggles ─── */
+export type EmailToggles = {
+  order_confirmation: boolean;
+  order_shipped: boolean;
+  order_delivered: boolean;
+  abandoned_cart: boolean;
+  welcome_email: boolean;
+  new_order_alert: boolean;
+  low_stock_alert: boolean;
+};
+
+export const DEFAULT_EMAIL_TOGGLES: EmailToggles = {
+  order_confirmation: true,
+  order_shipped: true,
+  order_delivered: false,
+  abandoned_cart: false,
+  welcome_email: false,
+  new_order_alert: true,
+  low_stock_alert: false,
+};
+
+export function getEmailToggles(): EmailToggles {
+  try {
+    const s = localStorage.getItem("admin_email_toggles");
+    if (s) return { ...DEFAULT_EMAIL_TOGGLES, ...JSON.parse(s) };
+  } catch {}
+  return { ...DEFAULT_EMAIL_TOGGLES };
+}
+
+export function saveEmailToggles(t: EmailToggles): void {
+  localStorage.setItem("admin_email_toggles", JSON.stringify(t));
+}
+
 /* ─── Store Settings (read-only helper for storefront) ─── */
 export function getStoreFrontSettings(): { freeShippingThreshold: number; currency: string; storeName: string } {
   try {

@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import {
   Check, Eye, EyeOff, Send, RefreshCw, Trash2, Mail,
-  Server, FileText, Clock,
+  Server, FileText, Clock, Bell,
 } from "lucide-react";
 import {
   getEmailSettings, saveEmailSettings, type EmailSettings,
   getEmailTemplates, saveEmailTemplates, type EmailTemplates, type EmailTemplateKey,
   getEmailLog, addEmailLog, type EmailLogEntry,
+  getEmailToggles, saveEmailToggles, type EmailToggles,
 } from "@/data/liveData";
 
 const TEMPLATE_LABELS: Record<EmailTemplateKey, string> = {
@@ -20,6 +21,23 @@ const TEMPLATE_VARS: Record<EmailTemplateKey, string[]> = {
   contact_reply: ["{{firstName}}", "{{email}}", "{{message}}"],
   shipping_update: ["{{firstName}}", "{{orderId}}", "{{carrier}}", "{{trackingNumber}}"],
 };
+
+type ToggleInfo = {
+  key: keyof EmailToggles;
+  label: string;
+  description: string;
+  recipient: "customer" | "admin";
+};
+
+const TOGGLE_LIST: ToggleInfo[] = [
+  { key: "order_confirmation", label: "Order Confirmation", description: "Sent to the customer immediately after a successful order is placed.", recipient: "customer" },
+  { key: "order_shipped", label: "Order Shipped", description: "Sent to the customer when their order has been dispatched.", recipient: "customer" },
+  { key: "order_delivered", label: "Order Delivered", description: "Sent to the customer once delivery is confirmed.", recipient: "customer" },
+  { key: "abandoned_cart", label: "Abandoned Cart Reminder", description: "Reminder sent to customers who left items in their cart.", recipient: "customer" },
+  { key: "welcome_email", label: "Welcome Email", description: "Sent to the customer on their very first order.", recipient: "customer" },
+  { key: "new_order_alert", label: "New Order Alert", description: "Alerts the store admin whenever a new order is placed.", recipient: "admin" },
+  { key: "low_stock_alert", label: "Low Stock Alert", description: "Alerts the store admin when a product's stock falls below the threshold.", recipient: "admin" },
+];
 
 function Field({
   label, value, onChange, type = "text", placeholder = "", hint,
@@ -42,6 +60,21 @@ function Field({
   );
 }
 
+function ToggleSwitch({ enabled, onToggle }: { enabled: boolean; onToggle: () => void }) {
+  return (
+    <button
+      onClick={onToggle}
+      className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors border-none cursor-pointer flex-shrink-0"
+      style={{ background: enabled ? "#111827" : "#d1d5db" }}
+    >
+      <span
+        className="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform"
+        style={{ transform: enabled ? "translateX(24px)" : "translateX(3px)" }}
+      />
+    </button>
+  );
+}
+
 function StatusBadge({ status }: { status: EmailLogEntry["status"] }) {
   const styles: Record<string, string> = {
     sent: "bg-green-50 text-green-700 border-green-200",
@@ -55,21 +88,31 @@ function StatusBadge({ status }: { status: EmailLogEntry["status"] }) {
   );
 }
 
-type Tab = "smtp" | "templates" | "log";
+type Tab = "smtp" | "notifications" | "templates" | "log";
 
 export function AdminEmail() {
   const [activeTab, setActiveTab] = useState<Tab>("smtp");
+
+  // SMTP state
   const [smtp, setSmtp] = useState<EmailSettings>(() => getEmailSettings());
   const [smtpSaved, setSmtpSaved] = useState(false);
   const [showPw, setShowPw] = useState(false);
+  const [testEmail, setTestEmail] = useState("");
+  const [testStatus, setTestStatus] = useState<"idle" | "sending" | "ok" | "error">("idle");
+  const [testError, setTestError] = useState("");
+
+  // Notifications toggles state
+  const [toggles, setToggles] = useState<EmailToggles>(() => getEmailToggles());
+  const [togglesSaved, setTogglesSaved] = useState(false);
+
+  // Templates state
   const [templates, setTemplates] = useState<EmailTemplates>(() => getEmailTemplates());
   const [templatesSaved, setTemplatesSaved] = useState(false);
   const [activeTemplate, setActiveTemplate] = useState<EmailTemplateKey>("order_confirmation");
   const [showPreview, setShowPreview] = useState(false);
+
+  // Log state
   const [emailLog, setEmailLog] = useState<EmailLogEntry[]>(() => getEmailLog());
-  const [testEmail, setTestEmail] = useState("");
-  const [testStatus, setTestStatus] = useState<"idle" | "sending" | "ok" | "error">("idle");
-  const [testError, setTestError] = useState("");
 
   const updateSmtp = (field: keyof EmailSettings) => (val: string | boolean | number) => {
     setSmtp((s) => ({ ...s, [field]: val }));
@@ -79,6 +122,16 @@ export function AdminEmail() {
     saveEmailSettings(smtp);
     setSmtpSaved(true);
     setTimeout(() => setSmtpSaved(false), 2500);
+  };
+
+  const handleToggleNotification = (key: keyof EmailToggles) => {
+    setToggles((t) => ({ ...t, [key]: !t[key] }));
+  };
+
+  const handleSaveToggles = () => {
+    saveEmailToggles(toggles);
+    setTogglesSaved(true);
+    setTimeout(() => setTogglesSaved(false), 2500);
   };
 
   const updateTemplate = (field: "subject" | "body", val: string) => {
@@ -123,7 +176,7 @@ export function AdminEmail() {
           replyTo: smtp.replyTo,
           to: testEmail,
           subject: "MagnifiScent — Test Email",
-          html: `<h2>Test Email</h2><p>Your SMTP settings are working correctly! 🎉</p><p><em>— MagnifiScent Admin Panel</em></p>`,
+          html: `<h2>Test Email</h2><p>Your SMTP settings are working correctly!</p><p><em>— MagnifiScent Admin Panel</em></p>`,
         }),
       });
       const data = await res.json();
@@ -152,6 +205,7 @@ export function AdminEmail() {
 
   const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
     { key: "smtp", label: "SMTP Config", icon: <Server size={14} /> },
+    { key: "notifications", label: "Notifications", icon: <Bell size={14} /> },
     { key: "templates", label: "Templates", icon: <FileText size={14} /> },
     { key: "log", label: "Email Log", icon: <Clock size={14} /> },
   ];
@@ -160,7 +214,7 @@ export function AdminEmail() {
     <div className="max-w-3xl space-y-6">
       <div>
         <h1 className="text-xl font-bold text-gray-900">Email & SMTP</h1>
-        <p className="text-sm text-gray-500 mt-1">Configure outgoing mail settings, edit email templates, and review send history.</p>
+        <p className="text-sm text-gray-500 mt-1">Configure outgoing mail settings, toggle notifications, edit templates, and review send history.</p>
       </div>
 
       {/* Tab bar */}
@@ -184,13 +238,12 @@ export function AdminEmail() {
       {/* SMTP Tab */}
       {activeTab === "smtp" && (
         <div className="space-y-5">
-          {/* Info banner */}
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-3">
             <Mail size={18} className="text-blue-500 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-sm font-semibold text-blue-800">How email sending works</p>
               <p className="text-xs text-blue-600 mt-1 leading-relaxed">
-                Enter your SMTP credentials and your backend API URL. The admin panel will call your API server to send emails via nodemailer. Common providers: Gmail (smtp.gmail.com:587), Mailgun, SendGrid, AWS SES.
+                Enter your SMTP credentials and your backend API URL. The admin panel calls the API server to send emails via nodemailer. Common providers: Gmail (smtp.gmail.com:587), Mailgun, SendGrid, AWS SES.
               </p>
             </div>
           </div>
@@ -202,13 +255,7 @@ export function AdminEmail() {
               <Field label="Port" value={smtp.port} onChange={(v) => updateSmtp("port")(parseInt(v) || 587)} type="number" placeholder="587" />
             </div>
             <div className="flex items-center gap-3">
-              <button
-                onClick={() => updateSmtp("secure")(!smtp.secure)}
-                className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors border-none cursor-pointer flex-shrink-0"
-                style={{ background: smtp.secure ? "#111827" : "#d1d5db" }}
-              >
-                <span className="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform" style={{ transform: smtp.secure ? "translateX(24px)" : "translateX(3px)" }} />
-              </button>
+              <ToggleSwitch enabled={smtp.secure} onToggle={() => updateSmtp("secure")(!smtp.secure)} />
               <div>
                 <p className="text-sm font-medium text-gray-700">Use SSL/TLS</p>
                 <p className="text-xs text-gray-400">Enable for port 465. Leave off for port 587 with STARTTLS.</p>
@@ -269,7 +316,6 @@ export function AdminEmail() {
             {smtpSaved ? <><Check size={14} />Saved!</> : "Save SMTP Settings"}
           </button>
 
-          {/* Test Email */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
             <h2 className="text-sm font-semibold text-gray-700 pb-2 border-b border-gray-100">Send Test Email</h2>
             <p className="text-xs text-gray-500">Send a test email to verify your SMTP settings are working correctly.</p>
@@ -304,11 +350,62 @@ export function AdminEmail() {
         </div>
       )}
 
+      {/* Notifications Tab */}
+      {activeTab === "notifications" && (
+        <div className="space-y-5">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100">
+              <h2 className="text-sm font-semibold text-gray-700">Email Notification Types</h2>
+              <p className="text-xs text-gray-400 mt-1">Enable or disable each type of automated email. Changes take effect immediately after saving.</p>
+            </div>
+
+            {/* Customer emails */}
+            <div className="px-6 py-3 bg-gray-50 border-b border-gray-100">
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Customer Emails</p>
+            </div>
+            <div className="divide-y divide-gray-50">
+              {TOGGLE_LIST.filter((t) => t.recipient === "customer").map((item) => (
+                <div key={item.key} className="flex items-center gap-4 px-6 py-4">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-800">{item.label}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">{item.description}</p>
+                  </div>
+                  <ToggleSwitch enabled={toggles[item.key]} onToggle={() => handleToggleNotification(item.key)} />
+                </div>
+              ))}
+            </div>
+
+            {/* Admin emails */}
+            <div className="px-6 py-3 bg-gray-50 border-b border-gray-100">
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Admin Alerts</p>
+            </div>
+            <div className="divide-y divide-gray-50">
+              {TOGGLE_LIST.filter((t) => t.recipient === "admin").map((item) => (
+                <div key={item.key} className="flex items-center gap-4 px-6 py-4">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-800">{item.label}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">{item.description}</p>
+                  </div>
+                  <ToggleSwitch enabled={toggles[item.key]} onToggle={() => handleToggleNotification(item.key)} />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <button
+            onClick={handleSaveToggles}
+            className="flex items-center gap-2 px-6 py-2.5 text-sm font-bold text-white rounded-lg border-none cursor-pointer transition-colors"
+            style={{ background: togglesSaved ? "#10b981" : "#111827" }}
+          >
+            {togglesSaved ? <><Check size={14} />Saved!</> : "Save Notification Settings"}
+          </button>
+        </div>
+      )}
+
       {/* Templates Tab */}
       {activeTab === "templates" && (
         <div className="space-y-5">
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            {/* Template selector */}
             <div className="flex border-b border-gray-100">
               {(Object.keys(TEMPLATE_LABELS) as EmailTemplateKey[]).map((key) => (
                 <button
@@ -334,7 +431,6 @@ export function AdminEmail() {
                 placeholder="Email subject line"
               />
 
-              {/* Available variables */}
               <div className="flex flex-wrap gap-1.5">
                 <span className="text-xs text-gray-400 font-semibold mr-1">Variables:</span>
                 {TEMPLATE_VARS[activeTemplate].map((v) => (
