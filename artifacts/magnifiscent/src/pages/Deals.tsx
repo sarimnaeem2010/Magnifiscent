@@ -1,0 +1,166 @@
+import React, { useState } from "react";
+import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
+import { Star } from "lucide-react";
+import { PRODUCTS } from "@/data/products";
+import { useCart } from "@/context/CartContext";
+
+function StarRating({ count }: { count: number }) {
+  return (
+    <div className="flex items-center gap-0.5">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <Star key={i} size={11} className={i < count ? "fill-amber-400 text-amber-400" : "fill-gray-200 text-gray-200"} />
+      ))}
+    </div>
+  );
+}
+
+const DEALS = [
+  {
+    name: "THE ICONIC DUO",
+    img1: PRODUCTS[4].img,
+    img2: PRODUCTS[0].img,
+    price: 149,
+    originalPrice: 178,
+    reviews: 14,
+    desc: "QUEST and CHIC — two signature fragrances paired together in one exclusive combo. One bold, one floral.",
+    contains: [PRODUCTS[4].name, PRODUCTS[0].name],
+    savings: 29,
+  },
+  {
+    name: "FLORAL DREAM PACK",
+    img1: PRODUCTS[0].img,
+    img2: PRODUCTS[3].img,
+    price: 159,
+    originalPrice: 204,
+    reviews: 8,
+    desc: "CHIC and SIGMA — warm and feminine florals combined in a stunning gift set. Perfect for gifting.",
+    contains: [PRODUCTS[0].name, PRODUCTS[3].name],
+    savings: 45,
+  },
+  {
+    name: "DARK POWER DUO",
+    img1: PRODUCTS[1].img,
+    img2: PRODUCTS[5].img,
+    price: 189,
+    originalPrice: 229,
+    reviews: 11,
+    desc: "Dark Angel meets NOIR — an intense, mysterious pairing for bold souls who command attention.",
+    contains: [PRODUCTS[1].name, PRODUCTS[5].name],
+    savings: 40,
+  },
+  {
+    name: "RISING STORM SET",
+    img1: PRODUCTS[2].img,
+    img2: PRODUCTS[6].img,
+    price: 139,
+    originalPrice: 160,
+    reviews: 6,
+    desc: "Fresh meets aquatic — Rising Sun and STORM, the perfect daytime duo. Bright, energetic, memorable.",
+    contains: [PRODUCTS[2].name, PRODUCTS[6].name],
+    savings: 21,
+  },
+  {
+    name: "POWER TRIO",
+    img1: PRODUCTS[4].img,
+    img2: PRODUCTS[5].img,
+    price: 249,
+    originalPrice: 299,
+    reviews: 19,
+    desc: "The ultimate men's collection — QUEST, NOIR, and STORM in one spectacular package.",
+    contains: [PRODUCTS[4].name, PRODUCTS[5].name, PRODUCTS[6].name],
+    savings: 50,
+  },
+  {
+    name: "FLORAL TRIO",
+    img1: PRODUCTS[0].img,
+    img2: PRODUCTS[3].img,
+    price: 239,
+    originalPrice: 289,
+    reviews: 22,
+    desc: "Three floral masterpieces — CHIC, SIGMA, and Rising Sun — for the woman who embraces every mood.",
+    contains: [PRODUCTS[0].name, PRODUCTS[3].name, PRODUCTS[2].name],
+    savings: 50,
+  },
+];
+
+function DealCard({ deal }: { deal: typeof DEALS[0] }) {
+  const [hovered, setHovered] = useState(false);
+  const { addItem } = useCart();
+  const discount = Math.round(((deal.originalPrice - deal.price) / deal.originalPrice) * 100);
+
+  return (
+    <div
+      className="product-card cursor-pointer"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <div className="relative overflow-hidden bg-gray-50" style={{ aspectRatio: "3/4" }}>
+        <span className="sale-badge">{discount}% OFF</span>
+        <img src={deal.img1} alt={deal.name} className="w-full h-full object-cover absolute inset-0"
+          style={{ opacity: hovered ? 0 : 1, transition: "opacity 0.4s ease" }} />
+        <img src={deal.img2} alt={deal.name} className="w-full h-full object-cover absolute inset-0"
+          style={{ opacity: hovered ? 1 : 0, transition: "opacity 0.4s ease" }} />
+        <button
+          className="quickshop-btn"
+          style={{ transform: hovered ? "translateY(0)" : "translateY(100%)", transition: "transform 0.3s ease" }}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (PRODUCTS[4]) addItem(PRODUCTS[4]);
+          }}
+        >
+          Quick Add
+        </button>
+      </div>
+      <div className="pt-3 pb-2">
+        <p className="text-xs text-green-600 font-bold mb-1">Save ${deal.savings.toFixed(2)}</p>
+        <div className="flex items-center gap-1 mb-1">
+          <StarRating count={5} />
+          <span className="text-gray-400 text-xs ml-1">({deal.reviews})</span>
+        </div>
+        <h3 className="font-bold text-sm text-gray-900 mb-1">{deal.name}</h3>
+        <p className="text-xs text-gray-500 mb-2 leading-snug line-clamp-2">{deal.desc}</p>
+        <div className="flex flex-wrap gap-1 mb-2">
+          {deal.contains.map((c) => (
+            <span key={c} className="text-[10px] border border-gray-200 px-2 py-0.5 text-gray-500 font-medium">{c}</span>
+          ))}
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-bold text-gray-900">${deal.price.toFixed(2)}</span>
+          <span className="text-xs text-gray-400 line-through">${deal.originalPrice.toFixed(2)}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function Deals() {
+  return (
+    <div className="min-h-screen bg-white text-gray-900">
+      <Header />
+
+      {/* Banner */}
+      <div className="bg-gray-50 border-b border-gray-100 py-10">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Exclusive Savings</p>
+          <h1 className="font-bold text-3xl md:text-4xl uppercase tracking-wide" style={{ fontFamily: "Georgia, serif" }}>
+            Deals &amp; Combo
+          </h1>
+          <p className="text-gray-500 text-sm mt-3 max-w-md mx-auto">
+            Save more when you bundle. Exclusive paired sets for every mood and occasion.
+          </p>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 py-10">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
+          {DEALS.map((d) => (
+            <DealCard key={d.name} deal={d} />
+          ))}
+        </div>
+      </div>
+
+      <Footer />
+    </div>
+  );
+}

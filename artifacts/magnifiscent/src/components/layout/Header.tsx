@@ -1,26 +1,30 @@
 import React, { useState, useRef, useEffect } from "react";
 import { ShoppingBag, Search, Menu, X, ChevronDown } from "lucide-react";
+import { useLocation } from "wouter";
+import { useCart } from "@/context/CartContext";
 
 const navLinks = [
-  { label: "Best Seller", href: "#best-seller" },
+  { label: "Home", href: "/" },
   {
-    label: "Men Collection",
-    href: "#men",
-    sub: ["Men's Perfumes", "Men's Collection"],
+    label: "All Products",
+    href: "/products",
+    sub: [
+      { label: "All", href: "/products" },
+      { label: "Men", href: "/products?gender=men" },
+      { label: "Women", href: "/products?gender=women" },
+    ],
   },
-  {
-    label: "Women Collection",
-    href: "#women",
-    sub: ["Women's Perfumes", "Women's Collection"],
-  },
-  { label: "Deal & Combo", href: "#deals" },
+  { label: "Deals & Combo", href: "/deals" },
+  { label: "About Us", href: "/about" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [cartCount] = useState(0);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { count, openCart } = useCart();
+  const [location, navigate] = useLocation();
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -31,6 +35,12 @@ export function Header() {
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
+
+  function handleNav(href: string) {
+    setMenuOpen(false);
+    setOpenDropdown(null);
+    navigate(href);
+  }
 
   return (
     <>
@@ -60,45 +70,57 @@ export function Header() {
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <a href="/" className="flex items-center gap-2 text-black no-underline">
+          <button
+            onClick={() => handleNav("/")}
+            className="flex items-center gap-2 text-black bg-transparent border-none cursor-pointer p-0"
+          >
             <svg width="22" height="18" viewBox="0 0 22 18" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M11 2L13.5 7H8.5L11 2Z" fill="#1a1a1a"/>
               <path d="M1 16L3.5 6L7 11L11 1L15 11L18.5 6L21 16H1Z" stroke="#1a1a1a" strokeWidth="1.5" fill="none" strokeLinejoin="round"/>
             </svg>
-            <span style={{ fontFamily: 'Georgia, serif', fontSize: 22, fontWeight: 700, letterSpacing: '0.08em', color: '#1a1a1a' }}>
+            <span style={{ fontFamily: "Georgia, serif", fontSize: 22, fontWeight: 700, letterSpacing: "0.08em", color: "#1a1a1a" }}>
               MagnifiScent
             </span>
-          </a>
+          </button>
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-1" ref={dropdownRef}>
             {navLinks.map((link) => (
               <div key={link.label} className="relative">
-                <button
-                  className="flex items-center gap-1 px-4 py-2 text-sm font-semibold text-gray-800 hover:text-black uppercase tracking-wide transition-colors"
-                  onClick={() => setOpenDropdown(openDropdown === link.label ? null : link.label)}
-                  onMouseEnter={() => link.sub && setOpenDropdown(link.label)}
-                >
-                  {link.label}
-                  {link.sub && <ChevronDown size={14} />}
-                </button>
-                {link.sub && openDropdown === link.label && (
-                  <div
-                    className="absolute top-full left-0 bg-white border border-gray-200 shadow-lg min-w-[180px] z-50"
-                    onMouseLeave={() => setOpenDropdown(null)}
-                  >
-                    {link.sub.map((s) => (
-                      <a
-                        key={s}
-                        href={link.href}
-                        className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 hover:text-black"
-                        style={{ textDecoration: "none" }}
-                        onClick={() => setOpenDropdown(null)}
+                {link.sub ? (
+                  <>
+                    <button
+                      className="flex items-center gap-1 px-4 py-2 text-sm font-semibold text-gray-800 hover:text-black uppercase tracking-wide transition-colors"
+                      onMouseEnter={() => setOpenDropdown(link.label)}
+                      onClick={() => { handleNav(link.href); }}
+                    >
+                      {link.label}
+                      <ChevronDown size={14} />
+                    </button>
+                    {openDropdown === link.label && (
+                      <div
+                        className="absolute top-full left-0 bg-white border border-gray-200 shadow-lg min-w-[160px] z-50"
+                        onMouseLeave={() => setOpenDropdown(null)}
                       >
-                        {s}
-                      </a>
-                    ))}
-                  </div>
+                        {link.sub.map((s) => (
+                          <button
+                            key={s.label}
+                            className="block w-full text-left px-5 py-3 text-sm text-gray-700 hover:bg-gray-50 hover:text-black font-medium transition-colors"
+                            onClick={() => handleNav(s.href)}
+                          >
+                            {s.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <button
+                    className={`flex items-center gap-1 px-4 py-2 text-sm font-semibold uppercase tracking-wide transition-colors ${location === link.href ? "text-black border-b-2 border-black" : "text-gray-800 hover:text-black"}`}
+                    onClick={() => handleNav(link.href)}
+                  >
+                    {link.label}
+                  </button>
                 )}
               </div>
             ))}
@@ -109,11 +131,15 @@ export function Header() {
             <button className="text-gray-700 hover:text-black transition-colors hidden md:block">
               <Search size={20} />
             </button>
-            <button className="relative text-gray-700 hover:text-black transition-colors">
+            <button
+              className="relative text-gray-700 hover:text-black transition-colors"
+              onClick={openCart}
+              aria-label="Open cart"
+            >
               <ShoppingBag size={20} />
-              {cartCount > 0 && (
+              {count > 0 && (
                 <span className="absolute -top-2 -right-2 bg-black text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
-                  {cartCount}
+                  {count}
                 </span>
               )}
             </button>
@@ -130,15 +156,27 @@ export function Header() {
         {menuOpen && (
           <div className="md:hidden border-t border-gray-100 bg-white">
             {navLinks.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                onClick={() => setMenuOpen(false)}
-                className="block px-4 py-4 text-sm font-semibold uppercase tracking-wide border-b border-gray-100 text-gray-800 hover:bg-gray-50"
-                style={{ textDecoration: "none" }}
-              >
-                {link.label}
-              </a>
+              <div key={link.label}>
+                <button
+                  onClick={() => handleNav(link.href)}
+                  className="block w-full text-left px-4 py-4 text-sm font-semibold uppercase tracking-wide border-b border-gray-100 text-gray-800 hover:bg-gray-50 transition-colors"
+                >
+                  {link.label}
+                </button>
+                {link.sub && (
+                  <div className="bg-gray-50">
+                    {link.sub.map((s) => (
+                      <button
+                        key={s.label}
+                        onClick={() => handleNav(s.href)}
+                        className="block w-full text-left px-8 py-3 text-sm text-gray-600 hover:text-black border-b border-gray-100 transition-colors"
+                      >
+                        — {s.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         )}
