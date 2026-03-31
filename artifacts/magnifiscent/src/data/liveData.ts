@@ -159,23 +159,35 @@ export function saveInstagramReels(reels: InstagramReel[]): void {
 /* ─── Home Headings ─── */
 export type HomeHeadings = {
   deals: string;
+  dealsSubtitle: string;
   shopByGender: string;
+  shopByGenderSubtitle: string;
   allProducts: string;
+  allProductsSubtitle: string;
   shopByNotes: string;
+  shopByNotesSubtitle: string;
   instagramTitle: string;
   instagramSubtitle: string;
   reviews: string;
+  reviewsSubtitle: string;
   whyChoose: string;
+  whyChooseSubtitle: string;
 };
 export const DEFAULT_HOME_HEADINGS: HomeHeadings = {
   deals: "Deals & Combo",
+  dealsSubtitle: "Save more with our exclusive fragrance bundles",
   shopByGender: "Shop By Gender",
+  shopByGenderSubtitle: "Curated collections crafted for him and for her",
   allProducts: "All Products",
+  allProductsSubtitle: "Every scent in our signature collection",
   shopByNotes: "Shop By Notes",
+  shopByNotesSubtitle: "Find your perfect fragrance by scent family",
   instagramTitle: "Scent That Spreads",
   instagramSubtitle: "Everyone's favourite MagnifiScent Fragrances",
   reviews: "Buyer's Reviews",
+  reviewsSubtitle: "Real experiences from our fragrance community",
   whyChoose: "Why Choose MagnifiScent?",
+  whyChooseSubtitle: "Authenticity, longevity, and luxury — without compromise",
 };
 export function getHomeHeadings(): HomeHeadings {
   try {
