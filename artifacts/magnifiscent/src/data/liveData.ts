@@ -58,6 +58,26 @@ export function saveProductCustomImages(imgs: ProductCustomImages): void {
   localStorage.setItem("admin_product_images", JSON.stringify(imgs));
 }
 
+/* ─── Announcement Ticker ─── */
+export const DEFAULT_TICKER_MESSAGES = [
+  "FREE SHIPPING ON ORDERS ABOVE $100",
+  "20 DAYS RETURN & REFUND POLICY",
+  "100% AUTHENTIC FRAGRANCES",
+];
+export function getTickerMessages(): string[] {
+  try {
+    const s = localStorage.getItem("admin_ticker_messages");
+    if (s) {
+      const parsed = JSON.parse(s);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch {}
+  return [...DEFAULT_TICKER_MESSAGES];
+}
+export function saveTickerMessages(msgs: string[]): void {
+  localStorage.setItem("admin_ticker_messages", JSON.stringify(msgs));
+}
+
 /* ─── Deal Custom Images ─── */
 export function getDealCustomImages(): DealCustomImages {
   try {

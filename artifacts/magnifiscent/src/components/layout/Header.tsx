@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { ShoppingBag, Search, Menu, X, ChevronDown } from "lucide-react";
 import { useLocation } from "wouter";
 import { useCart } from "@/context/CartContext";
+import { getTickerMessages } from "@/data/liveData";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -22,6 +23,7 @@ const navLinks = [
 export function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const tickerMessages = getTickerMessages();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { count, openCart } = useCart();
   const [location, navigate] = useLocation();
@@ -49,18 +51,12 @@ export function Header() {
         <div className="ticker-track h-full flex items-center">
           {[...Array(6)].map((_, i) => (
             <div key={i} className="flex items-center gap-0 whitespace-nowrap">
-              <span className="text-xs font-semibold tracking-wider px-6">
-                FREE SHIPPING ON ORDERS ABOVE $100
-              </span>
-              <span className="text-xs text-gray-400 px-2">•</span>
-              <span className="text-xs font-semibold tracking-wider px-6">
-                20 DAYS RETURN &amp; REFUND POLICY
-              </span>
-              <span className="text-xs text-gray-400 px-2">•</span>
-              <span className="text-xs font-semibold tracking-wider px-6">
-                100% AUTHENTIC FRAGRANCES
-              </span>
-              <span className="text-xs text-gray-400 px-2">•</span>
+              {tickerMessages.map((msg, j) => (
+                <React.Fragment key={j}>
+                  <span className="text-xs font-semibold tracking-wider px-6">{msg}</span>
+                  <span className="text-xs text-gray-400 px-2">•</span>
+                </React.Fragment>
+              ))}
             </div>
           ))}
         </div>

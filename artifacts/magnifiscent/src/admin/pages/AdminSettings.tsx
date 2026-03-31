@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useAdmin } from "../AdminContext";
 import type { StoreSettings } from "../AdminContext";
-import { Check, Eye, EyeOff } from "lucide-react";
-import { getPaymentSettings, savePaymentSettings, type PaymentSettings } from "@/data/liveData";
+import { Check, Eye, EyeOff, X } from "lucide-react";
+import { getPaymentSettings, savePaymentSettings, type PaymentSettings, getTickerMessages, saveTickerMessages } from "@/data/liveData";
 
 function Field({ label, value, onChange, type = "text", placeholder = "" }: {
   label: string; value: string | number; onChange: (v: string) => void;
@@ -52,6 +52,8 @@ export function AdminSettings() {
   const [pwError, setPwError] = useState("");
   const [payment, setPayment] = useState<PaymentSettings>(() => getPaymentSettings());
   const [paymentSaved, setPaymentSaved] = useState(false);
+  const [ticker, setTicker] = useState<string[]>(() => getTickerMessages());
+  const [tickerSaved, setTickerSaved] = useState(false);
 
   const update = (field: keyof StoreSettings) => (val: string) => {
     setForm((f) => ({ ...f, [field]: field === "freeShippingThreshold" ? parseFloat(val) || 0 : val }));
@@ -81,6 +83,27 @@ export function AdminSettings() {
     savePaymentSettings(next);
     setPaymentSaved(true);
     setTimeout(() => setPaymentSaved(false), 2000);
+  };
+
+  const updateTicker = (idx: number, val: string) => {
+    setTicker((prev) => prev.map((m, i) => (i === idx ? val : m)));
+  };
+
+  const addTickerMsg = () => {
+    if (ticker.length < 6) setTicker((prev) => [...prev, ""]);
+  };
+
+  const removeTickerMsg = (idx: number) => {
+    if (ticker.length > 1) setTicker((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const saveTicker = () => {
+    const cleaned = ticker.map((m) => m.trim()).filter(Boolean);
+    if (cleaned.length === 0) return;
+    saveTickerMessages(cleaned);
+    setTicker(cleaned);
+    setTickerSaved(true);
+    setTimeout(() => setTickerSaved(false), 2500);
   };
 
   const handleReset = () => {
@@ -174,6 +197,54 @@ export function AdminSettings() {
           enabled={payment.card}
           onToggle={() => togglePayment("card")}
         />
+      </div>
+
+      {/* Announcement Ticker */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-3">
+        <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+          <div>
+            <h2 className="text-sm font-semibold text-gray-700">Announcement Ticker</h2>
+            <p className="text-xs text-gray-400 mt-0.5">The scrolling messages shown at the top of every page. Up to 6 messages.</p>
+          </div>
+          {tickerSaved && <span className="text-xs font-bold text-green-600">✓ Saved</span>}
+        </div>
+        <div className="space-y-2">
+          {ticker.map((msg, idx) => (
+            <div key={idx} className="flex items-center gap-2">
+              <span className="text-xs text-gray-400 w-4 flex-shrink-0">{idx + 1}.</span>
+              <input
+                type="text"
+                className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900 uppercase"
+                value={msg}
+                onChange={(e) => updateTicker(idx, e.target.value.toUpperCase())}
+                placeholder="E.G. FREE SHIPPING ON ORDERS ABOVE $100"
+              />
+              <button
+                onClick={() => removeTickerMsg(idx)}
+                disabled={ticker.length <= 1}
+                className="p-1.5 text-gray-400 hover:text-red-500 bg-transparent border-none cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                <X size={15} />
+              </button>
+            </div>
+          ))}
+        </div>
+        <div className="flex items-center justify-between pt-1">
+          <button
+            onClick={addTickerMsg}
+            disabled={ticker.length >= 6}
+            className="text-xs font-semibold text-gray-500 hover:text-gray-900 bg-transparent border border-gray-200 rounded-lg px-3 py-1.5 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+          >
+            + Add Message
+          </button>
+          <button
+            onClick={saveTicker}
+            className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white rounded-lg border-none cursor-pointer transition-colors"
+            style={{ background: tickerSaved ? "#10b981" : "#111827" }}
+          >
+            {tickerSaved ? <><Check size={13} /> Saved!</> : "Save Ticker"}
+          </button>
+        </div>
       </div>
 
       {/* Actions */}
