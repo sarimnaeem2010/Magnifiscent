@@ -1,5 +1,6 @@
 import React from "react";
 import { Instagram, Facebook } from "lucide-react";
+import logoImg from "@assets/Logo_1774977360169.png";
 
 export function Footer() {
   return (
@@ -8,14 +9,12 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
           {/* Brand */}
           <div className="md:col-span-1">
-            <div className="flex items-center gap-2 mb-4">
-              <svg width="20" height="16" viewBox="0 0 22 18" fill="none">
-                <path d="M11 2L13.5 7H8.5L11 2Z" fill="white"/>
-                <path d="M1 16L3.5 6L7 11L11 1L15 11L18.5 6L21 16H1Z" stroke="white" strokeWidth="1.5" fill="none" strokeLinejoin="round"/>
-              </svg>
-              <span style={{ fontFamily: 'Georgia, serif', fontSize: 18, fontWeight: 700, letterSpacing: '0.08em' }}>
-                MagnifiScent
-              </span>
+            <div className="mb-4">
+              <img
+                src={logoImg}
+                alt="MagnifiScent"
+                style={{ height: 44, width: "auto", objectFit: "contain", filter: "invert(1)" }}
+              />
             </div>
             <p className="text-gray-400 text-sm mb-6 leading-relaxed">
               Premium Eau de Parfum — crafted for those who wear their story.

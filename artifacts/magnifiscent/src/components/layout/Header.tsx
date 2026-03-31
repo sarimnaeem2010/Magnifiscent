@@ -3,6 +3,7 @@ import { ShoppingBag, Search, Menu, X, ChevronDown } from "lucide-react";
 import { useLocation } from "wouter";
 import { useCart } from "@/context/CartContext";
 import { getTickerMessages } from "@/data/liveData";
+import logoImg from "@assets/Logo_1774977360169.png";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -68,15 +69,13 @@ export function Header() {
           {/* Logo */}
           <button
             onClick={() => handleNav("/")}
-            className="flex items-center gap-2 text-black bg-transparent border-none cursor-pointer p-0"
+            className="flex items-center bg-transparent border-none cursor-pointer p-0"
           >
-            <svg width="22" height="18" viewBox="0 0 22 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M11 2L13.5 7H8.5L11 2Z" fill="#1a1a1a"/>
-              <path d="M1 16L3.5 6L7 11L11 1L15 11L18.5 6L21 16H1Z" stroke="#1a1a1a" strokeWidth="1.5" fill="none" strokeLinejoin="round"/>
-            </svg>
-            <span style={{ fontFamily: "Georgia, serif", fontSize: 22, fontWeight: 700, letterSpacing: "0.08em", color: "#1a1a1a" }}>
-              MagnifiScent
-            </span>
+            <img
+              src={logoImg}
+              alt="MagnifiScent"
+              style={{ height: 44, width: "auto", objectFit: "contain" }}
+            />
           </button>
 
           {/* Desktop Nav */}

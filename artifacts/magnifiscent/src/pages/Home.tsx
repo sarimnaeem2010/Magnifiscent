@@ -324,7 +324,10 @@ export default function Home() {
       <section id="deals" className="py-10 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-end justify-between mb-6">
-            <h2 className="section-title mb-0">{headings.deals}</h2>
+            <div>
+              <h2 className="section-title mb-1">{headings.deals}</h2>
+              <p className="text-sm text-gray-400">{headings.dealsSubtitle}</p>
+            </div>
             <button onClick={() => navigate("/deals")} className="text-sm font-semibold text-gray-700 hover:text-black underline underline-offset-2 bg-transparent border-none cursor-pointer">
               View All
             </button>
@@ -348,8 +351,11 @@ export default function Home() {
       {/* ── Shop By Gender ── */}
       <section className="py-10 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="section-title text-center">{headings.shopByGender}</h2>
-          <div className="flex flex-col md:flex-row gap-4 mt-6">
+          <div className="text-center mb-6">
+            <h2 className="section-title mb-1">{headings.shopByGender}</h2>
+            <p className="text-sm text-gray-400">{headings.shopByGenderSubtitle}</p>
+          </div>
+          <div className="flex flex-col md:flex-row gap-4">
             <button
               onClick={() => navigate("/products?gender=men")}
               className="flex-1 group cursor-pointer border-none bg-transparent p-0 text-left"
@@ -389,8 +395,11 @@ export default function Home() {
       {/* ── All Products ── */}
       <section id="all-products" className="py-10 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-            <h2 className="section-title mb-0">{headings.allProducts}</h2>
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-6">
+            <div>
+              <h2 className="section-title mb-1">{headings.allProducts}</h2>
+              <p className="text-sm text-gray-400">{headings.allProductsSubtitle}</p>
+            </div>
             {/* Filter tabs */}
             <div className="flex items-center border border-gray-200">
               {(["all", "men", "women"] as const).map((f) => (
@@ -428,7 +437,10 @@ export default function Home() {
       {/* ── Shop By Notes ── */}
       <section className="py-10 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="section-title">{headings.shopByNotes}</h2>
+          <div className="mb-6">
+            <h2 className="section-title mb-1">{headings.shopByNotes}</h2>
+            <p className="text-sm text-gray-400">{headings.shopByNotesSubtitle}</p>
+          </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
             {NOTES.map((note) => {
               const customImg = notesImgs[note.label];
@@ -540,7 +552,10 @@ export default function Home() {
       {/* ── Buyer's Reviews ── */}
       <section className="py-10 border-b border-gray-100 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="section-title text-center">{headings.reviews}</h2>
+          <div className="text-center mb-4">
+            <h2 className="section-title mb-1">{headings.reviews}</h2>
+            <p className="text-sm text-gray-400">{headings.reviewsSubtitle}</p>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
             {REVIEWS.slice(0, 3).map((r, i) => (
               <div key={i} className="bg-white rounded p-6 shadow-sm">
@@ -559,7 +574,10 @@ export default function Home() {
       {/* ── Why Choose ── */}
       <section className="py-12 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="section-title text-center">{headings.whyChoose}</h2>
+          <div className="text-center mb-6">
+            <h2 className="section-title mb-1">{headings.whyChoose}</h2>
+            <p className="text-sm text-gray-400">{headings.whyChooseSubtitle}</p>
+          </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-6">
             {[
               { icon: "🚚", title: "Free Shipping", sub: "On orders above $100" },

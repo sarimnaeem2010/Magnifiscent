@@ -328,14 +328,20 @@ function NotesImagesManager() {
 
 /* ─── Headings Manager ─── */
 const HEADING_FIELDS: { key: keyof HomeHeadings; label: string; hint: string }[] = [
-  { key: "deals", label: "Deals & Combo section", hint: "Main heading for the deals section" },
-  { key: "shopByGender", label: "Shop By Gender section", hint: "Heading above the men/women banners" },
-  { key: "allProducts", label: "All Products section", hint: "Heading for the product grid" },
-  { key: "shopByNotes", label: "Shop By Notes section", hint: "Heading for the scent notes" },
-  { key: "instagramTitle", label: "Instagram section title", hint: "Bold heading above the reel cards" },
-  { key: "instagramSubtitle", label: "Instagram section subtitle", hint: "Smaller text below the title" },
-  { key: "reviews", label: "Reviews section", hint: "Heading for buyer reviews" },
-  { key: "whyChoose", label: "Why Choose section", hint: "Feature highlights heading" },
+  { key: "deals", label: "Deals & Combo — heading", hint: "Main heading for the deals section" },
+  { key: "dealsSubtitle", label: "Deals & Combo — subtext", hint: "Smaller text below the heading" },
+  { key: "shopByGender", label: "Shop By Gender — heading", hint: "Heading above the men/women banners" },
+  { key: "shopByGenderSubtitle", label: "Shop By Gender — subtext", hint: "Smaller text below the heading" },
+  { key: "allProducts", label: "All Products — heading", hint: "Heading for the product grid" },
+  { key: "allProductsSubtitle", label: "All Products — subtext", hint: "Smaller text below the heading" },
+  { key: "shopByNotes", label: "Shop By Notes — heading", hint: "Heading for the scent notes" },
+  { key: "shopByNotesSubtitle", label: "Shop By Notes — subtext", hint: "Smaller text below the heading" },
+  { key: "instagramTitle", label: "Instagram — heading", hint: "Bold heading above the reel cards" },
+  { key: "instagramSubtitle", label: "Instagram — subtext", hint: "Smaller italic text below the title" },
+  { key: "reviews", label: "Reviews — heading", hint: "Heading for buyer reviews" },
+  { key: "reviewsSubtitle", label: "Reviews — subtext", hint: "Smaller text below the heading" },
+  { key: "whyChoose", label: "Why Choose — heading", hint: "Feature highlights heading" },
+  { key: "whyChooseSubtitle", label: "Why Choose — subtext", hint: "Smaller text below the heading" },
 ];
 
 function HeadingsManager() {
