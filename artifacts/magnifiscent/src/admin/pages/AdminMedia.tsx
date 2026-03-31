@@ -9,12 +9,28 @@ import {
 
 const NOTE_LABELS = ["FLORAL", "FRESH", "WOODY", "MUSKY", "ORIENTAL", "AQUATIC"];
 
-function readFile(file: File): Promise<string> {
+function compressImage(file: File, maxW: number, maxH: number, quality = 0.75): Promise<string> {
   return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = (e) => resolve(e.target?.result as string);
-    r.onerror = reject;
-    r.readAsDataURL(file);
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onerror = reject;
+      img.onload = () => {
+        let { width, height } = img;
+        const ratio = Math.min(maxW / width, maxH / height, 1);
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.src = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
   });
 }
 
@@ -43,20 +59,29 @@ function SaveButton({ dirty, saved, onSave }: { dirty: boolean; saved: boolean; 
 /* ─── Upload Box ─── */
 function UploadBox({
   label, src, onUpload, onRemove, aspect = "16/5",
+  maxW = 1200, maxH = 800, quality = 0.75,
 }: {
   label: string; src: string; onUpload: (b64: string) => void;
   onRemove?: () => void; aspect?: string;
+  maxW?: number; maxH?: number; quality?: number;
 }) {
   const ref = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
   return (
     <div>
       <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{label}</p>
       <div
         className="relative rounded-xl overflow-hidden border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center cursor-pointer group hover:border-gray-400 transition-colors"
         style={{ aspectRatio: aspect }}
-        onClick={() => ref.current?.click()}
+        onClick={() => !uploading && ref.current?.click()}
       >
-        {src ? (
+        {uploading ? (
+          <div className="flex flex-col items-center gap-2 text-gray-400 p-4">
+            <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-700 rounded-full animate-spin" />
+            <p className="text-xs font-medium">Compressing…</p>
+          </div>
+        ) : src ? (
           <>
             <img src={src} alt={label} className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
@@ -77,7 +102,7 @@ function UploadBox({
           <div className="flex flex-col items-center gap-2 text-gray-400 p-4">
             <ImageIcon size={28} />
             <p className="text-xs font-medium">Click to upload image</p>
-            <p className="text-[10px]">PNG, JPG, WEBP</p>
+            <p className="text-[10px]">PNG, JPG, WEBP — auto-compressed</p>
           </div>
         )}
       </div>
@@ -85,7 +110,15 @@ function UploadBox({
         ref={ref} type="file" accept="image/*" className="hidden"
         onChange={async (e) => {
           const file = e.target.files?.[0];
-          if (file) { const b64 = await readFile(file); onUpload(b64); }
+          if (file) {
+            setUploading(true);
+            try {
+              const b64 = await compressImage(file, maxW, maxH, quality);
+              onUpload(b64);
+            } finally {
+              setUploading(false);
+            }
+          }
           e.target.value = "";
         }}
       />
@@ -178,6 +211,7 @@ function HeroSlidesManager() {
                 label={`Slide ${idx + 1}`}
                 src={slide.src}
                 aspect="16/5"
+                maxW={1920} maxH={700} quality={0.82}
                 onUpload={(b64) => updateSlide(slide.id, b64)}
                 onRemove={() => removeSlide(slide.id)}
               />
@@ -228,6 +262,7 @@ function GenderBannersManager() {
           label="Men's Banner"
           src={banners.men}
           aspect="4/3"
+          maxW={900} maxH={700} quality={0.78}
           onUpload={(b64) => update("men", b64)}
           onRemove={() => update("men", "")}
         />
@@ -235,6 +270,7 @@ function GenderBannersManager() {
           label="Women's Banner"
           src={banners.women}
           aspect="4/3"
+          maxW={900} maxH={700} quality={0.78}
           onUpload={(b64) => update("women", b64)}
           onRemove={() => update("women", "")}
         />
@@ -278,6 +314,7 @@ function NotesImagesManager() {
             label={label}
             src={imgs[label] || ""}
             aspect="1/1"
+            maxW={400} maxH={400} quality={0.72}
             onUpload={(b64) => update(label, b64)}
             onRemove={() => update(label, "")}
           />

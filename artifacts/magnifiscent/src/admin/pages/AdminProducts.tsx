@@ -16,12 +16,27 @@ type ProductForm = {
   img2: string;
 };
 
-function readFile(file: File): Promise<string> {
+function compressImage(file: File, maxW: number, maxH: number, quality = 0.78): Promise<string> {
   return new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = (e) => resolve(e.target?.result as string);
-    r.onerror = reject;
-    r.readAsDataURL(file);
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onerror = reject;
+      img.onload = () => {
+        let { width, height } = img;
+        const ratio = Math.min(maxW / width, maxH / height, 1);
+        width = Math.round(width * ratio);
+        height = Math.round(height * ratio);
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d")!.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.src = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
   });
 }
 
@@ -52,7 +67,7 @@ function ImgUploadCell({ src, label, onChange }: { src: string; label: string; o
       <input ref={ref} type="file" accept="image/*" className="hidden"
         onChange={async (e) => {
           const file = e.target.files?.[0];
-          if (file) { const b64 = await readFile(file); onChange(b64); }
+          if (file) { const b64 = await compressImage(file, 600, 800, 0.80); onChange(b64); }
           e.target.value = "";
         }}
       />
