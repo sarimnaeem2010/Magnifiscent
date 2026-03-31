@@ -251,9 +251,52 @@ function extractReelShortcode(url: string): string | null {
   return m ? m[1] : null;
 }
 
+/* ─── Reel Lightbox Modal ─── */
+function ReelModal({ shortcode, onClose }: { shortcode: string; onClose: () => void }) {
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) { if (e.key === "Escape") onClose(); }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-[999] flex items-center justify-center"
+      style={{ background: "rgba(0,0,0,0.85)" }}
+      onClick={onClose}
+    >
+      <div
+        className="relative rounded-2xl overflow-hidden shadow-2xl"
+        style={{ width: 400, maxWidth: "95vw", height: 710, maxHeight: "92vh" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 z-10 flex items-center justify-center rounded-full border-none cursor-pointer"
+          style={{ width: 32, height: 32, background: "rgba(0,0,0,0.6)", color: "#fff" }}
+          aria-label="Close"
+        >
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M1 1L13 13M13 1L1 13" stroke="white" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+        </button>
+        <iframe
+          src={`https://www.instagram.com/reel/${shortcode}/embed/`}
+          width="400"
+          height="710"
+          style={{ border: "none", display: "block", width: "100%", height: "100%" }}
+          allowFullScreen
+          title="Instagram Reel"
+        />
+      </div>
+    </div>
+  );
+}
+
 /* ─── Main Page ─── */
 export default function Home() {
   const [productFilter, setProductFilter] = useState<"all" | "men" | "women">("all");
+  const [activeReel, setActiveReel] = useState<string | null>(null);
   const [, navigate] = useLocation();
   const genderBanners = getGenderBanners();
   const notesImgs = getNotesImages();
@@ -419,6 +462,9 @@ export default function Home() {
       </section>
 
       {/* ── Instagram Posts ── */}
+      {activeReel && (
+        <ReelModal shortcode={activeReel} onClose={() => setActiveReel(null)} />
+      )}
       <section className="py-10 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-6">
@@ -431,72 +477,48 @@ export default function Home() {
           >
             {instaPosts.map((post, i) => {
               const shortcode = extractReelShortcode(post.url);
+              const handleClick = () => {
+                if (shortcode) {
+                  setActiveReel(shortcode);
+                } else {
+                  window.open(post.url || "https://instagram.com", "_blank", "noopener,noreferrer");
+                }
+              };
               return (
-                <a
+                <button
                   key={i}
-                  href={post.url || "https://instagram.com"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="relative group flex-shrink-0 overflow-hidden rounded-xl block bg-gray-900"
+                  onClick={handleClick}
+                  className="relative group flex-shrink-0 overflow-hidden rounded-xl bg-gray-900 p-0 border-none cursor-pointer"
                   style={{ width: 160, height: 260, scrollSnapAlign: "start" }}
                 >
-                  {/* Thumbnail: embedded reel OR static product image */}
-                  {shortcode ? (
-                    <div
-                      className="absolute inset-0 overflow-hidden"
-                      style={{ pointerEvents: "none" }}
+                  <img
+                    src={post.img}
+                    alt={post.label}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div
+                    className="absolute inset-0 pointer-events-none"
+                    style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.1) 45%, rgba(0,0,0,0.55) 100%)" }}
+                  />
+                  <div className="absolute top-0 left-0 right-0 px-3 pt-3 pointer-events-none">
+                    <p
+                      className="text-white leading-tight uppercase"
+                      style={{ fontSize: 18, fontWeight: 900, fontFamily: "Impact, Arial Black, sans-serif", letterSpacing: 0.5, lineHeight: 1.1, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}
                     >
-                      <iframe
-                        src={`https://www.instagram.com/reel/${shortcode}/embed/`}
-                        style={{
-                          width: 320,
-                          height: 600,
-                          transform: "scale(0.5)",
-                          transformOrigin: "top left",
-                          border: "none",
-                          display: "block",
-                          marginTop: -4,
-                        }}
-                        scrolling="no"
-                        allowFullScreen
-                        title={post.label}
-                      />
+                      {post.label}
+                    </p>
+                  </div>
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div
+                      className="flex items-center justify-center rounded-full transition-transform group-hover:scale-110"
+                      style={{ width: 44, height: 44, background: "rgba(255,255,255,0.22)", backdropFilter: "blur(4px)", border: "2px solid rgba(255,255,255,0.55)" }}
+                    >
+                      <svg width="16" height="18" viewBox="0 0 16 18" fill="none">
+                        <path d="M2 1.5L14 9L2 16.5V1.5Z" fill="white" />
+                      </svg>
                     </div>
-                  ) : (
-                    <img
-                      src={post.img}
-                      alt={post.label}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  )}
-                  {/* Overlays — only for static image cards */}
-                  {!shortcode && (
-                    <>
-                      <div
-                        className="absolute inset-0 pointer-events-none"
-                        style={{ background: "linear-gradient(180deg, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.1) 45%, rgba(0,0,0,0.55) 100%)" }}
-                      />
-                      <div className="absolute top-0 left-0 right-0 px-3 pt-3 pointer-events-none">
-                        <p
-                          className="text-white leading-tight uppercase"
-                          style={{ fontSize: 18, fontWeight: 900, fontFamily: "Impact, Arial Black, sans-serif", letterSpacing: 0.5, lineHeight: 1.1, textShadow: "0 1px 4px rgba(0,0,0,0.8)" }}
-                        >
-                          {post.label}
-                        </p>
-                      </div>
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div
-                          className="flex items-center justify-center rounded-full transition-transform group-hover:scale-110"
-                          style={{ width: 44, height: 44, background: "rgba(255,255,255,0.22)", backdropFilter: "blur(4px)", border: "2px solid rgba(255,255,255,0.55)" }}
-                        >
-                          <svg width="16" height="18" viewBox="0 0 16 18" fill="none">
-                            <path d="M2 1.5L14 9L2 16.5V1.5Z" fill="white" />
-                          </svg>
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </a>
+                  </div>
+                </button>
               );
             })}
           </div>
