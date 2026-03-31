@@ -1,0 +1,50 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "0Q1kWf_tNJN-U065jUMR9"
+uri = "file://artifacts/magnifiscent/public/hero-bg.png"
+type = "image"
+title = "Hero background image"
+
+[[generated]]
+id = "X7ejuapgY6Y3D_OCmJ038"
+uri = "file://artifacts/magnifiscent/public/men-banner.png"
+type = "image"
+title = "Men category banner"
+
+[[generated]]
+id = "8lvL9CFPeEILEDj6EmkJ5"
+uri = "file://artifacts/magnifiscent/public/women-banner.png"
+type = "image"
+title = "Women category banner"
+
+[[generated]]
+id = "LkJocSys4N8lqggCkXpW2"
+uri = "file://artifacts/magnifiscent/public/noir-product.png"
+type = "image"
+title = "NOIR product"
+
+[[generated]]
+id = "7APXnlenrmiofUyjL7gMJ"
+uri = "file://artifacts/magnifiscent/public/storm-product.png"
+type = "image"
+title = "STORM product"
+
+[[generated]]
+id = "ocy_O86a3ql_AKrfRg61s"
+uri = "file://artifacts/magnifiscent/public/story-bg.png"
+type = "image"
+title = "Brand Story background"
+
+[[generated]]
+id = "fFaX2C19aKwzFK-2xN34f"
+uri = "file://artifacts/magnifiscent/public/men-split.png"
+type = "image"
+title = "Men split panel"
+
+[[generated]]
+id = "VJpx1siOhs0njJpxjUEpm"
+uri = "file://artifacts/magnifiscent/public/women-split.png"
+type = "image"
+title = "Women split panel"
