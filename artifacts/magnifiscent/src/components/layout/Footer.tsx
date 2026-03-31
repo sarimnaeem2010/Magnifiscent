@@ -1,72 +1,82 @@
 import React from "react";
-import { Link } from "wouter";
-import { Facebook, Instagram } from "lucide-react";
-import { SiTiktok } from "react-icons/si";
+import { Instagram, Facebook } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="bg-[#0a0f18] text-white pt-24 pb-12 border-t border-white/10">
-      <div className="container mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-          <div className="col-span-1 md:col-span-2">
-            <Link href="/" className="flex flex-col items-start gap-2 mb-6">
-              <svg
-                width="32"
-                height="32"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#D4AF37"
-                strokeWidth="1.5"
-              >
-                <path d="M2 20h20M4 20V9l4 4 4-8 4 8 4-4v11" />
+    <footer className="bg-[#1a1a1a] text-white pt-16 pb-8">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+          {/* Brand */}
+          <div className="md:col-span-1">
+            <div className="flex items-center gap-2 mb-4">
+              <svg width="20" height="16" viewBox="0 0 22 18" fill="none">
+                <path d="M11 2L13.5 7H8.5L11 2Z" fill="white"/>
+                <path d="M1 16L3.5 6L7 11L11 1L15 11L18.5 6L21 16H1Z" stroke="white" strokeWidth="1.5" fill="none" strokeLinejoin="round"/>
               </svg>
-              <span className="font-serif text-3xl tracking-widest">
+              <span style={{ fontFamily: 'Georgia, serif', fontSize: 18, fontWeight: 700, letterSpacing: '0.08em' }}>
                 MagnifiScent
               </span>
-            </Link>
-            <p className="text-white/60 font-serif italic text-lg mb-8 max-w-sm">
-              "Wear Your Story"
+            </div>
+            <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+              Premium Eau de Parfum — crafted for those who wear their story.
             </p>
-            <div className="flex items-center gap-4">
-              <a href="#" className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-[#D4AF37] hover:border-[#D4AF37] hover:text-black transition-all">
-                <Instagram size={18} />
+            <div className="flex gap-3">
+              <a href="#" className="w-9 h-9 rounded-full border border-gray-600 flex items-center justify-center hover:border-white hover:bg-white hover:text-black transition-all">
+                <Instagram size={16} />
               </a>
-              <a href="#" className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-[#D4AF37] hover:border-[#D4AF37] hover:text-black transition-all">
-                <Facebook size={18} />
+              <a href="#" className="w-9 h-9 rounded-full border border-gray-600 flex items-center justify-center hover:border-white hover:bg-white hover:text-black transition-all">
+                <Facebook size={16} />
               </a>
-              <a href="#" className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center hover:bg-[#D4AF37] hover:border-[#D4AF37] hover:text-black transition-all">
-                <SiTiktok size={18} />
+              <a href="#" className="w-9 h-9 rounded-full border border-gray-600 flex items-center justify-center hover:border-white hover:bg-white hover:text-black transition-all text-xs font-bold">
+                TK
               </a>
             </div>
           </div>
 
+          {/* Collections */}
           <div>
-            <h4 className="font-serif text-xl mb-6 text-[#D4AF37]">Explore</h4>
-            <ul className="flex flex-col gap-4 text-white/70">
-              <li><a href="#collections" className="hover:text-white transition-colors">Collections</a></li>
-              <li><a href="#men" className="hover:text-white transition-colors">Men's Fragrances</a></li>
-              <li><a href="#women" className="hover:text-white transition-colors">Women's Fragrances</a></li>
-              <li><a href="#about" className="hover:text-white transition-colors">About Us</a></li>
+            <h4 className="text-sm font-bold uppercase tracking-widest mb-5 text-gray-300">Collections</h4>
+            <ul className="space-y-3">
+              {["Men's Perfumes", "Women's Perfumes", "Best Sellers", "New Arrivals", "Deal & Combo"].map((l) => (
+                <li key={l}>
+                  <a href="#" className="text-gray-400 text-sm hover:text-white transition-colors" style={{ textDecoration: "none" }}>{l}</a>
+                </li>
+              ))}
             </ul>
           </div>
 
+          {/* Info */}
           <div>
-            <h4 className="font-serif text-xl mb-6 text-[#D4AF37]">Support</h4>
-            <ul className="flex flex-col gap-4 text-white/70">
-              <li><a href="#contact" className="hover:text-white transition-colors">Contact</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Returns Policy</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">Shipping Info</a></li>
-              <li><a href="#" className="hover:text-white transition-colors">FAQ</a></li>
+            <h4 className="text-sm font-bold uppercase tracking-widest mb-5 text-gray-300">Information</h4>
+            <ul className="space-y-3">
+              {["About Us", "Contact Us", "Returns Policy", "Shipping Info", "Privacy Policy", "Terms of Service"].map((l) => (
+                <li key={l}>
+                  <a href="#" className="text-gray-400 text-sm hover:text-white transition-colors" style={{ textDecoration: "none" }}>{l}</a>
+                </li>
+              ))}
             </ul>
+          </div>
+
+          {/* Newsletter */}
+          <div>
+            <h4 className="text-sm font-bold uppercase tracking-widest mb-5 text-gray-300">Newsletter</h4>
+            <p className="text-gray-400 text-sm mb-4">Subscribe for exclusive offers and new launches.</p>
+            <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-2">
+              <input
+                type="email"
+                placeholder="Your email address"
+                className="bg-transparent border border-gray-600 text-white placeholder-gray-500 px-3 py-2 text-sm focus:outline-none focus:border-white transition-colors"
+              />
+              <button type="submit" className="bg-white text-black text-sm font-bold uppercase tracking-widest py-2 hover:bg-gray-200 transition-colors">
+                Subscribe
+              </button>
+            </form>
           </div>
         </div>
 
-        <div className="pt-8 border-t border-white/10 text-center md:text-left text-white/50 text-sm flex flex-col md:flex-row justify-between items-center gap-4">
-          <p>&copy; 2024 MagnifiScent. All rights reserved.</p>
-          <div className="flex gap-4">
-            <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
-          </div>
+        <div className="border-t border-gray-700 pt-6 flex flex-col md:flex-row justify-between items-center gap-3 text-gray-500 text-xs">
+          <p>&copy; {new Date().getFullYear()} MagnifiScent. All rights reserved.</p>
+          <p>Eau de Parfum • 100ml • 3.4 Fl.oz</p>
         </div>
       </div>
     </footer>
