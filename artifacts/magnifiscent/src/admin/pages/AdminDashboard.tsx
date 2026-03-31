@@ -1,9 +1,7 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useRef, useState, useLayoutEffect } from "react";
 import { useAdmin } from "../AdminContext";
 import { ShoppingBag, DollarSign, Clock, Package } from "lucide-react";
-import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-} from "recharts";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 
 function StatCard({ label, value, sub, icon: Icon, color }: {
   label: string; value: string; sub: string; icon: React.ElementType; color: string;
@@ -19,6 +17,36 @@ function StatCard({ label, value, sub, icon: Icon, color }: {
         <div className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: color }}>
           <Icon size={20} className="text-white" />
         </div>
+      </div>
+    </div>
+  );
+}
+
+function ChartContainer({ chartData }: { chartData: { date: string; revenue: number }[] }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(600);
+
+  useLayoutEffect(() => {
+    if (ref.current) setWidth(ref.current.offsetWidth);
+  }, []);
+
+  return (
+    <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+      <h2 className="text-sm font-semibold text-gray-700 mb-4">Revenue — Last 7 Days</h2>
+      <div ref={ref} style={{ width: "100%", overflowX: "auto" }}>
+        <AreaChart width={width} height={200} data={chartData} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
+          <defs>
+            <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="#111827" stopOpacity={0.15} />
+              <stop offset="95%" stopColor="#111827" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+          <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
+          <YAxis tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${v}`} />
+          <Tooltip formatter={(v: number) => [`$${v}`, "Revenue"]} contentStyle={{ fontSize: 12 }} />
+          <Area type="monotone" dataKey="revenue" stroke="#111827" strokeWidth={2} fill="url(#revGrad)" />
+        </AreaChart>
       </div>
     </div>
   );
@@ -71,24 +99,7 @@ export function AdminDashboard() {
       </div>
 
       {/* Chart */}
-      <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-        <h2 className="text-sm font-semibold text-gray-700 mb-4">Revenue — Last 7 Days</h2>
-        <ResponsiveContainer width="100%" height={200}>
-          <AreaChart data={chartData} margin={{ top: 4, right: 8, bottom: 0, left: 0 }}>
-            <defs>
-              <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#111827" stopOpacity={0.15} />
-                <stop offset="95%" stopColor="#111827" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-            <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${v}`} />
-            <Tooltip formatter={(v: number) => [`$${v}`, "Revenue"]} contentStyle={{ fontSize: 12 }} />
-            <Area type="monotone" dataKey="revenue" stroke="#111827" strokeWidth={2} fill="url(#revGrad)" />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
+      <ChartContainer chartData={chartData} />
 
       {/* Recent Orders */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
