@@ -1,10 +1,10 @@
 import React, { useState, useRef } from "react";
-import { Upload, Trash2, Plus, ImageIcon, ChevronUp, ChevronDown } from "lucide-react";
+import { Trash2, Plus, ImageIcon, ChevronUp, ChevronDown, Save, CheckCircle2 } from "lucide-react";
 import {
   getHeroSlides, saveHeroSlides,
   getGenderBanners, saveGenderBanners,
   getNotesImages, saveNotesImages,
-  type HeroSlide,
+  type HeroSlide, type GenderBanners, type NotesImages,
 } from "@/data/liveData";
 
 const NOTE_LABELS = ["FLORAL", "FRESH", "WOODY", "MUSKY", "ORIENTAL", "AQUATIC"];
@@ -18,6 +18,29 @@ function readFile(file: File): Promise<string> {
   });
 }
 
+/* ─── Shared Save Button ─── */
+function SaveButton({ dirty, saved, onSave }: { dirty: boolean; saved: boolean; onSave: () => void }) {
+  return (
+    <button
+      onClick={onSave}
+      disabled={!dirty && !saved}
+      className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold rounded-lg border-none cursor-pointer transition-all"
+      style={{
+        background: saved ? "#16a34a" : dirty ? "#111827" : "#e5e7eb",
+        color: saved || dirty ? "#fff" : "#9ca3af",
+        cursor: dirty ? "pointer" : "default",
+      }}
+    >
+      {saved ? (
+        <><CheckCircle2 size={13} /> Saved!</>
+      ) : (
+        <><Save size={13} /> Save Changes</>
+      )}
+    </button>
+  );
+}
+
+/* ─── Upload Box ─── */
 function UploadBox({
   label, src, onUpload, onRemove, aspect = "16/5",
 }: {
@@ -73,32 +96,35 @@ function UploadBox({
 /* ─── Hero Slides Manager ─── */
 function HeroSlidesManager() {
   const [slides, setSlides] = useState<HeroSlide[]>(() => getHeroSlides());
+  const [dirty, setDirty] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  const save = (updated: HeroSlide[]) => {
+  const mutate = (updated: HeroSlide[]) => {
     setSlides(updated);
-    saveHeroSlides(updated);
+    setDirty(true);
+    setSaved(false);
+  };
+
+  const handleSave = () => {
+    saveHeroSlides(slides);
+    setDirty(false);
     setSaved(true);
-    setTimeout(() => setSaved(false), 1800);
+    setTimeout(() => setSaved(false), 2000);
   };
 
-  const addSlide = () => {
-    save([...slides, { id: Date.now().toString(), src: "", alt: "Hero Banner" }]);
-  };
-
-  const removeSlide = (id: string) => save(slides.filter((s) => s.id !== id));
+  const addSlide = () => mutate([...slides, { id: Date.now().toString(), src: "", alt: "Hero Banner" }]);
+  const removeSlide = (id: string) => mutate(slides.filter((s) => s.id !== id));
 
   const moveSlide = (idx: number, dir: -1 | 1) => {
     const arr = [...slides];
     const swap = idx + dir;
     if (swap < 0 || swap >= arr.length) return;
     [arr[idx], arr[swap]] = [arr[swap], arr[idx]];
-    save(arr);
+    mutate(arr);
   };
 
-  const updateSlide = (id: string, src: string) => {
-    save(slides.map((s) => (s.id === id ? { ...s, src } : s)));
-  };
+  const updateSlide = (id: string, src: string) =>
+    mutate(slides.map((s) => (s.id === id ? { ...s, src } : s)));
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
@@ -108,14 +134,14 @@ function HeroSlidesManager() {
           <p className="text-xs text-gray-400 mt-0.5">One image = static banner. Multiple images = auto-rotating slider.</p>
         </div>
         <div className="flex items-center gap-2">
-          {saved && <span className="text-xs text-green-600 font-medium">Saved!</span>}
           <button
             onClick={addSlide}
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white rounded-lg border-none cursor-pointer"
-            style={{ background: "#111827" }}
+            style={{ background: "#6b7280" }}
           >
             <Plus size={14} /> Add Slide
           </button>
+          <SaveButton dirty={dirty} saved={saved} onSave={handleSave} />
         </div>
       </div>
 
@@ -123,7 +149,7 @@ function HeroSlidesManager() {
         <div className="text-center py-8 text-gray-400">
           <ImageIcon size={32} className="mx-auto mb-2 opacity-40" />
           <p className="text-sm">No slides yet. Click "Add Slide" to upload your first banner.</p>
-          <p className="text-xs mt-1 text-gray-400">If no slides are added, the default static banner will show.</p>
+          <p className="text-xs mt-1">If no slides are added, the default static banner will show.</p>
         </div>
       )}
 
@@ -171,15 +197,21 @@ function HeroSlidesManager() {
 
 /* ─── Gender Banners Manager ─── */
 function GenderBannersManager() {
-  const [banners, setBanners] = useState(() => getGenderBanners());
+  const [banners, setBanners] = useState<GenderBanners>(() => getGenderBanners());
+  const [dirty, setDirty] = useState(false);
   const [saved, setSaved] = useState(false);
 
   const update = (key: "men" | "women", src: string) => {
-    const updated = { ...banners, [key]: src };
-    setBanners(updated);
-    saveGenderBanners(updated);
+    setBanners((prev) => ({ ...prev, [key]: src }));
+    setDirty(true);
+    setSaved(false);
+  };
+
+  const handleSave = () => {
+    saveGenderBanners(banners);
+    setDirty(false);
     setSaved(true);
-    setTimeout(() => setSaved(false), 1800);
+    setTimeout(() => setSaved(false), 2000);
   };
 
   return (
@@ -189,7 +221,7 @@ function GenderBannersManager() {
           <h2 className="text-sm font-semibold text-gray-700">Shop By Gender Banners</h2>
           <p className="text-xs text-gray-400 mt-0.5">Upload banner images for Men and Women sections on the homepage.</p>
         </div>
-        {saved && <span className="text-xs text-green-600 font-medium">Saved!</span>}
+        <SaveButton dirty={dirty} saved={saved} onSave={handleSave} />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <UploadBox
@@ -213,15 +245,21 @@ function GenderBannersManager() {
 
 /* ─── Notes Images Manager ─── */
 function NotesImagesManager() {
-  const [imgs, setImgs] = useState(() => getNotesImages());
+  const [imgs, setImgs] = useState<NotesImages>(() => getNotesImages());
+  const [dirty, setDirty] = useState(false);
   const [saved, setSaved] = useState(false);
 
   const update = (label: string, src: string) => {
-    const updated = { ...imgs, [label]: src };
-    setImgs(updated);
-    saveNotesImages(updated);
+    setImgs((prev) => ({ ...prev, [label]: src }));
+    setDirty(true);
+    setSaved(false);
+  };
+
+  const handleSave = () => {
+    saveNotesImages(imgs);
+    setDirty(false);
     setSaved(true);
-    setTimeout(() => setSaved(false), 1800);
+    setTimeout(() => setSaved(false), 2000);
   };
 
   return (
@@ -231,7 +269,7 @@ function NotesImagesManager() {
           <h2 className="text-sm font-semibold text-gray-700">Shop By Notes Images</h2>
           <p className="text-xs text-gray-400 mt-0.5">Upload images for each scent note category. Falls back to color gradient if no image.</p>
         </div>
-        {saved && <span className="text-xs text-green-600 font-medium">Saved!</span>}
+        <SaveButton dirty={dirty} saved={saved} onSave={handleSave} />
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
         {NOTE_LABELS.map((label) => (
