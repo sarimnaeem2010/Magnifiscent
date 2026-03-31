@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useAdmin } from "../AdminContext";
 import type { StoreSettings } from "../AdminContext";
 import { Check, Eye, EyeOff } from "lucide-react";
+import { getPaymentSettings, savePaymentSettings, type PaymentSettings } from "@/data/liveData";
 
 function Field({ label, value, onChange, type = "text", placeholder = "" }: {
   label: string; value: string | number; onChange: (v: string) => void;
@@ -21,6 +22,27 @@ function Field({ label, value, onChange, type = "text", placeholder = "" }: {
   );
 }
 
+function Toggle({ enabled, onToggle, label, desc }: { enabled: boolean; onToggle: () => void; label: string; desc: string }) {
+  return (
+    <div className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
+      <div>
+        <p className="text-sm font-semibold text-gray-800">{label}</p>
+        <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
+      </div>
+      <button
+        onClick={onToggle}
+        className="relative inline-flex h-6 w-11 items-center rounded-full transition-colors border-none cursor-pointer flex-shrink-0"
+        style={{ background: enabled ? "#111827" : "#d1d5db" }}
+      >
+        <span
+          className="inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow"
+          style={{ transform: enabled ? "translateX(24px)" : "translateX(3px)" }}
+        />
+      </button>
+    </div>
+  );
+}
+
 export function AdminSettings() {
   const { settings, setSettings, logout } = useAdmin();
   const [form, setForm] = useState<StoreSettings>({ ...settings });
@@ -28,6 +50,8 @@ export function AdminSettings() {
   const [showPw, setShowPw] = useState(false);
   const [confirmPw, setConfirmPw] = useState("");
   const [pwError, setPwError] = useState("");
+  const [payment, setPayment] = useState<PaymentSettings>(() => getPaymentSettings());
+  const [paymentSaved, setPaymentSaved] = useState(false);
 
   const update = (field: keyof StoreSettings) => (val: string) => {
     setForm((f) => ({ ...f, [field]: field === "freeShippingThreshold" ? parseFloat(val) || 0 : val }));
@@ -48,6 +72,15 @@ export function AdminSettings() {
     setSettings(form);
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
+  };
+
+  const togglePayment = (key: keyof PaymentSettings) => {
+    const next = { ...payment, [key]: !payment[key] };
+    if (!next.cod && !next.card) return;
+    setPayment(next);
+    savePaymentSettings(next);
+    setPaymentSaved(true);
+    setTimeout(() => setPaymentSaved(false), 2000);
   };
 
   const handleReset = () => {
@@ -116,6 +149,31 @@ export function AdminSettings() {
           </div>
         )}
         {pwError && <p className="text-red-500 text-xs">{pwError}</p>}
+      </div>
+
+      {/* Payment Methods */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+        <div className="flex items-center justify-between pb-2 border-b border-gray-100 mb-1">
+          <div>
+            <h2 className="text-sm font-semibold text-gray-700">Payment Methods</h2>
+            <p className="text-xs text-gray-400 mt-0.5">Enable or disable payment options at checkout. At least one must stay on.</p>
+          </div>
+          {paymentSaved && (
+            <span className="text-xs font-bold text-green-600">✓ Saved</span>
+          )}
+        </div>
+        <Toggle
+          label="Cash on Delivery (COD)"
+          desc="Customer pays when the order is delivered"
+          enabled={payment.cod}
+          onToggle={() => togglePayment("cod")}
+        />
+        <Toggle
+          label="Card Payment"
+          desc="Customer pays with credit / debit card at checkout"
+          enabled={payment.card}
+          onToggle={() => togglePayment("card")}
+        />
       </div>
 
       {/* Actions */}

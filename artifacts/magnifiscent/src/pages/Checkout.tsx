@@ -1,14 +1,22 @@
 import React, { useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { ChevronRight, Shield, Lock } from "lucide-react";
+import { ChevronRight, Shield, Lock, Truck } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useLocation } from "wouter";
+import { getPaymentSettings } from "@/data/liveData";
 
 export default function Checkout() {
   const { items, total, clearCart } = useCart();
   const [, navigate] = useLocation();
   const [step, setStep] = useState<"form" | "success">("form");
+  const paymentSettings = getPaymentSettings();
+
+  const availableMethods: ("card" | "cod")[] = [];
+  if (paymentSettings.card) availableMethods.push("card");
+  if (paymentSettings.cod) availableMethods.push("cod");
+
+  const [payMethod, setPayMethod] = useState<"card" | "cod">(availableMethods[0] ?? "cod");
 
   const shipping = total >= 100 ? 0 : 9.99;
   const orderTotal = total + shipping;
@@ -43,6 +51,9 @@ export default function Checkout() {
           <p className="text-gray-600 text-sm leading-relaxed mb-2">
             Thank you for your order. A confirmation email has been sent to {form.email}.
           </p>
+          {payMethod === "cod" && (
+            <p className="text-gray-500 text-xs mb-2 font-medium">Payment will be collected upon delivery.</p>
+          )}
           <p className="text-gray-400 text-xs mb-8">
             Your order will be processed and dispatched within 1-2 business days.
           </p>
@@ -188,76 +199,111 @@ export default function Checkout() {
               {/* Payment */}
               <div>
                 <h2 className="font-bold text-sm uppercase tracking-widest text-gray-900 mb-5 pb-3 border-b border-gray-100">
-                  Payment Details
+                  Payment Method
                 </h2>
-                <div className="bg-gray-50 border border-gray-100 p-4 mb-4 flex items-center gap-2">
-                  <Lock size={14} className="text-gray-500" />
-                  <p className="text-xs text-gray-500">Your payment information is secure and encrypted</p>
-                </div>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Name on Card *</label>
-                    <input
-                      type="text"
-                      required
-                      value={form.cardName}
-                      onChange={(e) => handleInput("cardName", e.target.value)}
-                      className="w-full border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:border-gray-400 transition-colors"
-                      placeholder="John Smith"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Card Number *</label>
-                    <input
-                      type="text"
-                      required
-                      maxLength={19}
-                      value={form.cardNumber}
-                      onChange={(e) => {
-                        const v = e.target.value.replace(/\D/g, "").slice(0, 16);
-                        handleInput("cardNumber", v.replace(/(.{4})/g, "$1 ").trim());
-                      }}
-                      className="w-full border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:border-gray-400 transition-colors font-mono"
-                      placeholder="1234 5678 9012 3456"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Expiry *</label>
-                      <input
-                        type="text"
-                        required
-                        value={form.cardExpiry}
-                        onChange={(e) => {
-                          let v = e.target.value.replace(/\D/g, "").slice(0, 4);
-                          if (v.length > 2) v = v.slice(0, 2) + "/" + v.slice(2);
-                          handleInput("cardExpiry", v);
+
+                {/* Method tabs */}
+                {availableMethods.length > 1 && (
+                  <div className="flex gap-0 mb-5 border border-gray-200 overflow-hidden">
+                    {availableMethods.map((m) => (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => setPayMethod(m)}
+                        className="flex-1 px-4 py-3 text-xs font-bold uppercase tracking-widest transition-colors border-none cursor-pointer"
+                        style={{
+                          background: payMethod === m ? "#111827" : "#fff",
+                          color: payMethod === m ? "#fff" : "#6b7280",
                         }}
-                        className="w-full border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:border-gray-400 transition-colors"
-                        placeholder="MM/YY"
-                      />
+                      >
+                        {m === "card" ? "💳  Card" : "🚚  Cash on Delivery"}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {payMethod === "card" ? (
+                  <>
+                    <div className="bg-gray-50 border border-gray-100 p-4 mb-4 flex items-center gap-2">
+                      <Lock size={14} className="text-gray-500" />
+                      <p className="text-xs text-gray-500">Your payment information is secure and encrypted</p>
                     </div>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Name on Card *</label>
+                        <input
+                          type="text"
+                          required={payMethod === "card"}
+                          value={form.cardName}
+                          onChange={(e) => handleInput("cardName", e.target.value)}
+                          className="w-full border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:border-gray-400 transition-colors"
+                          placeholder="John Smith"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Card Number *</label>
+                        <input
+                          type="text"
+                          required={payMethod === "card"}
+                          maxLength={19}
+                          value={form.cardNumber}
+                          onChange={(e) => {
+                            const v = e.target.value.replace(/\D/g, "").slice(0, 16);
+                            handleInput("cardNumber", v.replace(/(.{4})/g, "$1 ").trim());
+                          }}
+                          className="w-full border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:border-gray-400 transition-colors font-mono"
+                          placeholder="1234 5678 9012 3456"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">Expiry *</label>
+                          <input
+                            type="text"
+                            required={payMethod === "card"}
+                            value={form.cardExpiry}
+                            onChange={(e) => {
+                              let v = e.target.value.replace(/\D/g, "").slice(0, 4);
+                              if (v.length > 2) v = v.slice(0, 2) + "/" + v.slice(2);
+                              handleInput("cardExpiry", v);
+                            }}
+                            className="w-full border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:border-gray-400 transition-colors"
+                            placeholder="MM/YY"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">CVV *</label>
+                          <input
+                            type="text"
+                            required={payMethod === "card"}
+                            maxLength={4}
+                            value={form.cardCvv}
+                            onChange={(e) => handleInput("cardCvv", e.target.value.replace(/\D/g, "").slice(0, 4))}
+                            className="w-full border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:border-gray-400 transition-colors"
+                            placeholder="123"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="bg-gray-50 border border-gray-100 p-5 flex items-start gap-3">
+                    <Truck size={20} className="text-gray-500 mt-0.5 flex-shrink-0" />
                     <div>
-                      <label className="block text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">CVV *</label>
-                      <input
-                        type="text"
-                        required
-                        maxLength={4}
-                        value={form.cardCvv}
-                        onChange={(e) => handleInput("cardCvv", e.target.value.replace(/\D/g, "").slice(0, 4))}
-                        className="w-full border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:border-gray-400 transition-colors"
-                        placeholder="123"
-                      />
+                      <p className="text-sm font-bold text-gray-800">Pay when your order arrives</p>
+                      <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                        No payment is required now. Our delivery agent will collect the full amount at your door when your order is delivered.
+                      </p>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
 
               <button
                 type="submit"
                 className="w-full bg-black text-white font-bold uppercase tracking-widest text-sm py-4 hover:bg-gray-800 transition-colors border-none cursor-pointer"
               >
-                Place Order — ${orderTotal.toFixed(2)}
+                {payMethod === "cod" ? `Place Order (COD) — $${orderTotal.toFixed(2)}` : `Pay Now — $${orderTotal.toFixed(2)}`}
               </button>
 
               <div className="flex items-center justify-center gap-2 text-xs text-gray-400">

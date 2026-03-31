@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { useAdmin } from "./AdminContext";
 import {
   LayoutDashboard, Package, ShoppingBag, Users, Warehouse,
-  Tag, Settings, LogOut, Menu, X, Crown, Image,
+  Tag, Settings, LogOut, Menu, X, Crown, Image, Instagram,
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -14,6 +14,7 @@ const NAV_ITEMS = [
   { label: "Inventory", icon: Warehouse, path: "/admin/inventory" },
   { label: "Deals", icon: Tag, path: "/admin/deals" },
   { label: "Media", icon: Image, path: "/admin/media" },
+  { label: "Instagram", icon: Instagram, path: "/admin/instagram" },
   { label: "Settings", icon: Settings, path: "/admin/settings" },
 ];
 

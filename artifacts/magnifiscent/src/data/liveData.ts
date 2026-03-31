@@ -117,6 +117,70 @@ export function getAdminDeal(id: string): AdminDealEntry | null {
   }
 }
 
+/* ─── Instagram Reels ─── */
+export type InstagramReel = {
+  id: string;
+  url: string;
+  img: string;
+  label: string;
+  likes: number;
+};
+export function getInstagramReels(): InstagramReel[] {
+  try {
+    const s = localStorage.getItem("admin_instagram_reels");
+    if (s) return JSON.parse(s);
+  } catch {}
+  return [];
+}
+export function saveInstagramReels(reels: InstagramReel[]): void {
+  localStorage.setItem("admin_instagram_reels", JSON.stringify(reels));
+}
+
+/* ─── Home Headings ─── */
+export type HomeHeadings = {
+  deals: string;
+  shopByGender: string;
+  allProducts: string;
+  shopByNotes: string;
+  instagramTitle: string;
+  instagramSubtitle: string;
+  reviews: string;
+  whyChoose: string;
+};
+export const DEFAULT_HOME_HEADINGS: HomeHeadings = {
+  deals: "Deals & Combo",
+  shopByGender: "Shop By Gender",
+  allProducts: "All Products",
+  shopByNotes: "Shop By Notes",
+  instagramTitle: "Scent That Spreads",
+  instagramSubtitle: "Everyone's favourite MagnifiScent Fragrances",
+  reviews: "Buyer's Reviews",
+  whyChoose: "Why Choose MagnifiScent?",
+};
+export function getHomeHeadings(): HomeHeadings {
+  try {
+    const s = localStorage.getItem("admin_home_headings");
+    if (s) return { ...DEFAULT_HOME_HEADINGS, ...JSON.parse(s) };
+  } catch {}
+  return { ...DEFAULT_HOME_HEADINGS };
+}
+export function saveHomeHeadings(h: HomeHeadings): void {
+  localStorage.setItem("admin_home_headings", JSON.stringify(h));
+}
+
+/* ─── Payment Settings ─── */
+export type PaymentSettings = { cod: boolean; card: boolean };
+export function getPaymentSettings(): PaymentSettings {
+  try {
+    const s = localStorage.getItem("admin_payment_settings");
+    if (s) return JSON.parse(s);
+  } catch {}
+  return { cod: true, card: true };
+}
+export function savePaymentSettings(s: PaymentSettings): void {
+  localStorage.setItem("admin_payment_settings", JSON.stringify(s));
+}
+
 export function getAdminDeals(): AdminDealEntry[] {
   const stored = localStorage.getItem("admin_deals");
   if (!stored) return [];

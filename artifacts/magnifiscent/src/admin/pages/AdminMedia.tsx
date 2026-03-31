@@ -1,10 +1,12 @@
 import React, { useState, useRef } from "react";
-import { Trash2, Plus, ImageIcon, ChevronUp, ChevronDown, Save, CheckCircle2 } from "lucide-react";
+import { Trash2, Plus, ImageIcon, ChevronUp, ChevronDown, Save, CheckCircle2, Type } from "lucide-react";
 import {
   getHeroSlides, saveHeroSlides,
   getGenderBanners, saveGenderBanners,
   getNotesImages, saveNotesImages,
-  type HeroSlide, type GenderBanners, type NotesImages,
+  getHomeHeadings, saveHomeHeadings,
+  DEFAULT_HOME_HEADINGS,
+  type HeroSlide, type GenderBanners, type NotesImages, type HomeHeadings,
 } from "@/data/liveData";
 
 const NOTE_LABELS = ["FLORAL", "FRESH", "WOODY", "MUSKY", "ORIENTAL", "AQUATIC"];
@@ -324,6 +326,78 @@ function NotesImagesManager() {
   );
 }
 
+/* ─── Headings Manager ─── */
+const HEADING_FIELDS: { key: keyof HomeHeadings; label: string; hint: string }[] = [
+  { key: "deals", label: "Deals & Combo section", hint: "Main heading for the deals section" },
+  { key: "shopByGender", label: "Shop By Gender section", hint: "Heading above the men/women banners" },
+  { key: "allProducts", label: "All Products section", hint: "Heading for the product grid" },
+  { key: "shopByNotes", label: "Shop By Notes section", hint: "Heading for the scent notes" },
+  { key: "instagramTitle", label: "Instagram section title", hint: "Bold heading above the reel cards" },
+  { key: "instagramSubtitle", label: "Instagram section subtitle", hint: "Smaller text below the title" },
+  { key: "reviews", label: "Reviews section", hint: "Heading for buyer reviews" },
+  { key: "whyChoose", label: "Why Choose section", hint: "Feature highlights heading" },
+];
+
+function HeadingsManager() {
+  const [headings, setHeadings] = useState<HomeHeadings>(() => getHomeHeadings());
+  const [dirty, setDirty] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const update = (key: keyof HomeHeadings, val: string) => {
+    setHeadings((prev) => ({ ...prev, [key]: val }));
+    setDirty(true);
+    setSaved(false);
+  };
+
+  const handleSave = () => {
+    saveHomeHeadings(headings);
+    setDirty(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
+  const handleReset = () => {
+    setHeadings({ ...DEFAULT_HOME_HEADINGS });
+    setDirty(true);
+    setSaved(false);
+  };
+
+  return (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 space-y-4">
+      <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+        <div>
+          <h2 className="text-sm font-semibold text-gray-700">Homepage Section Headings</h2>
+          <p className="text-xs text-gray-400 mt-0.5">Edit the headings and subtitles for each section on the homepage.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleReset}
+            className="px-3 py-1.5 text-xs font-medium text-gray-500 border border-gray-200 rounded-lg bg-transparent cursor-pointer hover:bg-gray-50 transition-colors"
+          >
+            Reset to Default
+          </button>
+          <SaveButton dirty={dirty} saved={saved} onSave={handleSave} />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {HEADING_FIELDS.map(({ key, label, hint }) => (
+          <div key={key}>
+            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">{label}</label>
+            <input
+              type="text"
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+              value={headings[key]}
+              onChange={(e) => update(key, e.target.value)}
+              placeholder={DEFAULT_HOME_HEADINGS[key]}
+            />
+            <p className="text-[10px] text-gray-400 mt-0.5">{hint}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ─── Main Page ─── */
 export function AdminMedia() {
   return (
@@ -331,6 +405,7 @@ export function AdminMedia() {
       <HeroSlidesManager />
       <GenderBannersManager />
       <NotesImagesManager />
+      <HeadingsManager />
     </div>
   );
 }

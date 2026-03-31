@@ -9,7 +9,7 @@ import type { Product } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 import { useLocation } from "wouter";
 import {
-  getHeroSlides, getGenderBanners, getNotesImages,
+  getHeroSlides, getGenderBanners, getNotesImages, getInstagramReels, getHomeHeadings,
   type HeroSlide,
 } from "@/data/liveData";
 
@@ -243,6 +243,11 @@ export default function Home() {
   const [, navigate] = useLocation();
   const genderBanners = getGenderBanners();
   const notesImgs = getNotesImages();
+  const headings = getHomeHeadings();
+  const adminReels = getInstagramReels();
+  const instaPosts = adminReels.length > 0
+    ? adminReels.map((r) => ({ img: r.img || PRODUCTS[0].img, likes: r.likes, tag: r.label, label: r.label, url: r.url }))
+    : INSTAGRAM_POSTS.map((p) => ({ ...p, url: "https://instagram.com" }));
 
   const [liveProducts] = useState(() => getActiveProducts());
   const filteredProducts = productFilter === "all"
@@ -260,7 +265,7 @@ export default function Home() {
       <section id="deals" className="py-10 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-end justify-between mb-6">
-            <h2 className="section-title mb-0">Deals &amp; Combo</h2>
+            <h2 className="section-title mb-0">{headings.deals}</h2>
             <button onClick={() => navigate("/deals")} className="text-sm font-semibold text-gray-700 hover:text-black underline underline-offset-2 bg-transparent border-none cursor-pointer">
               View All
             </button>
@@ -274,7 +279,7 @@ export default function Home() {
       {/* ── Shop By Gender ── */}
       <section className="py-10 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="section-title text-center">Shop By Gender</h2>
+          <h2 className="section-title text-center">{headings.shopByGender}</h2>
           <div className="flex flex-col md:flex-row gap-4 mt-6">
             <button
               onClick={() => navigate("/products?gender=men")}
@@ -316,7 +321,7 @@ export default function Home() {
       <section id="all-products" className="py-10 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-            <h2 className="section-title mb-0">All Products</h2>
+            <h2 className="section-title mb-0">{headings.allProducts}</h2>
             {/* Filter tabs */}
             <div className="flex items-center border border-gray-200">
               {(["all", "men", "women"] as const).map((f) => (
@@ -354,7 +359,7 @@ export default function Home() {
       {/* ── Shop By Notes ── */}
       <section className="py-10 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="section-title">Shop By Notes</h2>
+          <h2 className="section-title">{headings.shopByNotes}</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
             {NOTES.map((note) => {
               const customImg = notesImgs[note.label];
@@ -391,17 +396,17 @@ export default function Home() {
       <section className="py-10 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-6">
-            <h2 className="section-title mb-1">Scent That Spreads</h2>
-            <p className="text-sm text-gray-400 italic">Everyone's favourite MagnifiScent Fragrances</p>
+            <h2 className="section-title mb-1">{headings.instagramTitle}</h2>
+            <p className="text-sm text-gray-400 italic">{headings.instagramSubtitle}</p>
           </div>
           <div
             className="scroll-x flex gap-3 overflow-x-auto pb-3"
             style={{ scrollSnapType: "x mandatory" }}
           >
-            {INSTAGRAM_POSTS.map((post, i) => (
+            {instaPosts.map((post, i) => (
               <a
                 key={i}
-                href="https://instagram.com"
+                href={post.url || "https://instagram.com"}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="relative group flex-shrink-0 overflow-hidden rounded-xl block bg-gray-900"
@@ -464,7 +469,7 @@ export default function Home() {
       {/* ── Buyer's Reviews ── */}
       <section className="py-10 border-b border-gray-100 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="section-title text-center">Buyer's Reviews</h2>
+          <h2 className="section-title text-center">{headings.reviews}</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4">
             {REVIEWS.slice(0, 3).map((r, i) => (
               <div key={i} className="bg-white rounded p-6 shadow-sm">
@@ -483,7 +488,7 @@ export default function Home() {
       {/* ── Why Choose ── */}
       <section className="py-12 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="section-title text-center">Why Choose MagnifiScent?</h2>
+          <h2 className="section-title text-center">{headings.whyChoose}</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-6">
             {[
               { icon: "🚚", title: "Free Shipping", sub: "On orders above $100" },
