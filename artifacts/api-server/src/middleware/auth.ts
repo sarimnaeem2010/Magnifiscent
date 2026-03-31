@@ -6,7 +6,7 @@ function getAdminKey(): string {
 
 export function isAuthorized(req: Request): boolean {
   const key = getAdminKey();
-  if (!key) return true;
+  if (!key) return false;
   const authHeader = (req.headers["authorization"] as string) ?? "";
   return authHeader === `Bearer ${key}`;
 }

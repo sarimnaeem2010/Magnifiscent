@@ -12,6 +12,7 @@ router.get("/products", async (_req, res) => {
     const products = await db
       .select()
       .from(productsTable)
+      .where(eq(productsTable.active, true))
       .orderBy(productsTable.id);
     res.json({ success: true, products });
   } catch (err) {
