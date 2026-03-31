@@ -106,7 +106,7 @@ export function AdminEmail() {
   const [smtp, setSmtp] = useState<SmtpSettings>(() => getSmtpSettings());
   const [smtpSaved, setSmtpSaved] = useState(false);
   const [showPw, setShowPw] = useState(false);
-  const [testEmail, setTestEmail] = useState("");
+  const [testEmail, setTestEmail] = useState(() => getSmtpSettings().fromEmail || getSmtpSettings().username || "");
   const [testStatus, setTestStatus] = useState<"idle" | "sending" | "ok" | "error">("idle");
   const [testError, setTestError] = useState("");
 
@@ -122,6 +122,8 @@ export function AdminEmail() {
 
   // Log state
   const [emailLog, setEmailLog] = useState<EmailLogEntry[]>(() => getEmailLog());
+  // Default test email to admin's from-email
+  const defaultTestEmail = smtp.fromEmail || smtp.username || "";
 
   const updateSmtp = (field: keyof SmtpSettings) => (val: string | boolean | number) => {
     setSmtp((s) => ({ ...s, [field]: val }));
@@ -182,6 +184,10 @@ export function AdminEmail() {
           from: `"${smtp.fromName}" <${smtp.fromEmail}>`,
           replyTo: smtp.replyTo,
           to: testEmail,
+          template: {
+            subject: "MagnifiScent — Test Email",
+            body: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#fff;border:1px solid #e5e7eb;border-radius:8px"><h2 style="font-family:Georgia,serif;color:#111827;margin-top:0">Test Email</h2><p>Your SMTP settings are working correctly!</p><p style="color:#6b7280;font-size:14px"><em>— MagnifiScent Admin Panel</em></p></div>`,
+          },
         }),
       });
       const data = await res.json();

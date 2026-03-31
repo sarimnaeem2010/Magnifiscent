@@ -4,7 +4,7 @@ import { Footer } from "@/components/layout/Footer";
 import { ChevronRight, Shield, Lock, Truck, Tag } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useLocation } from "wouter";
-import { getPaymentSettings, getExtendedSettings, getStoreFrontSettings, applyDiscountCode, getSmtpSettings, getEmailToggles } from "@/data/liveData";
+import { getPaymentSettings, getExtendedSettings, getStoreFrontSettings, applyDiscountCode, getSmtpSettings, getEmailToggles, getEmailTemplates } from "@/data/liveData";
 
 export default function Checkout() {
   const { items, total, clearCart } = useCart();
@@ -66,11 +66,17 @@ export default function Checkout() {
       const emailToggles = getEmailToggles();
       if (!emailToggles.order_confirmation) return;
       if (!smtpSettings.apiUrl || !form.email) return;
+      const savedTemplate = getEmailTemplates().order_confirmation;
       fetch(`${smtpSettings.apiUrl.replace(/\/$/, "")}/api/send-email`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           type: "order_confirmation",
+          orderId,
+          customerEmail: form.email,
+          customerName: `${form.firstName} ${form.lastName}`.trim(),
+          orderTotal: `${cur} ${orderTotal.toFixed(2)}`,
+          items: items.map((i) => ({ name: i.product.name, qty: i.qty, price: i.product.priceNum })),
           smtp: {
             host: smtpSettings.host,
             port: smtpSettings.port,
@@ -79,11 +85,8 @@ export default function Checkout() {
           },
           from: `"${smtpSettings.fromName}" <${smtpSettings.fromEmail}>`,
           replyTo: smtpSettings.replyTo,
-          to: form.email,
+          template: savedTemplate,
           variables: {
-            customer_name: `${form.firstName} ${form.lastName}`.trim(),
-            order_id: orderId,
-            order_total: `${cur} ${orderTotal.toFixed(2)}`,
             store_name: storeSettings.storeName || "MagnifiScent",
           },
         }),

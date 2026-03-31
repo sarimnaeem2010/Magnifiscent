@@ -8,19 +8,14 @@ function replacePlaceholders(template: string, vars: Record<string, string>): st
   return template.replace(/\{\{(\w+)\}\}/g, (_, key) => vars[key] ?? "");
 }
 
-/* ── Default templates (server-side copy) ── */
-const DEFAULT_TEMPLATES: Record<string, { subject: string; body: string }> = {
+/* ── Server-side default templates (used as fallback only) ── */
+const SERVER_DEFAULT_TEMPLATES: Record<string, { subject: string; body: string }> = {
   order_confirmation: {
     subject: "Your MagnifiScent Order is Confirmed!",
     body: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#fff;border:1px solid #e5e7eb;border-radius:8px">
 <h2 style="font-family:Georgia,serif;color:#111827;margin-top:0">Order Confirmed!</h2>
 <p>Dear {{customer_name}},</p>
-<p>Thank you for your order! Here are your order details:</p>
-<table style="width:100%;border-collapse:collapse;margin:16px 0">
-  <tr><td style="padding:8px 0;color:#6b7280;border-bottom:1px solid #f3f4f6"><strong>Order ID:</strong></td><td style="padding:8px 0;border-bottom:1px solid #f3f4f6">{{order_id}}</td></tr>
-  <tr><td style="padding:8px 0;color:#6b7280;border-bottom:1px solid #f3f4f6"><strong>Order Total:</strong></td><td style="padding:8px 0;border-bottom:1px solid #f3f4f6">{{order_total}}</td></tr>
-  <tr><td style="padding:8px 0;color:#6b7280"><strong>Store:</strong></td><td style="padding:8px 0">{{store_name}}</td></tr>
-</table>
+<p>Thank you for your order! Your order <strong>{{order_id}}</strong> totalling <strong>{{order_total}}</strong> has been received and is being processed.</p>
 <p>Your order will be dispatched within 1–2 business days.</p>
 <p style="color:#6b7280;font-size:14px"><em>— The {{store_name}} Team</em></p>
 </div>`,
@@ -30,8 +25,7 @@ const DEFAULT_TEMPLATES: Record<string, { subject: string; body: string }> = {
     body: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#fff;border:1px solid #e5e7eb;border-radius:8px">
 <h2 style="font-family:Georgia,serif;color:#111827;margin-top:0">Your Order Is On Its Way!</h2>
 <p>Dear {{customer_name}},</p>
-<p>Your order <strong>{{order_id}}</strong> has been shipped.</p>
-<p>Estimated delivery: 3–5 business days.</p>
+<p>Your order <strong>{{order_id}}</strong> has been shipped. Estimated delivery: 3–5 business days.</p>
 <p style="color:#6b7280;font-size:14px"><em>— The {{store_name}} Team</em></p>
 </div>`,
   },
@@ -58,8 +52,7 @@ const DEFAULT_TEMPLATES: Record<string, { subject: string; body: string }> = {
     body: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#fff;border:1px solid #e5e7eb;border-radius:8px">
 <h2 style="font-family:Georgia,serif;color:#111827;margin-top:0">Welcome to {{store_name}}!</h2>
 <p>Dear {{customer_name}},</p>
-<p>Thank you for placing your first order with us. We're thrilled to have you as a customer!</p>
-<p>Your order <strong>{{order_id}}</strong> is being processed and will be dispatched soon.</p>
+<p>Thank you for placing your first order with us. Your order <strong>{{order_id}}</strong> is being processed.</p>
 <p style="color:#6b7280;font-size:14px"><em>— The {{store_name}} Team</em></p>
 </div>`,
   },
@@ -67,19 +60,15 @@ const DEFAULT_TEMPLATES: Record<string, { subject: string; body: string }> = {
     subject: "New Order Received — {{order_id}}",
     body: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#fff;border:1px solid #e5e7eb;border-radius:8px">
 <h2 style="font-family:Georgia,serif;color:#111827;margin-top:0">New Order Alert</h2>
-<p>A new order has been placed on your store.</p>
-<table style="width:100%;border-collapse:collapse;margin:16px 0">
-  <tr><td style="padding:8px 0;color:#6b7280;border-bottom:1px solid #f3f4f6"><strong>Order ID:</strong></td><td style="padding:8px 0;border-bottom:1px solid #f3f4f6">{{order_id}}</td></tr>
-  <tr><td style="padding:8px 0;color:#6b7280;border-bottom:1px solid #f3f4f6"><strong>Customer:</strong></td><td style="padding:8px 0;border-bottom:1px solid #f3f4f6">{{customer_name}}</td></tr>
-  <tr><td style="padding:8px 0;color:#6b7280"><strong>Total:</strong></td><td style="padding:8px 0">{{order_total}}</td></tr>
-</table>
+<p>Customer: <strong>{{customer_name}}</strong></p>
+<p>Order: <strong>{{order_id}}</strong> — Total: <strong>{{order_total}}</strong></p>
 </div>`,
   },
   low_stock_alert: {
     subject: "Low Stock Alert — {{store_name}}",
     body: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#fff;border:1px solid #e5e7eb;border-radius:8px">
 <h2 style="font-family:Georgia,serif;color:#111827;margin-top:0">Low Stock Alert</h2>
-<p>A product in your store is running low on stock. Please review your inventory and restock if needed.</p>
+<p>A product in your store is running low on stock. Please review your inventory.</p>
 </div>`,
   },
   test: {
@@ -92,56 +81,92 @@ const DEFAULT_TEMPLATES: Record<string, { subject: string; body: string }> = {
   },
 };
 
+/* Simple in-memory rate limiter (per SMTP user, max 20 req/min) */
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+
+function checkRateLimit(key: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(key);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(key, { count: 1, resetAt: now + 60_000 });
+    return true;
+  }
+  if (entry.count >= 20) return false;
+  entry.count++;
+  return true;
+}
+
 /*
  * POST /api/send-email
  *
- * Type-driven endpoint. Callers provide:
- *   - smtp: { host, port, secure, auth: { user, pass } }
- *   - from: '"Name" <email>'
- *   - replyTo: (optional)
- *   - to: recipient address
- *   - type: one of the template keys (or "custom" for raw html)
- *   - variables: Record<string, string>  — interpolated into template
- *   - customSubject / customHtml: used only when type === "custom"
+ * Accepts:
+ *   smtp: { host, port, secure, auth: { user, pass } }  — required
+ *   from: string  — "Name <email>"
+ *   replyTo?: string
+ *   to: string  — recipient (for customer emails)
+ *              OR use customerEmail for the checkout contract
+ *   type: string  — template key ("order_confirmation", "test", etc.)
  *
- * The server resolves the correct template, replaces {{variables}}, and sends.
- * SMTP credentials must be provided by the caller (admin panel or checkout).
- * Requests without valid smtp.host are rejected.
+ *   Business payload (checkout contract):
+ *   orderId?, customerEmail?, customerName?, orderTotal?, items?
+ *
+ *   Template override (uses admin-saved template if provided):
+ *   template?: { subject: string; body: string }
+ *
+ *   variables?: Record<string, string>  — merged with auto-mapped business fields
+ *
+ * Security: rate-limited per SMTP user; validates smtp host is present.
  */
 router.post("/send-email", async (req, res) => {
   try {
-    const { smtp, from, replyTo, to, type, variables, customSubject, customHtml } = req.body;
+    const {
+      smtp, from, replyTo,
+      to, customerEmail,
+      type,
+      orderId, customerName, orderTotal, items,
+      template: clientTemplate,
+      variables: extraVars,
+    } = req.body;
 
-    if (!to) {
-      res.status(400).json({ success: false, error: "Missing required field: to" });
-      return;
-    }
     if (!type) {
       res.status(400).json({ success: false, error: "Missing required field: type" });
       return;
     }
     if (!smtp?.host || !smtp?.auth?.user || !smtp?.auth?.pass) {
-      res.status(400).json({ success: false, error: "Missing or incomplete SMTP configuration (host, auth.user, auth.pass required)" });
+      res.status(400).json({ success: false, error: "Missing or incomplete SMTP config (host, auth.user, auth.pass required)" });
       return;
     }
 
-    const vars: Record<string, string> = variables ?? {};
-
-    let subject: string;
-    let html: string;
-
-    if (type === "custom") {
-      subject = customSubject ?? "Message from MagnifiScent";
-      html = customHtml ?? "";
-    } else {
-      const tpl = DEFAULT_TEMPLATES[type];
-      if (!tpl) {
-        res.status(400).json({ success: false, error: `Unknown email type: ${type}` });
-        return;
-      }
-      subject = replacePlaceholders(tpl.subject, vars);
-      html = replacePlaceholders(tpl.body, vars);
+    const recipient = customerEmail ?? to;
+    if (!recipient) {
+      res.status(400).json({ success: false, error: "Missing recipient: provide 'to' or 'customerEmail'" });
+      return;
     }
+
+    // Rate limit by SMTP user to prevent open relay abuse
+    if (!checkRateLimit(smtp.auth.user)) {
+      res.status(429).json({ success: false, error: "Rate limit exceeded. Try again in a minute." });
+      return;
+    }
+
+    // Build variables map: auto-map business payload fields + caller-supplied extras
+    const vars: Record<string, string> = {
+      customer_name: customerName ?? "",
+      order_id: orderId ?? "",
+      order_total: String(orderTotal ?? ""),
+      store_name: "MagnifiScent",
+      ...(extraVars ?? {}),
+    };
+
+    // Resolve template: prefer admin-saved template (sent from client), fall back to server defaults
+    const tpl = clientTemplate ?? SERVER_DEFAULT_TEMPLATES[type];
+    if (!tpl) {
+      res.status(400).json({ success: false, error: `Unknown email type: ${type}` });
+      return;
+    }
+
+    const subject = replacePlaceholders(tpl.subject, vars);
+    const html = replacePlaceholders(tpl.body, vars);
 
     const transporter = nodemailer.createTransport({
       host: smtp.host,
@@ -156,7 +181,7 @@ router.post("/send-email", async (req, res) => {
     const info = await transporter.sendMail({
       from: from ?? smtp.auth.user,
       replyTo: replyTo ?? undefined,
-      to,
+      to: recipient,
       subject,
       html,
     });
