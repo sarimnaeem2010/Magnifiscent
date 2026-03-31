@@ -96,7 +96,7 @@ function ProductCard({ product }: { product: Product }) {
 
   return (
     <div
-      className="product-card w-full cursor-pointer"
+      className="product-card flex-shrink-0 w-[200px] md:w-[230px] cursor-pointer"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       onClick={() => navigate(`/products/${product.slug}`)}
@@ -289,10 +289,18 @@ export default function Home() {
               ))}
             </div>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-0">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
             {filteredProducts.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}
+          </div>
+          <div className="text-center mt-8">
+            <button
+              onClick={() => navigate("/products")}
+              className="inline-block border border-black text-black font-bold uppercase tracking-widest text-xs px-10 py-3 hover:bg-black hover:text-white transition-colors bg-transparent cursor-pointer"
+            >
+              View All Products
+            </button>
           </div>
         </div>
       </section>
