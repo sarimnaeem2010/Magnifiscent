@@ -1,6 +1,6 @@
 import React from "react";
 import { Instagram, Facebook } from "lucide-react";
-import logoImg from "@assets/Logo_1774977360169.png";
+import logoImg from "@assets/whitelogo_1774978057429.png";
 
 export function Footer() {
   return (
@@ -13,7 +13,7 @@ export function Footer() {
               <img
                 src={logoImg}
                 alt="MagnifiScent"
-                style={{ height: 44, width: "auto", objectFit: "contain", filter: "invert(1)" }}
+                style={{ height: 44, width: "auto", objectFit: "contain" }}
               />
             </div>
             <p className="text-gray-400 text-sm mb-6 leading-relaxed">

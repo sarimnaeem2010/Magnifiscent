@@ -3,7 +3,7 @@ import { ShoppingBag, Search, Menu, X, ChevronDown } from "lucide-react";
 import { useLocation } from "wouter";
 import { useCart } from "@/context/CartContext";
 import { getTickerMessages } from "@/data/liveData";
-import logoImg from "@assets/Logo_1774977360169.png";
+import logoImg from "@assets/whitelogo_1774978057429.png";
 
 const navLinks = [
   { label: "Home", href: "/" },
@@ -74,7 +74,7 @@ export function Header() {
             <img
               src={logoImg}
               alt="MagnifiScent"
-              style={{ height: 44, width: "auto", objectFit: "contain" }}
+              style={{ height: 44, width: "auto", objectFit: "contain", filter: "invert(1)" }}
             />
           </button>
 
