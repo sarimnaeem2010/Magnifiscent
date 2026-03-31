@@ -11,27 +11,40 @@ import Contact from "@/pages/Contact";
 import Checkout from "@/pages/Checkout";
 import Deals from "@/pages/Deals";
 import { AdminApp } from "@/admin/AdminApp";
+import { useEffect } from "react";
 
 const queryClient = new QueryClient();
+
+function ScrollToTop() {
+  const [location] = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [location]);
+  return null;
+}
 
 function AdminWrapper() {
   return <AdminApp />;
 }
 
 function StorefrontRouter() {
+  const [location] = useLocation();
   return (
     <CartProvider>
+      <ScrollToTop />
       <CartDrawer />
-      <Switch>
-        <Route path="/" component={Home} />
-        <Route path="/products" component={Products} />
-        <Route path="/products/:slug" component={ProductDetail} />
-        <Route path="/deals" component={Deals} />
-        <Route path="/about" component={About} />
-        <Route path="/contact" component={Contact} />
-        <Route path="/checkout" component={Checkout} />
-        <Route component={NotFound} />
-      </Switch>
+      <div key={location} className="page-transition">
+        <Switch>
+          <Route path="/" component={Home} />
+          <Route path="/products" component={Products} />
+          <Route path="/products/:slug" component={ProductDetail} />
+          <Route path="/deals" component={Deals} />
+          <Route path="/about" component={About} />
+          <Route path="/contact" component={Contact} />
+          <Route path="/checkout" component={Checkout} />
+          <Route component={NotFound} />
+        </Switch>
+      </div>
     </CartProvider>
   );
 }
