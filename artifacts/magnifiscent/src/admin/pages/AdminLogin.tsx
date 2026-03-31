@@ -60,9 +60,6 @@ export function AdminLogin() {
             {loading ? "Signing in…" : "Sign In"}
           </button>
 
-          <p className="text-center text-xs text-gray-400 mt-4">
-            Default password: <span className="font-mono font-semibold text-gray-600">admin123</span>
-          </p>
         </form>
       </div>
     </div>

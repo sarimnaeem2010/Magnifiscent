@@ -61,12 +61,12 @@ function RelatedCard({ product }: { product: LiveProduct }) {
 export default function ProductDetail() {
   const params = useParams<{ slug: string }>();
   const [, navigate] = useLocation();
-  const product = getLiveProductBySlug(params.slug);
+  const productOrUndef = getLiveProductBySlug(params.slug);
   const { addItem } = useCart();
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
 
-  if (!product) {
+  if (!productOrUndef) {
     return (
       <div className="min-h-screen bg-white">
         <Header />
@@ -84,6 +84,7 @@ export default function ProductDetail() {
     );
   }
 
+  const product = productOrUndef;
   const related = getLiveRelated(product);
 
   function handleAddToCart() {
