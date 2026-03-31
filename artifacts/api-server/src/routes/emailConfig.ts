@@ -1,32 +1,11 @@
 import { Router } from "express";
-import { readFile, writeFile, mkdir } from "node:fs/promises";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { db } from "../lib/db.js";
+import { emailConfigTable } from "@workspace/db";
+import { requireAdminAuth } from "../middleware/auth.js";
 
 const router = Router();
 
-/*
- * Config file: <api-server-root>/data/email-config.json
- * At runtime, import.meta.url is artifacts/api-server/dist/index.mjs
- * path.dirname → artifacts/api-server/dist
- * ../data      → artifacts/api-server/data   ✓
- */
-const CONFIG_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../data");
-const CONFIG_PATH = path.join(CONFIG_DIR, "email-config.json");
-
-/* ── Auth helper ────────────────────────────────────────────────────────── */
-function getAdminKey(): string {
-  return process.env.ADMIN_API_KEY || process.env.SESSION_SECRET || "";
-}
-
-function isAuthorized(req: { headers: Record<string, string | string[] | undefined> }): boolean {
-  const key = getAdminKey();
-  if (!key) return true; // no key configured → open (dev mode only)
-  const authHeader = req.headers["authorization"] ?? "";
-  return authHeader === `Bearer ${key}`;
-}
-
-/* ── Types ───────────────────────────────────────────────────────────────── */
+/* ── Types ── */
 export type ServerSmtpSettings = {
   host: string;
   port: number;
@@ -67,31 +46,34 @@ const DEFAULT_TOGGLES: ServerEmailToggles = {
   low_stock_alert: false,
 };
 
-async function readConfig(): Promise<EmailConfig> {
+/* Read config from the database */
+export async function readConfig(): Promise<EmailConfig> {
   try {
-    const raw = await readFile(CONFIG_PATH, "utf-8");
-    const parsed = JSON.parse(raw);
+    const [row] = await db.select().from(emailConfigTable).limit(1);
+    if (!row) return { smtp: null, toggles: { ...DEFAULT_TOGGLES }, templates: {} };
     return {
-      smtp: parsed.smtp ?? null,
-      toggles: { ...DEFAULT_TOGGLES, ...(parsed.toggles ?? {}) },
-      templates: parsed.templates ?? {},
+      smtp: row.username
+        ? {
+            host: row.host,
+            port: row.port,
+            secure: row.secure,
+            username: row.username,
+            password: row.password,
+            fromName: row.fromName,
+            fromEmail: row.fromEmail,
+            replyTo: row.replyTo,
+          }
+        : null,
+      toggles: { ...DEFAULT_TOGGLES, ...(row.toggles as Record<string, boolean>) },
+      templates: (row.templates as Record<string, { subject: string; body: string }>) ?? {},
     };
   } catch {
     return { smtp: null, toggles: { ...DEFAULT_TOGGLES }, templates: {} };
   }
 }
 
-async function writeConfig(config: EmailConfig): Promise<void> {
-  await mkdir(CONFIG_DIR, { recursive: true });
-  await writeFile(CONFIG_PATH, JSON.stringify(config, null, 2), "utf-8");
-}
-
-/* GET /api/email-config — requires admin auth; returns config with password masked */
-router.get("/email-config", async (req, res) => {
-  if (!isAuthorized(req)) {
-    res.status(401).json({ success: false, error: "Unauthorized" });
-    return;
-  }
+/* GET /api/email-config — admin auth required; returns config with password masked */
+router.get("/email-config", requireAdminAuth, async (_req, res) => {
   try {
     const config = await readConfig();
     const safeConfig = {
@@ -101,40 +83,67 @@ router.get("/email-config", async (req, res) => {
         : null,
     };
     res.json({ success: true, config: safeConfig });
-  } catch (err: unknown) {
+  } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     res.status(500).json({ success: false, error: message });
   }
 });
 
-/* POST /api/email-config — requires admin auth; saves full config */
-router.post("/email-config", async (req, res) => {
-  if (!isAuthorized(req)) {
-    res.status(401).json({ success: false, error: "Unauthorized" });
-    return;
-  }
+/* POST /api/email-config — admin auth required; saves full config to DB */
+router.post("/email-config", requireAdminAuth, async (req, res) => {
   try {
     const { smtp, toggles, templates } = req.body;
     const existing = await readConfig();
 
-    const updated: EmailConfig = {
-      smtp: smtp !== undefined ? smtp : existing.smtp,
-      toggles: toggles !== undefined ? { ...DEFAULT_TOGGLES, ...toggles } : existing.toggles,
-      templates: templates !== undefined ? templates : existing.templates,
-    };
-
-    // If password is the masked placeholder, keep the existing password
-    if (updated.smtp && updated.smtp.password === "••••••••" && existing.smtp) {
-      updated.smtp.password = existing.smtp.password;
+    let newSmtp = smtp !== undefined ? smtp : existing.smtp;
+    if (newSmtp && newSmtp.password === "••••••••" && existing.smtp) {
+      newSmtp = { ...newSmtp, password: existing.smtp.password };
     }
 
-    await writeConfig(updated);
+    const newToggles = toggles !== undefined
+      ? { ...DEFAULT_TOGGLES, ...toggles }
+      : existing.toggles;
+
+    const newTemplates = templates !== undefined ? templates : existing.templates;
+
+    const dbValues = {
+      id: 1,
+      host: newSmtp?.host ?? "smtp.gmail.com",
+      port: newSmtp?.port ?? 587,
+      secure: newSmtp?.secure ?? false,
+      username: newSmtp?.username ?? "",
+      password: newSmtp?.password ?? "",
+      fromName: newSmtp?.fromName ?? "MagnifiScent",
+      fromEmail: newSmtp?.fromEmail ?? "hello@magnifiscent.com",
+      replyTo: newSmtp?.replyTo ?? "hello@magnifiscent.com",
+      toggles: newToggles,
+      templates: newTemplates,
+    };
+
+    await db
+      .insert(emailConfigTable)
+      .values(dbValues)
+      .onConflictDoUpdate({
+        target: emailConfigTable.id,
+        set: {
+          host: dbValues.host,
+          port: dbValues.port,
+          secure: dbValues.secure,
+          username: dbValues.username,
+          password: dbValues.password,
+          fromName: dbValues.fromName,
+          fromEmail: dbValues.fromEmail,
+          replyTo: dbValues.replyTo,
+          toggles: dbValues.toggles,
+          templates: dbValues.templates,
+        },
+      });
+
     res.json({ success: true });
-  } catch (err: unknown) {
+  } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     res.status(500).json({ success: false, error: message });
   }
 });
 
-export { readConfig };
 export default router;
