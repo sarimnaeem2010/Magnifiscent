@@ -153,6 +153,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
               old.price !== p.price || old.priceNum !== p.priceNum ||
               old.originalPrice !== p.originalPrice || old.originalPriceNum !== p.originalPriceNum ||
               old.stock !== p.stock || old.active !== p.active || old.desc !== p.desc ||
+              old.notes !== p.notes || old.rating !== p.rating || old.reviews !== p.reviews ||
               old.img !== p.img || old.img2 !== p.img2;
             if (changed) {
               api.products.patch(p.id, {
@@ -160,6 +161,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
                 priceNum: p.priceNum, price: p.price,
                 originalPriceNum: p.originalPriceNum, originalPrice: p.originalPrice,
                 stock: p.stock, active: p.active, desc: p.desc, notes: p.notes,
+                rating: p.rating, reviews: p.reviews,
                 img: p.img, img2: p.img2,
               }).catch(() => {});
             }
