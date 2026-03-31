@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { db } from "../lib/db.js";
 import { productsTable } from "@workspace/db";
 import { requireAdminAuth } from "../middleware/auth.js";
@@ -21,13 +21,13 @@ router.get("/products", async (_req, res) => {
   }
 });
 
-/* GET /api/products/:slug — public, returns one product */
+/* GET /api/products/:slug — public, returns one active product */
 router.get("/products/:slug", async (req, res) => {
   try {
     const [product] = await db
       .select()
       .from(productsTable)
-      .where(eq(productsTable.slug, req.params.slug))
+      .where(and(eq(productsTable.slug, String(req.params.slug)), eq(productsTable.active, true)))
       .limit(1);
     if (!product) {
       res.status(404).json({ success: false, error: "Product not found" });
