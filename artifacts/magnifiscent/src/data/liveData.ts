@@ -8,7 +8,7 @@ export type HeroSlide = { id: string; src: string; alt: string };
 export type GenderBanners = { men: string; women: string };
 export type NotesImages = Record<string, string>;
 export type ProductCustomImages = Record<string, { img: string; img2: string }>;
-export type DealCustomImages = Record<string, string>;
+export type DealCustomImages = Record<string, { img1?: string; img2?: string }>;
 
 /* ─── Hero Slides ─── */
 export function getHeroSlides(): HeroSlide[] {

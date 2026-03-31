@@ -28,14 +28,24 @@ function compressImage(file: File, maxW: number, maxH: number, quality = 0.75): 
   });
 }
 
-function DealImageUpload({ dealId, currentImg }: { dealId: string; currentImg: string }) {
+function DealImageSlot({
+  dealId,
+  slot,
+  currentImg,
+  label,
+}: {
+  dealId: string;
+  slot: "img1" | "img2";
+  currentImg: string;
+  label: string;
+}) {
   const ref = useRef<HTMLInputElement>(null);
   const [src, setSrc] = useState(currentImg);
 
   const handleUpload = async (file: File) => {
     const b64 = await compressImage(file, 400, 400, 0.75);
     const all = getDealCustomImages();
-    all[dealId] = b64;
+    all[dealId] = { ...all[dealId], [slot]: b64 };
     saveDealCustomImages(all);
     setSrc(b64);
   };
@@ -43,39 +53,49 @@ function DealImageUpload({ dealId, currentImg }: { dealId: string; currentImg: s
   const handleRemove = (e: React.MouseEvent) => {
     e.stopPropagation();
     const all = getDealCustomImages();
-    delete all[dealId];
+    if (all[dealId]) {
+      delete (all[dealId] as Record<string, string | undefined>)[slot];
+      if (!all[dealId].img1 && !all[dealId].img2) delete all[dealId];
+    }
     saveDealCustomImages(all);
     setSrc("");
   };
 
   return (
-    <div
-      className="relative w-14 h-14 rounded-lg overflow-hidden border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center cursor-pointer group flex-shrink-0"
-      onClick={() => ref.current?.click()}
-    >
-      {src ? (
-        <>
-          <img src={src} alt="Deal" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
-            <span className="text-white text-[9px] font-bold">Change</span>
-            <button onClick={handleRemove} className="bg-red-500 rounded p-0.5 border-none cursor-pointer">
-              <Trash2 size={10} className="text-white" />
-            </button>
+    <div className="flex flex-col items-center gap-1">
+      <span className="text-[9px] font-semibold text-gray-400 uppercase tracking-wide">{label}</span>
+      <div
+        className="relative w-12 h-12 rounded-lg overflow-hidden border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center cursor-pointer group flex-shrink-0"
+        onClick={() => ref.current?.click()}
+      >
+        {src ? (
+          <>
+            <img src={src} alt={label} className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+              <span className="text-white text-[8px] font-bold">Change</span>
+              <button onClick={handleRemove} className="bg-red-500 rounded p-0.5 border-none cursor-pointer">
+                <Trash2 size={9} className="text-white" />
+              </button>
+            </div>
+          </>
+        ) : (
+          <div className="flex flex-col items-center gap-0.5 text-gray-400">
+            <ImageIcon size={14} />
+            <span className="text-[8px] font-medium">Add</span>
           </div>
-        </>
-      ) : (
-        <div className="flex flex-col items-center gap-0.5 text-gray-400">
-          <ImageIcon size={16} />
-          <span className="text-[9px] font-medium">Upload</span>
-        </div>
-      )}
-      <input ref={ref} type="file" accept="image/*" className="hidden"
-        onChange={async (e) => {
-          const file = e.target.files?.[0];
-          if (file) await handleUpload(file);
-          e.target.value = "";
-        }}
-      />
+        )}
+        <input
+          ref={ref}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={async (e) => {
+            const file = e.target.files?.[0];
+            if (file) await handleUpload(file);
+            e.target.value = "";
+          }}
+        />
+      </div>
     </div>
   );
 }
@@ -119,7 +139,7 @@ export function AdminDeals() {
       <div className="flex items-center gap-3 bg-white rounded-xl px-5 py-4 shadow-sm border border-gray-100">
         <span className="text-2xl font-bold text-gray-900">{activeCount}</span>
         <span className="text-sm text-gray-400">of {deals.length} deals are currently active on the storefront.</span>
-        <span className="ml-auto text-xs text-gray-400">Click the image thumbnail to upload a custom deal image.</span>
+        <span className="ml-auto text-xs text-gray-400">Upload a static image and a hover image for each deal.</span>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -127,7 +147,7 @@ export function AdminDeals() {
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-gray-50 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                <th className="px-4 py-3 text-left">Image</th>
+                <th className="px-4 py-3 text-left">Images</th>
                 <th className="px-4 py-3 text-left">Deal Name</th>
                 <th className="px-4 py-3 text-left">Products</th>
                 <th className="px-4 py-3 text-right">Price</th>
@@ -140,10 +160,14 @@ export function AdminDeals() {
             <tbody className="divide-y divide-gray-50">
               {deals.map((d) => {
                 const isEditing = editingId === d.id;
+                const custom = dealImgs[d.id] || {};
                 return (
                   <tr key={d.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-4 py-3">
-                      <DealImageUpload dealId={d.id} currentImg={dealImgs[d.id] || ""} />
+                      <div className="flex items-end gap-2">
+                        <DealImageSlot dealId={d.id} slot="img1" currentImg={custom.img1 || ""} label="Static" />
+                        <DealImageSlot dealId={d.id} slot="img2" currentImg={custom.img2 || ""} label="Hover" />
+                      </div>
                     </td>
                     <td className="px-4 py-3 font-semibold text-gray-900">{d.name}</td>
                     <td className="px-4 py-3">

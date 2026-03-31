@@ -287,13 +287,17 @@ export default function Home() {
             </button>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {DEALS.map((d) => (
-                <DealCard
-                  key={d.id}
-                  {...d}
-                  img1={dealImgs[d.id] || d.img1}
-                />
-              ))}
+            {DEALS.map((d) => {
+                const custom = dealImgs[d.id];
+                return (
+                  <DealCard
+                    key={d.id}
+                    {...d}
+                    img1={custom?.img1 || d.img1}
+                    img2={custom?.img2 || d.img2}
+                  />
+                );
+              })}
           </div>
         </div>
       </section>

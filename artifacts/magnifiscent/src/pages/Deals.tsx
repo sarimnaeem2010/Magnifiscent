@@ -148,10 +148,11 @@ export default function Deals() {
       const admin = adminDealMap.get(d.id);
       const price = admin ? admin.price : d.price;
       const originalPrice = admin ? admin.originalPrice : d.originalPrice;
-      const customImg = dealImgs[d.id];
+      const custom = dealImgs[d.id];
       return {
         ...d,
-        img1: customImg || d.img1,
+        img1: custom?.img1 || d.img1,
+        img2: custom?.img2 || d.img2,
         price,
         originalPrice,
         savings: originalPrice - price,
