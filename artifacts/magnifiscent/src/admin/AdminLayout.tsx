@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import { useLocation } from "wouter";
 import { useAdmin } from "./AdminContext";
+import { api } from "@/lib/api";
 import {
   LayoutDashboard, Package, ShoppingBag, Users, Warehouse,
-  Tag, Settings, LogOut, Menu, X, Crown, Image, Instagram, FileText, Mail,
+  Tag, Settings, LogOut, Menu, Crown, Image, Instagram, FileText, Mail,
+  Globe, CheckCircle, Loader2,
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -20,14 +22,30 @@ const NAV_ITEMS = [
   { label: "Settings", icon: Settings, path: "/admin/settings" },
 ];
 
+type PublishState = "idle" | "publishing" | "live" | "error";
+
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const [location, navigate] = useLocation();
   const { logout, settings } = useAdmin();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [publishState, setPublishState] = useState<PublishState>("idle");
 
   const handleLogout = () => {
     logout();
     navigate("/admin");
+  };
+
+  const handlePublish = async () => {
+    if (publishState === "publishing") return;
+    setPublishState("publishing");
+    try {
+      await api.admin.publish();
+      setPublishState("live");
+      setTimeout(() => setPublishState("idle"), 3000);
+    } catch {
+      setPublishState("error");
+      setTimeout(() => setPublishState("idle"), 3000);
+    }
   };
 
   const isActive = (path: string) => {
@@ -112,16 +130,39 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           <div className="ml-auto flex items-center gap-3">
             <button
               onClick={() => window.open("/", "_blank")}
-              className="text-xs font-medium text-gray-500 hover:text-gray-900 underline underline-offset-2 bg-transparent border-none cursor-pointer"
+              className="text-xs font-medium text-gray-500 hover:text-gray-900 underline underline-offset-2 bg-transparent border-none cursor-pointer hidden sm:block"
             >
               View Store
             </button>
+
+            {/* Publish button */}
+            <button
+              onClick={handlePublish}
+              disabled={publishState === "publishing"}
+              className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-md border-none cursor-pointer transition-all"
+              style={{
+                background:
+                  publishState === "live" ? "#16a34a"
+                  : publishState === "error" ? "#dc2626"
+                  : publishState === "publishing" ? "#d97706"
+                  : "#f59e0b",
+                color: "#fff",
+                opacity: publishState === "publishing" ? 0.8 : 1,
+                cursor: publishState === "publishing" ? "not-allowed" : "pointer",
+              }}
+            >
+              {publishState === "publishing" && <Loader2 size={13} className="animate-spin" />}
+              {publishState === "live" && <CheckCircle size={13} />}
+              {(publishState === "idle" || publishState === "error") && <Globe size={13} />}
+              {publishState === "publishing" ? "Publishing..." : publishState === "live" ? "Live!" : publishState === "error" ? "Failed" : "Publish"}
+            </button>
+
             <button
               onClick={handleLogout}
               className="flex items-center gap-1.5 text-xs font-medium text-red-500 hover:text-red-700 bg-transparent border-none cursor-pointer"
             >
               <LogOut size={14} />
-              Logout
+              <span className="hidden sm:inline">Logout</span>
             </button>
           </div>
         </header>

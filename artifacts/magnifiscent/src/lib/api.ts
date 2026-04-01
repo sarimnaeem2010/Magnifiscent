@@ -142,6 +142,8 @@ export const api = {
       post<{ success: boolean; token: string }>("/admin/login", { password }),
     changePassword: (currentPassword: string, newPassword: string) =>
       post<{ success: boolean }>("/admin/change-password", { currentPassword, newPassword }, true),
+    publish: () =>
+      post<{ success: boolean; publishedAt: string }>("/admin/publish", {}, true),
   },
 
   products: {

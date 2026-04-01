@@ -37,6 +37,11 @@ router.post("/admin/login", async (req, res) => {
   }
 });
 
+/* POST /api/admin/publish — admin auth required; confirms all changes are live */
+router.post("/admin/publish", requireAdminAuth, (_req, res) => {
+  res.json({ success: true, publishedAt: new Date().toISOString() });
+});
+
 /* POST /api/admin/change-password — admin auth required; updates the admin password */
 router.post("/admin/change-password", requireAdminAuth, async (req, res) => {
   try {
