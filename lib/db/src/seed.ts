@@ -254,22 +254,23 @@ export async function seedDatabase(db: DrizzleDb): Promise<void> {
     console.log(`Deals already seeded (${existingDeals.length} found), skipping`);
   }
 
-  const existingDealImages = await db.select({ id: schema.dealImagesTable.id }).from(schema.dealImagesTable);
-  if (existingDealImages.length === 0) {
-    await db.insert(schema.dealImagesTable).values(DEAL_IMAGES);
-    console.log(`Inserted ${DEAL_IMAGES.length} deal image placeholders`);
-  } else {
-    console.log(`Deal images already seeded (${existingDealImages.length} found), patching empty images`);
-    for (const di of DEAL_IMAGES) {
-      await db.update(schema.dealImagesTable)
-        .set({ img1: di.img1 })
-        .where(sql`${schema.dealImagesTable.dealId} = ${di.dealId} AND ${schema.dealImagesTable.img1} = ''`);
-      await db.update(schema.dealImagesTable)
-        .set({ img2: di.img2 })
-        .where(sql`${schema.dealImagesTable.dealId} = ${di.dealId} AND ${schema.dealImagesTable.img2} = ''`);
+  for (const di of DEAL_IMAGES) {
+    const existing = await db.select({ id: schema.dealImagesTable.id, img1: schema.dealImagesTable.img1, img2: schema.dealImagesTable.img2 })
+      .from(schema.dealImagesTable)
+      .where(sql`${schema.dealImagesTable.dealId} = ${di.dealId}`);
+    if (existing.length === 0) {
+      await db.insert(schema.dealImagesTable).values(di);
+    } else {
+      const row = existing[0];
+      if (row.img1 === "") {
+        await db.update(schema.dealImagesTable).set({ img1: di.img1 }).where(sql`${schema.dealImagesTable.dealId} = ${di.dealId}`);
+      }
+      if (row.img2 === "") {
+        await db.update(schema.dealImagesTable).set({ img2: di.img2 }).where(sql`${schema.dealImagesTable.dealId} = ${di.dealId}`);
+      }
     }
-    console.log("Placeholder images applied to any deal images with empty img1/img2 fields");
   }
+  console.log(`Deal image placeholders ensured for ${DEAL_IMAGES.length} deals`);
 
   const existingSettings = await db.select({ id: schema.storeSettingsTable.id }).from(schema.storeSettingsTable);
   if (existingSettings.length === 0) {
