@@ -202,16 +202,26 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     (updater: DealAdmin[] | ((prev: DealAdmin[]) => DealAdmin[])) => {
       setDealsState((prev) => {
         const next = typeof updater === "function" ? updater(prev) : updater;
+        const prevIds = new Set(prev.map((d) => d.id));
+        const nextIds = new Set(next.map((d) => d.id));
+
         next.forEach((deal) => {
           const old = prev.find((d) => d.id === deal.id);
-          if (!old) return;
+          if (!old) {
+            api.deals.create(deal).catch(() => {});
+            return;
+          }
           const changed =
             old.price !== deal.price ||
             old.originalPrice !== deal.originalPrice ||
             old.discount !== deal.discount ||
-            old.active !== deal.active;
+            old.active !== deal.active ||
+            old.name !== deal.name ||
+            JSON.stringify(old.contains) !== JSON.stringify(deal.contains);
           if (changed) {
             api.deals.patch(deal.id, {
+              name: deal.name,
+              contains: deal.contains,
               price: deal.price,
               originalPrice: deal.originalPrice,
               discount: deal.discount,
@@ -219,6 +229,13 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
             }).catch(() => {});
           }
         });
+
+        prev.forEach((d) => {
+          if (!nextIds.has(d.id)) {
+            api.deals.delete(d.id).catch(() => {});
+          }
+        });
+
         return next;
       });
     },

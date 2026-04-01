@@ -14,7 +14,7 @@ export function AdminExport() {
   async function handleExport() {
     setExportStatus("loading");
     try {
-      const token = sessionStorage.getItem("adminToken") || "";
+      const token = sessionStorage.getItem("admin_api_token") || "";
       const res = await fetch("/api/admin/export", {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -43,7 +43,7 @@ export function AdminExport() {
     try {
       const text = await file.text();
       const parsed = JSON.parse(text);
-      const token = sessionStorage.getItem("adminToken") || "";
+      const token = sessionStorage.getItem("admin_api_token") || "";
       const res = await fetch("/api/admin/import", {
         method: "POST",
         headers: {

@@ -169,8 +169,12 @@ export const api = {
   deals: {
     list: () => get<{ success: boolean; deals: ApiDeal[] }>("/deals"),
     listAll: () => get<{ success: boolean; deals: ApiDeal[] }>("/deals?all=true", true),
+    create: (data: ApiDeal) =>
+      post<{ success: boolean; deal: ApiDeal }>("/deals", data, true),
     patch: (id: string, data: Partial<ApiDeal>) =>
       patch<{ success: boolean; deal: ApiDeal }>(`/deals/${id}`, data, true),
+    delete: (id: string) =>
+      del<{ success: boolean }>(`/deals/${id}`, true),
   },
 
   settings: {
