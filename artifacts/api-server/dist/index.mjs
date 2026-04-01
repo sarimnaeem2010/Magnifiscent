@@ -57673,7 +57673,7 @@ var app_default = app;
 var rawPort = process.env["PORT"];
 var port = rawPort ? Number(rawPort) : 3e3;
 seedDatabase(db).then(() => {
-  app_default.listen(port, (err) => {
+  app_default.listen(port, "0.0.0.0", (err) => {
     if (err) {
       logger.error({ err }, "Error listening on port");
       process.exit(1);

@@ -7,7 +7,7 @@ const port = rawPort ? Number(rawPort) : 3000;
 
 seedDatabase(db)
   .then(() => {
-    app.listen(port, (err) => {
+    app.listen(port, "0.0.0.0", (err) => {
       if (err) {
         logger.error({ err }, "Error listening on port");
         process.exit(1);
