@@ -57664,7 +57664,7 @@ app.use(import_express12.default.json({ limit: "15mb" }));
 app.use(import_express12.default.urlencoded({ extended: true, limit: "15mb" }));
 app.use("/api", routes_default);
 app.use(import_express12.default.static(staticDir));
-app.get("*", (_req, res) => {
+app.get("/{*path}", (_req, res) => {
   res.sendFile(path.join(staticDir, "index.html"));
 });
 var app_default = app;

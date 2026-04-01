@@ -40,8 +40,8 @@ app.use("/api", router);
 // Serve built frontend static files in production
 app.use(express.static(staticDir));
 
-// SPA fallback — serve index.html for all non-API routes
-app.get("*", (_req, res) => {
+// SPA fallback — serve index.html for all non-API routes (Express 5 syntax)
+app.get("/{*path}", (_req, res) => {
   res.sendFile(path.join(staticDir, "index.html"));
 });
 
