@@ -14,6 +14,7 @@ import { AdminMedia } from "./pages/AdminMedia";
 import { AdminInstagram } from "./pages/AdminInstagram";
 import { AdminPages } from "./pages/AdminPages";
 import { AdminEmail } from "./pages/AdminEmail";
+import { AdminExport } from "./pages/AdminExport";
 
 function AdminRoutes() {
   const { isAuthenticated } = useAdmin();
@@ -36,6 +37,7 @@ function AdminRoutes() {
         <Route path="/admin/instagram" component={AdminInstagram} />
         <Route path="/admin/pages" component={AdminPages} />
         <Route path="/admin/email" component={AdminEmail} />
+        <Route path="/admin/export" component={AdminExport} />
         <Route component={AdminDashboard} />
       </Switch>
     </AdminLayout>

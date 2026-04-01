@@ -9,11 +9,13 @@ import dealsRouter from "./deals.js";
 import discountCodesRouter from "./discountCodes.js";
 import contentRouter from "./content.js";
 import adminRouter from "./admin.js";
+import exportImportRouter from "./exportImport.js";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
 router.use(adminRouter);
+router.use(exportImportRouter);
 router.use(emailConfigRouter);
 router.use(emailRouter);
 router.use(productsRouter);
