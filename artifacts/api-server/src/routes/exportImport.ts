@@ -108,12 +108,19 @@ router.post("/admin/import", requireAdminAuth, async (req, res) => {
     const { data } = body;
     const results: Record<string, number> = {};
 
+    // Strip the primary key from the SET clause — PostgreSQL does not allow
+    // updating the conflict target column itself.
+    function withoutId<T extends Record<string, unknown>>(row: T): Omit<T, "id"> {
+      const { id: _id, ...rest } = row;
+      return rest as Omit<T, "id">;
+    }
+
     if (Array.isArray(data.products) && data.products.length > 0) {
       for (const row of data.products) {
         await db
           .insert(productsTable)
           .values(row)
-          .onConflictDoUpdate({ target: productsTable.id, set: row });
+          .onConflictDoUpdate({ target: productsTable.id, set: withoutId(row) });
       }
       results.products = data.products.length;
     }
@@ -123,17 +130,18 @@ router.post("/admin/import", requireAdminAuth, async (req, res) => {
         await db
           .insert(dealsTable)
           .values(row)
-          .onConflictDoUpdate({ target: dealsTable.id, set: row });
+          .onConflictDoUpdate({ target: dealsTable.id, set: withoutId(row) });
       }
       results.deals = data.deals.length;
     }
 
     if (Array.isArray(data.dealImages) && data.dealImages.length > 0) {
       for (const row of data.dealImages) {
+        const { dealId: _dealId, ...rest } = row as Record<string, unknown>;
         await db
           .insert(dealImagesTable)
           .values(row)
-          .onConflictDoUpdate({ target: dealImagesTable.dealId, set: row });
+          .onConflictDoUpdate({ target: dealImagesTable.dealId, set: rest });
       }
       results.dealImages = data.dealImages.length;
     }
@@ -143,7 +151,7 @@ router.post("/admin/import", requireAdminAuth, async (req, res) => {
         await db
           .insert(storeSettingsTable)
           .values(row)
-          .onConflictDoUpdate({ target: storeSettingsTable.id, set: row });
+          .onConflictDoUpdate({ target: storeSettingsTable.id, set: withoutId(row) });
       }
       results.settings = data.settings.length;
     }
@@ -153,7 +161,7 @@ router.post("/admin/import", requireAdminAuth, async (req, res) => {
         await db
           .insert(extendedSettingsTable)
           .values(row)
-          .onConflictDoUpdate({ target: extendedSettingsTable.id, set: row });
+          .onConflictDoUpdate({ target: extendedSettingsTable.id, set: withoutId(row) });
       }
       results.extendedSettings = data.extendedSettings.length;
     }
@@ -163,7 +171,7 @@ router.post("/admin/import", requireAdminAuth, async (req, res) => {
         await db
           .insert(paymentSettingsTable)
           .values(row)
-          .onConflictDoUpdate({ target: paymentSettingsTable.id, set: row });
+          .onConflictDoUpdate({ target: paymentSettingsTable.id, set: withoutId(row) });
       }
       results.paymentSettings = data.paymentSettings.length;
     }
@@ -173,7 +181,7 @@ router.post("/admin/import", requireAdminAuth, async (req, res) => {
         await db
           .insert(emailConfigTable)
           .values(row)
-          .onConflictDoUpdate({ target: emailConfigTable.id, set: row });
+          .onConflictDoUpdate({ target: emailConfigTable.id, set: withoutId(row) });
       }
       results.emailConfig = data.emailConfig.length;
     }
@@ -183,7 +191,7 @@ router.post("/admin/import", requireAdminAuth, async (req, res) => {
         await db
           .insert(heroSlidesTable)
           .values(row)
-          .onConflictDoUpdate({ target: heroSlidesTable.id, set: row });
+          .onConflictDoUpdate({ target: heroSlidesTable.id, set: withoutId(row) });
       }
       results.heroSlides = data.heroSlides.length;
     }
@@ -193,7 +201,7 @@ router.post("/admin/import", requireAdminAuth, async (req, res) => {
         await db
           .insert(genderBannersTable)
           .values(row)
-          .onConflictDoUpdate({ target: genderBannersTable.id, set: row });
+          .onConflictDoUpdate({ target: genderBannersTable.id, set: withoutId(row) });
       }
       results.genderBanners = data.genderBanners.length;
     }
@@ -203,7 +211,7 @@ router.post("/admin/import", requireAdminAuth, async (req, res) => {
         await db
           .insert(notesImagesTable)
           .values(row)
-          .onConflictDoUpdate({ target: notesImagesTable.id, set: row });
+          .onConflictDoUpdate({ target: notesImagesTable.id, set: withoutId(row) });
       }
       results.notesImages = data.notesImages.length;
     }
@@ -213,7 +221,7 @@ router.post("/admin/import", requireAdminAuth, async (req, res) => {
         await db
           .insert(productImagesTable)
           .values(row)
-          .onConflictDoUpdate({ target: productImagesTable.id, set: row });
+          .onConflictDoUpdate({ target: productImagesTable.id, set: withoutId(row) });
       }
       results.productImages = data.productImages.length;
     }
@@ -223,7 +231,7 @@ router.post("/admin/import", requireAdminAuth, async (req, res) => {
         await db
           .insert(tickerMessagesTable)
           .values(row)
-          .onConflictDoUpdate({ target: tickerMessagesTable.id, set: row });
+          .onConflictDoUpdate({ target: tickerMessagesTable.id, set: withoutId(row) });
       }
       results.tickerMessages = data.tickerMessages.length;
     }
@@ -233,7 +241,7 @@ router.post("/admin/import", requireAdminAuth, async (req, res) => {
         await db
           .insert(instagramReelsTable)
           .values(row)
-          .onConflictDoUpdate({ target: instagramReelsTable.id, set: row });
+          .onConflictDoUpdate({ target: instagramReelsTable.id, set: withoutId(row) });
       }
       results.instagramReels = data.instagramReels.length;
     }
@@ -243,7 +251,7 @@ router.post("/admin/import", requireAdminAuth, async (req, res) => {
         await db
           .insert(homeHeadingsTable)
           .values(row)
-          .onConflictDoUpdate({ target: homeHeadingsTable.id, set: row });
+          .onConflictDoUpdate({ target: homeHeadingsTable.id, set: withoutId(row) });
       }
       results.homeHeadings = data.homeHeadings.length;
     }
@@ -253,7 +261,7 @@ router.post("/admin/import", requireAdminAuth, async (req, res) => {
         await db
           .insert(policyPagesTable)
           .values(row)
-          .onConflictDoUpdate({ target: policyPagesTable.id, set: row });
+          .onConflictDoUpdate({ target: policyPagesTable.id, set: withoutId(row) });
       }
       results.policyPages = data.policyPages.length;
     }
@@ -263,7 +271,7 @@ router.post("/admin/import", requireAdminAuth, async (req, res) => {
         await db
           .insert(discountCodesTable)
           .values(row)
-          .onConflictDoUpdate({ target: discountCodesTable.id, set: row });
+          .onConflictDoUpdate({ target: discountCodesTable.id, set: withoutId(row) });
       }
       results.discountCodes = data.discountCodes.length;
     }

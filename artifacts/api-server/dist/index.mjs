@@ -69167,6 +69167,11 @@ router11.get("/admin/export", requireAdminAuth, async (_req, res) => {
 });
 router11.post("/admin/import", requireAdminAuth, async (req, res) => {
   try {
+    let withoutId2 = function(row) {
+      const { id: _id, ...rest } = row;
+      return rest;
+    };
+    var withoutId = withoutId2;
     const body = req.body;
     if (!body?.data) {
       res.status(400).json({ success: false, error: "Invalid import file: missing data field" });
@@ -69176,97 +69181,98 @@ router11.post("/admin/import", requireAdminAuth, async (req, res) => {
     const results = {};
     if (Array.isArray(data.products) && data.products.length > 0) {
       for (const row of data.products) {
-        await db.insert(productsTable).values(row).onConflictDoUpdate({ target: productsTable.id, set: row });
+        await db.insert(productsTable).values(row).onConflictDoUpdate({ target: productsTable.id, set: withoutId2(row) });
       }
       results.products = data.products.length;
     }
     if (Array.isArray(data.deals) && data.deals.length > 0) {
       for (const row of data.deals) {
-        await db.insert(dealsTable).values(row).onConflictDoUpdate({ target: dealsTable.id, set: row });
+        await db.insert(dealsTable).values(row).onConflictDoUpdate({ target: dealsTable.id, set: withoutId2(row) });
       }
       results.deals = data.deals.length;
     }
     if (Array.isArray(data.dealImages) && data.dealImages.length > 0) {
       for (const row of data.dealImages) {
-        await db.insert(dealImagesTable).values(row).onConflictDoUpdate({ target: dealImagesTable.dealId, set: row });
+        const { dealId: _dealId, ...rest } = row;
+        await db.insert(dealImagesTable).values(row).onConflictDoUpdate({ target: dealImagesTable.dealId, set: rest });
       }
       results.dealImages = data.dealImages.length;
     }
     if (Array.isArray(data.settings) && data.settings.length > 0) {
       for (const row of data.settings) {
-        await db.insert(storeSettingsTable).values(row).onConflictDoUpdate({ target: storeSettingsTable.id, set: row });
+        await db.insert(storeSettingsTable).values(row).onConflictDoUpdate({ target: storeSettingsTable.id, set: withoutId2(row) });
       }
       results.settings = data.settings.length;
     }
     if (Array.isArray(data.extendedSettings) && data.extendedSettings.length > 0) {
       for (const row of data.extendedSettings) {
-        await db.insert(extendedSettingsTable).values(row).onConflictDoUpdate({ target: extendedSettingsTable.id, set: row });
+        await db.insert(extendedSettingsTable).values(row).onConflictDoUpdate({ target: extendedSettingsTable.id, set: withoutId2(row) });
       }
       results.extendedSettings = data.extendedSettings.length;
     }
     if (Array.isArray(data.paymentSettings) && data.paymentSettings.length > 0) {
       for (const row of data.paymentSettings) {
-        await db.insert(paymentSettingsTable).values(row).onConflictDoUpdate({ target: paymentSettingsTable.id, set: row });
+        await db.insert(paymentSettingsTable).values(row).onConflictDoUpdate({ target: paymentSettingsTable.id, set: withoutId2(row) });
       }
       results.paymentSettings = data.paymentSettings.length;
     }
     if (Array.isArray(data.emailConfig) && data.emailConfig.length > 0) {
       for (const row of data.emailConfig) {
-        await db.insert(emailConfigTable).values(row).onConflictDoUpdate({ target: emailConfigTable.id, set: row });
+        await db.insert(emailConfigTable).values(row).onConflictDoUpdate({ target: emailConfigTable.id, set: withoutId2(row) });
       }
       results.emailConfig = data.emailConfig.length;
     }
     if (Array.isArray(data.heroSlides) && data.heroSlides.length > 0) {
       for (const row of data.heroSlides) {
-        await db.insert(heroSlidesTable).values(row).onConflictDoUpdate({ target: heroSlidesTable.id, set: row });
+        await db.insert(heroSlidesTable).values(row).onConflictDoUpdate({ target: heroSlidesTable.id, set: withoutId2(row) });
       }
       results.heroSlides = data.heroSlides.length;
     }
     if (Array.isArray(data.genderBanners) && data.genderBanners.length > 0) {
       for (const row of data.genderBanners) {
-        await db.insert(genderBannersTable).values(row).onConflictDoUpdate({ target: genderBannersTable.id, set: row });
+        await db.insert(genderBannersTable).values(row).onConflictDoUpdate({ target: genderBannersTable.id, set: withoutId2(row) });
       }
       results.genderBanners = data.genderBanners.length;
     }
     if (Array.isArray(data.notesImages) && data.notesImages.length > 0) {
       for (const row of data.notesImages) {
-        await db.insert(notesImagesTable).values(row).onConflictDoUpdate({ target: notesImagesTable.id, set: row });
+        await db.insert(notesImagesTable).values(row).onConflictDoUpdate({ target: notesImagesTable.id, set: withoutId2(row) });
       }
       results.notesImages = data.notesImages.length;
     }
     if (Array.isArray(data.productImages) && data.productImages.length > 0) {
       for (const row of data.productImages) {
-        await db.insert(productImagesTable).values(row).onConflictDoUpdate({ target: productImagesTable.id, set: row });
+        await db.insert(productImagesTable).values(row).onConflictDoUpdate({ target: productImagesTable.id, set: withoutId2(row) });
       }
       results.productImages = data.productImages.length;
     }
     if (Array.isArray(data.tickerMessages) && data.tickerMessages.length > 0) {
       for (const row of data.tickerMessages) {
-        await db.insert(tickerMessagesTable).values(row).onConflictDoUpdate({ target: tickerMessagesTable.id, set: row });
+        await db.insert(tickerMessagesTable).values(row).onConflictDoUpdate({ target: tickerMessagesTable.id, set: withoutId2(row) });
       }
       results.tickerMessages = data.tickerMessages.length;
     }
     if (Array.isArray(data.instagramReels) && data.instagramReels.length > 0) {
       for (const row of data.instagramReels) {
-        await db.insert(instagramReelsTable).values(row).onConflictDoUpdate({ target: instagramReelsTable.id, set: row });
+        await db.insert(instagramReelsTable).values(row).onConflictDoUpdate({ target: instagramReelsTable.id, set: withoutId2(row) });
       }
       results.instagramReels = data.instagramReels.length;
     }
     if (Array.isArray(data.homeHeadings) && data.homeHeadings.length > 0) {
       for (const row of data.homeHeadings) {
-        await db.insert(homeHeadingsTable).values(row).onConflictDoUpdate({ target: homeHeadingsTable.id, set: row });
+        await db.insert(homeHeadingsTable).values(row).onConflictDoUpdate({ target: homeHeadingsTable.id, set: withoutId2(row) });
       }
       results.homeHeadings = data.homeHeadings.length;
     }
     if (Array.isArray(data.policyPages) && data.policyPages.length > 0) {
       for (const row of data.policyPages) {
-        await db.insert(policyPagesTable).values(row).onConflictDoUpdate({ target: policyPagesTable.id, set: row });
+        await db.insert(policyPagesTable).values(row).onConflictDoUpdate({ target: policyPagesTable.id, set: withoutId2(row) });
       }
       results.policyPages = data.policyPages.length;
     }
     if (Array.isArray(data.discountCodes) && data.discountCodes.length > 0) {
       for (const row of data.discountCodes) {
-        await db.insert(discountCodesTable).values(row).onConflictDoUpdate({ target: discountCodesTable.id, set: row });
+        await db.insert(discountCodesTable).values(row).onConflictDoUpdate({ target: discountCodesTable.id, set: withoutId2(row) });
       }
       results.discountCodes = data.discountCodes.length;
     }
