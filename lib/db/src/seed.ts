@@ -1,14 +1,18 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
+import { sql } from "drizzle-orm";
 import * as schema from "./schema/index.js";
 import { CATALOG_PRODUCTS, CATALOG_DEALS, CATALOG_TICKER_MESSAGES } from "./catalog.js";
 
 const { Pool } = pg;
 
+const WOMEN_PLACEHOLDER = "/noir-product.png";
+const MEN_PLACEHOLDER = "/storm-product.png";
+
 const PRODUCTS: schema.InsertProduct[] = CATALOG_PRODUCTS.map((p) => ({
   ...p,
-  img: "",
-  img2: "",
+  img: p.category === "men" ? MEN_PLACEHOLDER : WOMEN_PLACEHOLDER,
+  img2: p.category === "men" ? MEN_PLACEHOLDER : WOMEN_PLACEHOLDER,
 }));
 
 const DEALS: schema.InsertDeal[] = CATALOG_DEALS.map((d) => ({ ...d, contains: [...d.contains] }));
@@ -218,7 +222,13 @@ export async function seedDatabase(db: DrizzleDb): Promise<void> {
     await db.insert(schema.productsTable).values(PRODUCTS);
     console.log(`Inserted ${PRODUCTS.length} products`);
   } else {
-    console.log(`Products already seeded (${existingProducts.length} found), skipping`);
+    console.log(`Products already seeded (${existingProducts.length} found), patching empty images`);
+    for (const p of PRODUCTS) {
+      await db.update(schema.productsTable)
+        .set({ img: p.img, img2: p.img2 })
+        .where(sql`${schema.productsTable.id} = ${p.id} AND (${schema.productsTable.img} = '' OR ${schema.productsTable.img2} = '')`);
+    }
+    console.log("Placeholder images applied to any products with empty img fields");
   }
 
   const existingDeals = await db.select({ id: schema.dealsTable.id }).from(schema.dealsTable);
