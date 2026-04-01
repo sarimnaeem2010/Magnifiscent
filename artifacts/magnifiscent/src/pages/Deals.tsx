@@ -147,11 +147,9 @@ export default function Deals() {
 
   const adminDealMap = new Map<string, ApiDeal>(apiDeals.map((d) => [d.id, d]));
 
+  // API now returns only active deals — filter BASE_DEALS to those present in API response
   const activeDeals: DealWithPrice[] = BASE_DEALS
-    .filter((d) => {
-      const admin = adminDealMap.get(d.id);
-      return admin ? admin.active : true;
-    })
+    .filter((d) => apiDeals.length === 0 || adminDealMap.has(d.id))
     .map((d) => {
       const admin = adminDealMap.get(d.id);
       const price = admin ? admin.price : d.price;

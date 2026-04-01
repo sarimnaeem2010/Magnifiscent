@@ -9,7 +9,7 @@ import menBannerImg from "@assets/Gemini_Generated_Image_gthzqdgthzqdgthz.png";
 import { useCart } from "@/context/CartContext";
 import { useLocation } from "wouter";
 import { api } from "@/lib/api";
-import type { ApiProduct } from "@/lib/api";
+import type { ApiProduct, ApiDeal } from "@/lib/api";
 import { DEFAULT_HOME_HEADINGS } from "@/data/liveData";
 import type { HomeHeadings, HeroSlide } from "@/data/liveData";
 
@@ -305,6 +305,7 @@ export default function Home() {
   const [notesImgs, setNotesImgs] = useState<Record<string, string>>({});
   const [headings, setHeadings] = useState<HomeHeadings>({ ...DEFAULT_HOME_HEADINGS });
   const [dealImgs, setDealImgs] = useState<Record<string, { img1?: string; img2?: string }>>({});
+  const [apiDeals, setApiDeals] = useState<ApiDeal[]>([]);
   const [instaPosts, setInstaPosts] = useState(
     INSTAGRAM_POSTS.map((p) => ({ ...p, url: "https://instagram.com" }))
   );
@@ -318,6 +319,7 @@ export default function Home() {
       if (res.success && res.headings) setHeadings({ ...DEFAULT_HOME_HEADINGS, ...res.headings });
     }).catch(() => {});
     api.content.dealImages.get().then((res) => { if (res.success) setDealImgs(res.dealImages); }).catch(() => {});
+    api.deals.list().then((res) => { if (res.success) setApiDeals(res.deals); }).catch(() => {});
     api.content.instagramReels.get().then((res) => {
       if (res.success && res.reels.length > 0) {
         setInstaPosts(res.reels.map((r) => ({ img: r.img, likes: r.likes, tag: r.label, label: r.label, url: r.url })));
@@ -352,19 +354,34 @@ export default function Home() {
               View All
             </button>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {DEALS.map((d) => {
-                const custom = dealImgs[d.id];
-                return (
-                  <DealCard
-                    key={d.id}
-                    {...d}
-                    img1={custom?.img1 || d.img1}
-                    img2={custom?.img2 || d.img2}
-                  />
-                );
-              })}
-          </div>
+          {(() => {
+            const activeDealIds = apiDeals.length > 0
+              ? new Set(apiDeals.map((d) => d.id))
+              : null;
+            const visibleDeals = activeDealIds
+              ? DEALS.filter((d) => activeDealIds.has(d.id))
+              : DEALS;
+            return visibleDeals.length === 0 ? (
+              <p className="text-center text-gray-400 py-10 text-sm">No active deals at the moment. Check back soon!</p>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {visibleDeals.map((d) => {
+                  const api_deal = apiDeals.find((a) => a.id === d.id);
+                  const custom = dealImgs[d.id];
+                  return (
+                    <DealCard
+                      key={d.id}
+                      {...d}
+                      price={api_deal ? `Rs. ${api_deal.price.toFixed(2)}` : d.price}
+                      originalPrice={api_deal ? `Rs. ${api_deal.originalPrice.toFixed(2)}` : d.originalPrice}
+                      img1={custom?.img1 || d.img1}
+                      img2={custom?.img2 || d.img2}
+                    />
+                  );
+                })}
+              </div>
+            );
+          })()}
         </div>
       </section>
 

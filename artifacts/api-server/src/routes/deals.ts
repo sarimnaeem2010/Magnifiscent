@@ -6,10 +6,27 @@ import { requireAdminAuth } from "../middleware/auth.js";
 
 const router = Router();
 
-/* GET /api/deals — public; returns all deals */
-router.get("/deals", async (_req, res) => {
+/* GET /api/deals — public returns active only; admin with ?all=true returns all */
+router.get("/deals", async (req, res) => {
   try {
-    const deals = await db.select().from(dealsTable).orderBy(dealsTable.id);
+    const wantsAll = req.query.all === "true";
+    if (wantsAll) {
+      requireAdminAuth(req, res, async () => {
+        try {
+          const deals = await db.select().from(dealsTable).orderBy(dealsTable.id);
+          res.json({ success: true, deals });
+        } catch (err) {
+          const message = err instanceof Error ? err.message : "Unknown error";
+          res.status(500).json({ success: false, error: message });
+        }
+      });
+      return;
+    }
+    const deals = await db
+      .select()
+      .from(dealsTable)
+      .where(eq(dealsTable.active, true))
+      .orderBy(dealsTable.id);
     res.json({ success: true, deals });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";

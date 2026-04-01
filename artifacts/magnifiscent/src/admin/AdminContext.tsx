@@ -85,7 +85,8 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (dealsRes.status === "fulfilled" && dealsRes.value.success) {
-        setDealsState(dealsRes.value.deals);
+        const allDealsRes = await api.deals.listAll().catch(() => dealsRes.value);
+        setDealsState(allDealsRes.deals ?? dealsRes.value.deals);
       }
 
       if (settingsRes.status === "fulfilled" && settingsRes.value.success) {
