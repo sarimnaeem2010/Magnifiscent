@@ -57672,17 +57672,17 @@ var app_default = app;
 // src/index.ts
 var rawPort = process.env["PORT"];
 var port = rawPort ? Number(rawPort) : 3e3;
-seedDatabase(db).then(() => {
-  app_default.listen(port, "0.0.0.0", (err) => {
-    if (err) {
-      logger.error({ err }, "Error listening on port");
-      process.exit(1);
-    }
-    logger.info({ port }, "Server listening");
+app_default.listen(port, "0.0.0.0", (err) => {
+  if (err) {
+    logger.error({ err }, "Error listening on port");
+    process.exit(1);
+  }
+  logger.info({ port }, "Server listening");
+  seedDatabase(db).then(() => {
+    logger.info("Database seeding complete");
+  }).catch((err2) => {
+    logger.error({ err: err2 }, "Database seeding failed");
   });
-}).catch((err) => {
-  logger.error({ err }, "Database seeding failed, aborting startup");
-  process.exit(1);
 });
 /*! Bundled license information:
 
