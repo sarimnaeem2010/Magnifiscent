@@ -625,7 +625,7 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-6">
             {[
-              { icon: "🚚", title: "Free Shipping", sub: "On orders above Rs. 100" },
+              { icon: "🚚", title: "Free Shipping", sub: "On orders above Rs. 5000" },
               { icon: "⭐", title: "Thousands Happy Customers", sub: "Verified Reviews" },
               { icon: "🔄", title: "20 Day Easy Returns", sub: "Hassle-free policy" },
               { icon: "📞", title: "Dedicated Support", sub: "Human representative to assist you" },
