@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { eq, and } from "drizzle-orm";
+import { eq, and, sql } from "drizzle-orm";
 import { db } from "../lib/db.js";
 import { productsTable } from "@workspace/db";
 import { requireAdminAuth } from "../middleware/auth.js";
@@ -56,14 +56,17 @@ router.get("/products/:slug", async (req, res) => {
 /* POST /api/products — admin auth required; create a new product */
 router.post("/products", requireAdminAuth, async (req, res) => {
   try {
-    const { id, name, slug, img, img2, price, priceNum, originalPrice, originalPriceNum,
+    const { name, slug, img, img2, price, priceNum, originalPrice, originalPriceNum,
       reviews, rating, category, desc, notes, size, stock, active } = req.body;
-    if (!id || !name || !slug || !category) {
-      res.status(400).json({ success: false, error: "Missing required fields: id, name, slug, category" });
+    if (!name || !slug || !category) {
+      res.status(400).json({ success: false, error: "Missing required fields: name, slug, category" });
       return;
     }
+    /* Auto-generate next ID server-side to avoid duplicate key conflicts */
+    const [{ maxId }] = await db.select({ maxId: sql<number>`COALESCE(MAX(id), 0)` }).from(productsTable);
+    const nextId = Number(maxId) + 1;
     const [created] = await db.insert(productsTable).values({
-      id: Number(id), name, slug, img: img ?? "", img2: img2 ?? "",
+      id: nextId, name, slug, img: img ?? "", img2: img2 ?? "",
       price: price ?? "Rs. 0.00", priceNum: priceNum ?? 0,
       originalPrice: originalPrice ?? "Rs. 0.00", originalPriceNum: originalPriceNum ?? 0,
       reviews: reviews ?? 0, rating: rating ?? 5, category,
