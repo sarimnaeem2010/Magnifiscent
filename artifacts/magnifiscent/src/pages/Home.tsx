@@ -355,15 +355,8 @@ export default function Home() {
             </button>
           </div>
           {(() => {
-            const activeDealIds = apiDeals.length > 0
-              ? new Set(apiDeals.map((d) => d.id))
-              : null;
-            const visibleDeals = activeDealIds
-              ? DEALS.filter((d) => activeDealIds.has(d.id))
-              : DEALS;
-            return visibleDeals.length === 0 ? (
-              <p className="text-center text-gray-400 py-10 text-sm">No active deals at the moment. Check back soon!</p>
-            ) : (
+            const visibleDeals = DEALS.slice(0, 4);
+            return (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {visibleDeals.map((d) => {
                   const api_deal = apiDeals.find((a) => a.id === d.id);
