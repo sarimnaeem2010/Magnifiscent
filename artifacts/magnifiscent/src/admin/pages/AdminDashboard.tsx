@@ -119,7 +119,7 @@ function RevenueChart({ data }: { data: { date: string; revenue: number }[] }) {
           }}
         >
           <div className="font-semibold">{tooltip.date}</div>
-          <div>${tooltip.revenue.toFixed(2)}</div>
+          <div>PKR {tooltip.revenue.toFixed(2)}</div>
         </div>
       )}
     </div>
@@ -165,7 +165,7 @@ export function AdminDashboard() {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Total Revenue" value={`$${stats.total.toLocaleString()}`} sub="All time" icon={DollarSign} color="#10b981" />
+        <StatCard label="Total Revenue" value={`PKR ${stats.total.toLocaleString()}`} sub="All time" icon={DollarSign} color="#10b981" />
         <StatCard label="Total Orders" value={String(orders.length)} sub={`${stats.delivered} delivered`} icon={ShoppingBag} color="#3b82f6" />
         <StatCard label="Pending Orders" value={String(stats.pending)} sub="Awaiting action" icon={Clock} color="#f59e0b" />
         <StatCard label="Products" value={String(products.length)} sub={`${products.filter((p) => p.active).length} active`} icon={Package} color="#8b5cf6" />

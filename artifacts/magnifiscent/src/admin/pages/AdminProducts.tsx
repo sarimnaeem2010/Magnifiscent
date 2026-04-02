@@ -151,7 +151,7 @@ function Modal({ title, onClose, onSave, form, setForm }: {
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Price ($)</label>
+              <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Price (PKR)</label>
               <input
                 type="number"
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
@@ -161,7 +161,7 @@ function Modal({ title, onClose, onSave, form, setForm }: {
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Original Price ($)</label>
+              <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Original Price (PKR)</label>
               <input
                 type="number"
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"

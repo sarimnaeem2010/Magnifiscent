@@ -399,7 +399,7 @@ export default function Home() {
               </div>
               <div className="text-center mt-3">
                 <p className="font-bold text-base uppercase tracking-widest text-gray-900">MEN</p>
-                <p className="text-sm text-gray-400 mt-0.5">1 product</p>
+                {(() => { const c = liveProducts.filter((p) => p.category?.toLowerCase() === "men").length; return <p className="text-sm text-gray-400 mt-0.5">{c} {c === 1 ? "product" : "products"}</p>; })()}
               </div>
             </button>
             <button
@@ -415,7 +415,7 @@ export default function Home() {
               </div>
               <div className="text-center mt-3">
                 <p className="font-bold text-base uppercase tracking-widest text-gray-900">WOMEN</p>
-                <p className="text-sm text-gray-400 mt-0.5">5 products</p>
+                {(() => { const c = liveProducts.filter((p) => p.category?.toLowerCase() === "women").length; return <p className="text-sm text-gray-400 mt-0.5">{c} {c === 1 ? "product" : "products"}</p>; })()}
               </div>
             </button>
           </div>

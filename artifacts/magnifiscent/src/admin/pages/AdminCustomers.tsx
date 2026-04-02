@@ -49,8 +49,8 @@ export function AdminCustomers() {
       <div className="grid grid-cols-3 gap-4">
         {[
           { label: "Total Customers", value: customers.length },
-          { label: "Total Revenue", value: `$${totalRevenue.toFixed(0)}` },
-          { label: "Avg. Order Value", value: `$${avgOrderValue.toFixed(0)}` },
+          { label: "Total Revenue", value: `PKR ${totalRevenue.toFixed(0)}` },
+          { label: "Avg. Order Value", value: `PKR ${avgOrderValue.toFixed(0)}` },
         ].map((s) => (
           <div key={s.label} className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 text-center">
             <p className="text-2xl font-bold text-gray-900">{s.value}</p>
@@ -103,7 +103,7 @@ export function AdminCustomers() {
                       {c.orderCount}
                     </span>
                   </td>
-                  <td className="px-5 py-3 text-right font-bold text-gray-900">${c.totalSpent.toFixed(2)}</td>
+                  <td className="px-5 py-3 text-right font-bold text-gray-900">PKR {c.totalSpent.toFixed(2)}</td>
                   <td className="px-5 py-3 text-gray-400">{c.lastOrder}</td>
                 </tr>
               ))}

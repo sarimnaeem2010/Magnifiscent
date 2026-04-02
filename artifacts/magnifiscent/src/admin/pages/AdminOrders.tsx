@@ -185,7 +185,7 @@ export function AdminOrders() {
                     {o.items.map((i) => i.productName).join(", ").slice(0, 30)}{o.items.length > 1 ? "…" : ""}
                   </td>
                   <td className="px-5 py-3 text-gray-400">{o.date}</td>
-                  <td className="px-5 py-3 text-right font-semibold">${o.total.toFixed(2)}</td>
+                  <td className="px-5 py-3 text-right font-semibold">PKR {o.total.toFixed(2)}</td>
                   <td className="px-5 py-3">
                     <span className={`inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full ${statusColor[o.status]}`}>
                       {o.status}
