@@ -9,7 +9,7 @@ import menBannerImg from "@assets/Gemini_Generated_Image_gthzqdgthzqdgthz.png";
 import { useCart } from "@/context/CartContext";
 import { useLocation } from "wouter";
 import { api } from "@/lib/api";
-import type { ApiProduct, ApiDeal } from "@/lib/api";
+import type { ApiProduct } from "@/lib/api";
 import { DEFAULT_HOME_HEADINGS } from "@/data/liveData";
 import type { HomeHeadings, HeroSlide } from "@/data/liveData";
 
@@ -171,39 +171,6 @@ function ProductCard({ product }: { product: ApiProduct }) {
   );
 }
 
-function DealCard({ name, img1, img2, price, originalPrice, reviews, desc }: { name: string; img1: string; img2: string; price: string; originalPrice: string; reviews: number; desc: string }) {
-  const [hovered, setHovered] = useState(false);
-  const [, navigate] = useLocation();
-
-  return (
-    <div
-      className="cursor-pointer"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onClick={() => navigate("/deals")}
-    >
-      <div className="relative overflow-hidden rounded-xl bg-gray-900" style={{ aspectRatio: "1/1" }}>
-        <img src={img1} alt={name} className="w-full h-full object-cover absolute inset-0"
-          style={{ opacity: hovered ? 0 : 1, transition: "opacity 0.4s ease" }} />
-        <img src={img2} alt={name} className="w-full h-full object-cover absolute inset-0"
-          style={{ opacity: hovered ? 1 : 0, transition: "opacity 0.4s ease" }} />
-      </div>
-      <div className="pt-2.5 pb-2">
-        <div className="flex items-center gap-1 mb-1">
-          <StarRating count={5} />
-          <span className="text-gray-400 text-xs ml-1">({reviews})</span>
-        </div>
-        <h3 className="font-bold text-sm text-gray-900 mb-0.5">{name}</h3>
-        <p className="text-xs text-gray-500 leading-snug mb-1.5 line-clamp-1">{desc}</p>
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-bold text-gray-900">{price}</span>
-          <span className="text-xs text-gray-400 line-through">{originalPrice}</span>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 /* ─── helpers ─── */
 function extractReelShortcode(url: string): string | null {
   if (!url) return null;
@@ -261,8 +228,6 @@ export default function Home() {
   const [genderBanners, setGenderBanners] = useState<{ men: string; women: string }>({ men: "", women: "" });
   const [notesImgs, setNotesImgs] = useState<Record<string, string>>({});
   const [headings, setHeadings] = useState<HomeHeadings>({ ...DEFAULT_HOME_HEADINGS });
-  const [dealImgs, setDealImgs] = useState<Record<string, { img1?: string; img2?: string }>>({});
-  const [apiDeals, setApiDeals] = useState<ApiDeal[]>([]);
   const [instaPosts, setInstaPosts] = useState(
     INSTAGRAM_POSTS.map((p) => ({ ...p, url: "https://instagram.com" }))
   );
@@ -275,8 +240,6 @@ export default function Home() {
     api.content.homeHeadings.get().then((res) => {
       if (res.success && res.headings) setHeadings({ ...DEFAULT_HOME_HEADINGS, ...res.headings });
     }).catch(() => {});
-    api.content.dealImages.get().then((res) => { if (res.success) setDealImgs(res.dealImages); }).catch(() => {});
-    api.deals.list().then((res) => { if (res.success) setApiDeals(res.deals); }).catch(() => {});
     api.content.instagramReels.get().then((res) => {
       if (res.success && res.reels.length > 0) {
         setInstaPosts(res.reels.map((r) => ({ img: r.img, likes: r.likes, tag: r.label, label: r.label, url: r.url })));
@@ -298,44 +261,6 @@ export default function Home() {
 
       {/* ── Hero Banner / Slider ── */}
       <HeroBanner />
-
-      {/* ── Deals & Combo ── */}
-      <section id="deals" className="py-10 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-end justify-between mb-6">
-            <div>
-              <h2 className="section-title mb-1">{headings.deals}</h2>
-              <p className="text-sm text-gray-400">{headings.dealsSubtitle}</p>
-            </div>
-            <button onClick={() => navigate("/deals")} className="text-sm font-semibold text-gray-700 hover:text-black underline underline-offset-2 bg-transparent border-none cursor-pointer">
-              View All
-            </button>
-          </div>
-          {(() => {
-            const visibleDeals = apiDeals.filter((d) => d.active).slice(0, 4);
-            if (visibleDeals.length === 0) return null;
-            return (
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {visibleDeals.map((d) => {
-                  const custom = dealImgs[d.id];
-                  return (
-                    <DealCard
-                      key={d.id}
-                      name={d.name}
-                      price={`Rs. ${d.price.toFixed(2)}`}
-                      originalPrice={`Rs. ${d.originalPrice.toFixed(2)}`}
-                      img1={custom?.img1 || ""}
-                      img2={custom?.img2 || ""}
-                      reviews={0}
-                      desc=""
-                    />
-                  );
-                })}
-              </div>
-            );
-          })()}
-        </div>
-      </section>
 
       {/* ── Shop By Gender ── */}
       <section className="py-10 border-b border-gray-100">
