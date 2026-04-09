@@ -9,7 +9,7 @@ import menBannerImg from "@assets/Gemini_Generated_Image_gthzqdgthzqdgthz.png";
 import { useCart } from "@/context/CartContext";
 import { useLocation } from "wouter";
 import { api } from "@/lib/api";
-import type { ApiProduct } from "@/lib/api";
+import type { ApiProduct, ApiDeal } from "@/lib/api";
 import { DEFAULT_HOME_HEADINGS } from "@/data/liveData";
 import type { HomeHeadings, HeroSlide } from "@/data/liveData";
 
@@ -171,6 +171,64 @@ function ProductCard({ product }: { product: ApiProduct }) {
   );
 }
 
+/* ─── Deal types & card ─── */
+type LiveDeal = {
+  id: string;
+  name: string;
+  img1: string;
+  img2: string;
+  price: number;
+  originalPrice: number;
+  savings: number;
+  discount: number;
+  contains: string[];
+};
+
+function HomeDealCard({ deal }: { deal: LiveDeal }) {
+  const { addItem } = useCart();
+  const matchedProduct = PRODUCTS.find((p) =>
+    deal.contains.some((c) => c.toLowerCase() === p.name.toLowerCase())
+  );
+
+  return (
+    <div className="product-card cursor-pointer">
+      <div className="relative overflow-hidden bg-gray-50" style={{ aspectRatio: "3/4" }}>
+        {deal.discount > 0 && <span className="sale-badge">{deal.discount}% OFF</span>}
+        <img src={deal.img1} alt={deal.name} className="product-img-main w-full h-full object-cover" />
+        <img src={deal.img2} alt={deal.name} className="product-img-alt w-full h-full object-cover" />
+        {matchedProduct && (
+          <button
+            className="quickshop-btn"
+            onClick={(e) => { e.stopPropagation(); addItem(matchedProduct); }}
+          >
+            Quick Add
+          </button>
+        )}
+      </div>
+      <div className="pt-3 pb-2">
+        {deal.savings > 0 && (
+          <p className="text-xs text-green-600 font-bold mb-1">Save Rs. {deal.savings.toFixed(2)}</p>
+        )}
+        <div className="flex items-center gap-1 mb-1">
+          <StarRating count={5} />
+        </div>
+        <h3 className="font-bold text-sm text-gray-900 mb-1">{deal.name}</h3>
+        <div className="flex flex-wrap gap-1 mb-2">
+          {deal.contains.map((c) => (
+            <span key={c} className="text-[10px] border border-gray-200 px-2 py-0.5 text-gray-500 font-medium">{c}</span>
+          ))}
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-bold text-gray-900">Rs. {deal.price.toFixed(2)}</span>
+          {deal.originalPrice > deal.price && (
+            <span className="text-xs text-gray-400 line-through">Rs. {deal.originalPrice.toFixed(2)}</span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ─── helpers ─── */
 function extractReelShortcode(url: string): string | null {
   if (!url) return null;
@@ -228,6 +286,8 @@ export default function Home() {
   const [genderBanners, setGenderBanners] = useState<{ men: string; women: string }>({ men: "", women: "" });
   const [notesImgs, setNotesImgs] = useState<Record<string, string>>({});
   const [headings, setHeadings] = useState<HomeHeadings>({ ...DEFAULT_HOME_HEADINGS });
+  const [apiDeals, setApiDeals] = useState<ApiDeal[]>([]);
+  const [dealImgs, setDealImgs] = useState<Record<string, { img1?: string; img2?: string }>>({});
   const [instaPosts, setInstaPosts] = useState(
     INSTAGRAM_POSTS.map((p) => ({ ...p, url: "https://instagram.com" }))
   );
@@ -239,6 +299,10 @@ export default function Home() {
     api.content.notesImages.get().then((res) => { if (res.success) setNotesImgs(res.notesImages); }).catch(() => {});
     api.content.homeHeadings.get().then((res) => {
       if (res.success && res.headings) setHeadings({ ...DEFAULT_HOME_HEADINGS, ...res.headings });
+    }).catch(() => {});
+    Promise.all([api.deals.list(), api.content.dealImages.get()]).then(([dealsRes, imgsRes]) => {
+      if (dealsRes.success) setApiDeals(dealsRes.deals);
+      if (imgsRes.success) setDealImgs(imgsRes.dealImages);
     }).catch(() => {});
     api.content.instagramReels.get().then((res) => {
       if (res.success && res.reels.length > 0) {
@@ -261,6 +325,44 @@ export default function Home() {
 
       {/* ── Hero Banner / Slider ── */}
       <HeroBanner />
+
+      {/* ── Deals & Combo ── */}
+      {apiDeals.filter((d) => d.active).length > 0 && (() => {
+        const activeDeals: LiveDeal[] = apiDeals.filter((d) => d.active).map((d) => {
+          const imgs = dealImgs[d.id] || {};
+          return {
+            id: d.id,
+            name: d.name,
+            img1: imgs.img1 || "",
+            img2: imgs.img2 || "",
+            price: d.price,
+            originalPrice: d.originalPrice,
+            savings: d.originalPrice - d.price,
+            discount: d.discount,
+            contains: d.contains,
+          };
+        });
+        return (
+          <section id="deals" className="py-10 border-b border-gray-100">
+            <div className="max-w-7xl mx-auto px-4">
+              <div className="flex items-end justify-between mb-6">
+                <div>
+                  <h2 className="section-title mb-1">{headings.deals || "Deals & Combo"}</h2>
+                  <p className="text-sm text-gray-400">{headings.dealsSubtitle || "Exclusive paired sets for every mood"}</p>
+                </div>
+                <button onClick={() => navigate("/deals")} className="text-sm font-semibold text-gray-700 hover:text-black underline underline-offset-2 bg-transparent border-none cursor-pointer">
+                  View All
+                </button>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
+                {activeDeals.slice(0, 4).map((d) => (
+                  <HomeDealCard key={d.id} deal={d} />
+                ))}
+              </div>
+            </div>
+          </section>
+        );
+      })()}
 
       {/* ── Shop By Gender ── */}
       <section className="py-10 border-b border-gray-100">
