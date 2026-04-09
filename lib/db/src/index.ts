@@ -10,7 +10,14 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+// Explicitly set sslmode=verify-full to avoid pg deprecation warning
+// (modes 'require', 'prefer', 'verify-ca' are deprecated aliases for 'verify-full')
+const _dbUrl = new URL(process.env.DATABASE_URL);
+if (_dbUrl.searchParams.has("sslmode")) {
+  _dbUrl.searchParams.set("sslmode", "verify-full");
+}
+
+export const pool = new Pool({ connectionString: _dbUrl.toString() });
 export const db = drizzle(pool, { schema });
 
 export * from "./schema";

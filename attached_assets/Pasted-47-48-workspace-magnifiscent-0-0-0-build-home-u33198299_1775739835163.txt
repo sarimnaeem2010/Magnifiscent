@@ -1,0 +1,85 @@
+47
+
+
+48
+
+> @workspace/magnifiscent@0.0.0 build /home/u331982998/domains/magnifiscent.com.pk/public_html/.builds/source/repository/artifacts/magnifiscent
+
+49
+
+> vite build --config vite.config.ts
+
+50
+
+
+51
+
+You are using Node.js 18.20.8. Vite requires Node.js version 20.19+ or 22.12+. Please upgrade your Node.js version.
+
+52
+
+failed to load config from /home/u331982998/domains/magnifiscent.com.pk/public_html/.builds/source/repository/artifacts/magnifiscent/vite.config.ts
+
+53
+
+error during build:
+
+54
+
+Error: Cannot find native binding. npm has a bug related to optional dependencies (https://github.com/npm/cli/issues/4828). Please try `npm i` again after removing both package-lock.json and node_modules directory.
+
+55
+
+at Object. (/home/u331982998/domains/magnifiscent.com.pk/public_html/.builds/source/repository/node_modules/.pnpm/@tailwindcss+oxide@4.2.1/node_modules/@tailwindcss/oxide/index.js:559:11)
+
+56
+
+at Module._compile (node:internal/modules/cjs/loader:1364:14)
+
+57
+
+at Module._extensions..js (node:internal/modules/cjs/loader:1422:10)
+
+58
+
+at Module.load (node:internal/modules/cjs/loader:1203:32)
+
+59
+
+at Module._load (node:internal/modules/cjs/loader:1019:12)
+
+60
+
+at ModuleWrap. (node:internal/modules/esm/translators:203:29)
+
+61
+
+at ModuleJob.run (node:internal/modules/esm/module_job:195:25)
+
+62
+
+at async ModuleLoader.import (node:internal/modules/esm/loader:337:24)
+
+63
+
+at async loadConfigFromBundledFile (file:///home/u331982998/domains/magnifiscent.com.pk/public_html/.builds/source/repository/node_modules/.pnpm/vite@7.3.1_@types+node@25.3.5_jiti@2.6.1_lightningcss@1.31.1_tsx@4.21.0_yaml@2.8.2/node_modules/vite/dist/node/chunks/config.js:35909:12)
+
+64
+
+at async bundleAndLoadConfigFile (file:///home/u331982998/domains/magnifiscent.com.pk/public_html/.builds/source/repository/node_modules/.pnpm/vite@7.3.1_@types+node@25.3.5_jiti@2.6.1_lightningcss@1.31.1_tsx@4.21.0_yaml@2.8.2/node_modules/vite/dist/node/chunks/config.js:35797:17)
+
+65
+
+/home/u331982998/domains/magnifiscent.com.pk/public_html/.builds/source/repository/artifacts/magnifiscent:
+
+66
+
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @workspace/magnifiscent@0.0.0 build: `vite build --config vite.config.ts`
+
+67
+
+Exit status 1
+
+68
+
+ERROR: Failed to build the application

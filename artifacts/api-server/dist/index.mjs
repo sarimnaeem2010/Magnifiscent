@@ -67626,7 +67626,6 @@ var CATALOG_PRODUCTS = [
   }
 ];
 var CATALOG_DEALS = [
-  { id: "iconic-duo", name: "The Iconic Duo", contains: ["QUEST", "CHIC"], price: 149, originalPrice: 178, active: true, discount: 16 },
   { id: "floral-dream", name: "Floral Dream Pack", contains: ["CHIC", "SIGMA"], price: 159, originalPrice: 204, active: true, discount: 22 },
   { id: "dark-allure", name: "Dark Allure Duo", contains: ["Dark Angel", "Allure"], price: 189, originalPrice: 224, active: true, discount: 16 },
   { id: "fresh-bloom", name: "Fresh Bloom Duo", contains: ["Rising Sun", "CHIC"], price: 139, originalPrice: 164, active: true, discount: 15 },
@@ -67970,7 +67969,11 @@ if (!process.env.DATABASE_URL) {
     "DATABASE_URL must be set. Did you forget to provision a database?"
   );
 }
-var pool = new Pool4({ connectionString: process.env.DATABASE_URL });
+var _dbUrl = new URL(process.env.DATABASE_URL);
+if (_dbUrl.searchParams.has("sslmode")) {
+  _dbUrl.searchParams.set("sslmode", "verify-full");
+}
+var pool = new Pool4({ connectionString: _dbUrl.toString() });
 var db = drizzle(pool, { schema: schema_exports });
 
 // src/middleware/auth.ts
