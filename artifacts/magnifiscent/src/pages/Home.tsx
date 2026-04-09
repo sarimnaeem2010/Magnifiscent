@@ -175,13 +175,26 @@ type LiveDeal = {
 
 const DEAL_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='533' viewBox='0 0 400 533'%3E%3Crect width='400' height='533' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='14' fill='%239ca3af'%3ENo Image%3C/text%3E%3C/svg%3E";
 
-function HomeDealCard({ deal }: { deal: LiveDeal }) {
+function HomeDealCard({ deal, liveProducts }: { deal: LiveDeal; liveProducts: ApiProduct[] }) {
+  const { addItem } = useCart();
+  const matchedProduct = liveProducts.find((p) =>
+    deal.contains.some((c) => c.toLowerCase() === p.name.toLowerCase())
+  );
+
   return (
     <div className="product-card cursor-pointer">
       <div className="relative overflow-hidden bg-gray-50" style={{ aspectRatio: "3/4" }}>
         {deal.discount > 0 && <span className="sale-badge">{deal.discount}% OFF</span>}
         <img src={deal.img1 || DEAL_PLACEHOLDER} alt={deal.name} className="product-img-main w-full h-full object-cover" />
         <img src={deal.img2 || DEAL_PLACEHOLDER} alt={deal.name} className="product-img-alt w-full h-full object-cover" />
+        {matchedProduct && (
+          <button
+            className="quickshop-btn"
+            onClick={(e) => { e.stopPropagation(); addItem(matchedProduct); }}
+          >
+            Quick Add
+          </button>
+        )}
       </div>
       <div className="pt-3 pb-2">
         {deal.savings > 0 && (
@@ -334,7 +347,7 @@ export default function Home() {
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
                 {activeDeals.slice(0, 4).map((d) => (
-                  <HomeDealCard key={d.id} deal={d} />
+                  <HomeDealCard key={d.id} deal={d} liveProducts={liveProducts} />
                 ))}
               </div>
             </div>
