@@ -9,7 +9,9 @@ out-tsc
 
 # ignore dist everywhere EXCEPT the production build folders needed for Hostinger
 dist
+!artifacts/api-server/dist
 !artifacts/api-server/dist/**
+!artifacts/magnifiscent/dist
 !artifacts/magnifiscent/dist/**
 
 # dependencies

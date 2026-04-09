@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "node server.js",
-    "build": "npx pnpm install --no-frozen-lockfile && npx pnpm --filter @workspace/api-server run build && npx pnpm --filter @workspace/magnifiscent run build",
+    "build": "echo 'Using pre-built dist files'",
     "db:push": "npx pnpm --filter @workspace/db run push",
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"

@@ -1,0 +1,179 @@
+Search logs
+
+
+
+1
+
+added 65 packages, and audited 66 packages in 2s
+
+2
+
+
+3
+
+22 packages are looking for funding
+
+4
+
+run `npm fund` for details
+
+5
+
+
+6
+
+found 0 vulnerabilities
+
+7
+
+
+8
+
+> magnifiscent@1.0.0 build
+
+9
+
+> npx pnpm install --no-frozen-lockfile && npx pnpm --filter @workspace/api-server run build && npx pnpm --filter @workspace/magnifiscent run build
+
+10
+
+
+11
+
+Scope: all 9 workspace projects
+
+12
+
+Lockfile is up to date, resolution step is skipped
+
+13
+
+Progress: resolved 1, reused 0, downloaded 0, added 0
+
+14
+
+Packages: +488
+
+15
+
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+16
+
+Progress: resolved 488, reused 487, downloaded 1, added 371
+
+17
+
+Progress: resolved 488, reused 487, downloaded 1, added 478
+
+18
+
+Progress: resolved 488, reused 487, downloaded 1, added 488, done
+
+19
+
+.../esbuild@0.27.3/node_modules/esbuild postinstall$ node install.js
+
+20
+
+.../esbuild@0.27.3/node_modules/esbuild postinstall: node:internal/child_process:1123
+
+21
+
+.../esbuild@0.27.3/node_modules/esbuild postinstall: result.error = new ErrnoException(result.error, 'spawnSync ' + options.file);
+
+22
+
+.../esbuild@0.27.3/node_modules/esbuild postinstall: ^
+
+23
+
+.../esbuild@0.27.3/node_modules/esbuild postinstall: Error: spawnSync /home/u331982998/domains/magnifiscent.com.pk/public_html/.builds/source/repository/node_modules/.pnpm/esbuild@0.27.3/node_modules/esbuild/bin/esbuild EACCES
+
+24
+
+.../esbuild@0.27.3/node_modules/esbuild postinstall: at Object.spawnSync (node:internal/child_process:1123:20)
+
+25
+
+.../esbuild@0.27.3/node_modules/esbuild postinstall: at spawnSync (node:child_process:877:24)
+
+26
+
+.../esbuild@0.27.3/node_modules/esbuild postinstall: at Object.execFileSync (node:child_process:920:15)
+
+27
+
+.../esbuild@0.27.3/node_modules/esbuild postinstall: at validateBinaryVersion (/home/u331982998/domains/magnifiscent.com.pk/public_html/.builds/source/repository/node_modules/.pnpm/esbuild@0.27.3/node_modules/esbuild/install.js:102:28)
+
+28
+
+.../esbuild@0.27.3/node_modules/esbuild postinstall: at /home/u331982998/domains/magnifiscent.com.pk/public_html/.builds/source/repository/node_modules/.pnpm/esbuild@0.27.3/node_modules/esbuild/install.js:287:5 {
+
+29
+
+.../esbuild@0.27.3/node_modules/esbuild postinstall: errno: -13,
+
+30
+
+.../esbuild@0.27.3/node_modules/esbuild postinstall: code: 'EACCES',
+
+31
+
+.../esbuild@0.27.3/node_modules/esbuild postinstall: syscall: 'spawnSync /home/u331982998/domains/magnifiscent.com.pk/public_html/.builds/source/repository/node_modules/.pnpm/esbuild@0.27.3/node_modules/esbuild/bin/esbuild',
+
+32
+
+.../esbuild@0.27.3/node_modules/esbuild postinstall: path: '/home/u331982998/domains/magnifiscent.com.pk/public_html/.builds/source/repository/node_modules/.pnpm/esbuild@0.27.3/node_modules/esbuild/bin/esbuild',
+
+33
+
+.../esbuild@0.27.3/node_modules/esbuild postinstall: spawnargs: [ '--version' ],
+
+34
+
+.../esbuild@0.27.3/node_modules/esbuild postinstall: error: [Circular *1],
+
+35
+
+.../esbuild@0.27.3/node_modules/esbuild postinstall: status: null,
+
+36
+
+.../esbuild@0.27.3/node_modules/esbuild postinstall: signal: null,
+
+37
+
+.../esbuild@0.27.3/node_modules/esbuild postinstall: output: null,
+
+38
+
+.../esbuild@0.27.3/node_modules/esbuild postinstall: pid: 0,
+
+39
+
+.../esbuild@0.27.3/node_modules/esbuild postinstall: stdout: null,
+
+40
+
+.../esbuild@0.27.3/node_modules/esbuild postinstall: stderr: null
+
+41
+
+.../esbuild@0.27.3/node_modules/esbuild postinstall: }
+
+42
+
+.../esbuild@0.27.3/node_modules/esbuild postinstall: Node.js v20.19.4
+
+43
+
+.../esbuild@0.27.3/node_modules/esbuild postinstall: Failed
+
+44
+
+ ELIFECYCLE  Command failed with exit code 1.
+
+45
+
+ERROR: Failed to build the application
