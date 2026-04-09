@@ -17,111 +17,50 @@ function StarRating({ count }: { count: number }) {
   );
 }
 
-const BASE_DEALS = [
-  {
-    id: "iconic-duo",
-    name: "THE ICONIC DUO",
-    img1: PRODUCTS[4].img,
-    img2: PRODUCTS[0].img,
-    price: 149,
-    originalPrice: 178,
-    reviews: 14,
-    desc: "QUEST and CHIC — two signature fragrances paired together in one exclusive combo. One bold, one floral.",
-    contains: [PRODUCTS[4].name, PRODUCTS[0].name],
-    representativeProduct: PRODUCTS[4],
-  },
-  {
-    id: "floral-dream",
-    name: "FLORAL DREAM PACK",
-    img1: PRODUCTS[0].img,
-    img2: PRODUCTS[3].img,
-    price: 159,
-    originalPrice: 204,
-    reviews: 8,
-    desc: "CHIC and SIGMA — warm and feminine florals combined in a stunning gift set. Perfect for gifting.",
-    contains: [PRODUCTS[0].name, PRODUCTS[3].name],
-    representativeProduct: PRODUCTS[0],
-  },
-  {
-    id: "dark-allure",
-    name: "DARK ALLURE DUO",
-    img1: PRODUCTS[1].img,
-    img2: PRODUCTS[5].img,
-    price: 189,
-    originalPrice: 224,
-    reviews: 11,
-    desc: "Dark Angel meets Allure — two deeply mysterious and seductive fragrances for the bold woman who commands attention.",
-    contains: [PRODUCTS[1].name, PRODUCTS[5].name],
-    representativeProduct: PRODUCTS[1],
-  },
-  {
-    id: "fresh-bloom",
-    name: "FRESH BLOOM DUO",
-    img1: PRODUCTS[2].img,
-    img2: PRODUCTS[0].img,
-    price: 139,
-    originalPrice: 164,
-    reviews: 6,
-    desc: "Rising Sun and CHIC — a fresh citrus meets warm floral pairing. The perfect daytime duo for any occasion.",
-    contains: [PRODUCTS[2].name, PRODUCTS[0].name],
-    representativeProduct: PRODUCTS[2],
-  },
-  {
-    id: "womens-trio",
-    name: "WOMEN'S SIGNATURE TRIO",
-    img1: PRODUCTS[0].img,
-    img2: PRODUCTS[1].img,
-    price: 259,
-    originalPrice: 333,
-    reviews: 19,
-    desc: "The ultimate women's collection — CHIC, Dark Angel, and SIGMA in one spectacular package. Own every mood.",
-    contains: [PRODUCTS[0].name, PRODUCTS[1].name, PRODUCTS[3].name],
-    representativeProduct: PRODUCTS[0],
-  },
-  {
-    id: "floral-trio",
-    name: "FLORAL TRIO",
-    img1: PRODUCTS[0].img,
-    img2: PRODUCTS[3].img,
-    price: 239,
-    originalPrice: 289,
-    reviews: 22,
-    desc: "Three floral masterpieces — CHIC, SIGMA, and Rising Sun — for the woman who embraces every mood.",
-    contains: [PRODUCTS[0].name, PRODUCTS[3].name, PRODUCTS[2].name],
-    representativeProduct: PRODUCTS[0],
-  },
-];
+type LiveDeal = {
+  id: string;
+  name: string;
+  img1: string;
+  img2: string;
+  price: number;
+  originalPrice: number;
+  savings: number;
+  discount: number;
+  contains: string[];
+};
 
-type DealWithPrice = typeof BASE_DEALS[0] & { savings: number };
-
-function DealCard({ deal }: { deal: DealWithPrice }) {
+function DealCard({ deal }: { deal: LiveDeal }) {
   const { addItem } = useCart();
-  const discount = Math.round(((deal.originalPrice - deal.price) / deal.originalPrice) * 100);
+  const matchedProduct = PRODUCTS.find((p) =>
+    deal.contains.some((c) => c.toLowerCase() === p.name.toLowerCase())
+  );
 
   return (
     <div className="product-card cursor-pointer">
       <div className="relative overflow-hidden bg-gray-50" style={{ aspectRatio: "3/4" }}>
-        <span className="sale-badge">{discount}% OFF</span>
+        {deal.discount > 0 && <span className="sale-badge">{deal.discount}% OFF</span>}
         <img src={deal.img1} alt={deal.name} className="product-img-main w-full h-full object-cover" />
         <img src={deal.img2} alt={deal.name} className="product-img-alt w-full h-full object-cover" />
-        <button
-          className="quickshop-btn"
-          onClick={(e) => {
-            e.stopPropagation();
-            addItem(deal.representativeProduct);
-          }}
-        >
-          Quick Add
-        </button>
+        {matchedProduct && (
+          <button
+            className="quickshop-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              addItem(matchedProduct);
+            }}
+          >
+            Quick Add
+          </button>
+        )}
       </div>
       <div className="pt-3 pb-2">
-        <p className="text-xs text-green-600 font-bold mb-1">Save Rs. {deal.savings.toFixed(2)}</p>
+        {deal.savings > 0 && (
+          <p className="text-xs text-green-600 font-bold mb-1">Save Rs. {deal.savings.toFixed(2)}</p>
+        )}
         <div className="flex items-center gap-1 mb-1">
           <StarRating count={5} />
-          <span className="text-gray-400 text-xs ml-1">({deal.reviews})</span>
         </div>
         <h3 className="font-bold text-sm text-gray-900 mb-1">{deal.name}</h3>
-        <p className="text-xs text-gray-500 mb-2 leading-snug line-clamp-2">{deal.desc}</p>
         <div className="flex flex-wrap gap-1 mb-2">
           {deal.contains.map((c) => (
             <span key={c} className="text-[10px] border border-gray-200 px-2 py-0.5 text-gray-500 font-medium">{c}</span>
@@ -129,7 +68,9 @@ function DealCard({ deal }: { deal: DealWithPrice }) {
         </div>
         <div className="flex items-center gap-2">
           <span className="text-sm font-bold text-gray-900">Rs. {deal.price.toFixed(2)}</span>
-          <span className="text-xs text-gray-400 line-through">Rs. {deal.originalPrice.toFixed(2)}</span>
+          {deal.originalPrice > deal.price && (
+            <span className="text-xs text-gray-400 line-through">Rs. {deal.originalPrice.toFixed(2)}</span>
+          )}
         </div>
       </div>
     </div>
@@ -139,31 +80,35 @@ function DealCard({ deal }: { deal: DealWithPrice }) {
 export default function Deals() {
   const [apiDeals, setApiDeals] = useState<ApiDeal[]>([]);
   const [dealImgs, setDealImgs] = useState<Record<string, { img1?: string; img2?: string }>>({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.deals.list().then((res) => { if (res.success) setApiDeals(res.deals); }).catch(() => {});
-    api.content.dealImages.get().then((res) => { if (res.success) setDealImgs(res.dealImages); }).catch(() => {});
+    Promise.all([
+      api.deals.list(),
+      api.content.dealImages.get(),
+    ])
+      .then(([dealsRes, imgsRes]) => {
+        if (dealsRes.success) setApiDeals(dealsRes.deals);
+        if (imgsRes.success) setDealImgs(imgsRes.dealImages);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
-  const adminDealMap = new Map<string, ApiDeal>(apiDeals.map((d) => [d.id, d]));
-
-  // API now returns only active deals — filter BASE_DEALS to those present in API response
-  const activeDeals: DealWithPrice[] = BASE_DEALS
-    .filter((d) => apiDeals.length === 0 || adminDealMap.has(d.id))
-    .map((d) => {
-      const admin = adminDealMap.get(d.id);
-      const price = admin ? admin.price : d.price;
-      const originalPrice = admin ? admin.originalPrice : d.originalPrice;
-      const custom = dealImgs[d.id];
-      return {
-        ...d,
-        img1: custom?.img1 || d.img1,
-        img2: custom?.img2 || d.img2,
-        price,
-        originalPrice,
-        savings: originalPrice - price,
-      };
-    });
+  const activeDeals: LiveDeal[] = apiDeals.map((d) => {
+    const imgs = dealImgs[d.id] || {};
+    return {
+      id: d.id,
+      name: d.name,
+      img1: imgs.img1 || "",
+      img2: imgs.img2 || "",
+      price: d.price,
+      originalPrice: d.originalPrice,
+      savings: d.originalPrice - d.price,
+      discount: d.discount,
+      contains: d.contains,
+    };
+  });
 
   return (
     <div className="min-h-screen bg-white text-gray-900">
@@ -183,7 +128,9 @@ export default function Deals() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-10">
-        {activeDeals.length === 0 ? (
+        {loading ? (
+          <p className="text-center text-gray-400 py-20">Loading deals...</p>
+        ) : activeDeals.length === 0 ? (
           <p className="text-center text-gray-400 py-20">No active deals at the moment. Check back soon!</p>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-6">
