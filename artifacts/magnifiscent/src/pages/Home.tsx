@@ -33,49 +33,6 @@ const REVIEWS = [
   { name: "Khalid B.", rating: 5, product: "Allure", text: "Allure is the most captivating fragrance I've gifted my wife. The red rose and amber base is outstanding. Compliments every single time." },
 ];
 
-/* ─── Deals ─── */
-const DEALS = [
-  {
-    id: "iconic-duo",
-    name: "THE ICONIC DUO",
-    img1: PRODUCTS[4].img,
-    img2: PRODUCTS[0].img,
-    price: "Rs. 149.00",
-    originalPrice: "Rs. 178.00",
-    reviews: 14,
-    desc: "Two signature fragrances paired in one exclusive combo — one bold, one floral.",
-  },
-  {
-    id: "floral-dream",
-    name: "FLORAL DREAM PACK",
-    img1: PRODUCTS[0].img,
-    img2: PRODUCTS[3].img,
-    price: "Rs. 159.00",
-    originalPrice: "Rs. 204.00",
-    reviews: 8,
-    desc: "CHIC and SIGMA — warm and feminine florals combined in a stunning gift set.",
-  },
-  {
-    id: "dark-allure",
-    name: "DARK ALLURE DUO",
-    img1: PRODUCTS[1].img,
-    img2: PRODUCTS[5].img,
-    price: "Rs. 189.00",
-    originalPrice: "Rs. 224.00",
-    reviews: 11,
-    desc: "Dark Angel meets Allure — deeply mysterious and seductive, for the bold woman.",
-  },
-  {
-    id: "fresh-bloom",
-    name: "FRESH BLOOM DUO",
-    img1: PRODUCTS[2].img,
-    img2: PRODUCTS[0].img,
-    price: "Rs. 139.00",
-    originalPrice: "Rs. 164.00",
-    reviews: 6,
-    desc: "Rising Sun and CHIC — fresh citrus meets warm floral. The perfect daytime duo.",
-  },
-];
 
 /* ─── Instagram Posts ─── */
 const INSTAGRAM_POSTS = [

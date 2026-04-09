@@ -106,7 +106,6 @@ export const CATALOG_PRODUCTS: Omit<InsertProduct, "img" | "img2">[] = [
 ];
 
 export const CATALOG_DEALS = [
-  { id: "iconic-duo", name: "The Iconic Duo", contains: ["QUEST", "CHIC"], price: 149, originalPrice: 178, active: true, discount: 16 },
   { id: "floral-dream", name: "Floral Dream Pack", contains: ["CHIC", "SIGMA"], price: 159, originalPrice: 204, active: true, discount: 22 },
   { id: "dark-allure", name: "Dark Allure Duo", contains: ["Dark Angel", "Allure"], price: 189, originalPrice: 224, active: true, discount: 16 },
   { id: "fresh-bloom", name: "Fresh Bloom Duo", contains: ["Rising Sun", "CHIC"], price: 139, originalPrice: 164, active: true, discount: 15 },
