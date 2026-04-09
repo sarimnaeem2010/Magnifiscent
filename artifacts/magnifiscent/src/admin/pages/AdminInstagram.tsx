@@ -1,22 +1,13 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Plus, Trash2, ImageIcon, Save, CheckCircle2, Instagram } from "lucide-react";
 import { api } from "@/lib/api";
-import { PRODUCTS } from "@/data/products";
 import type { InstagramReel } from "@/data/liveData";
 
 const DEFAULT_REELS: InstagramReel[] = [
-  { id: "d1", url: "https://instagram.com", img: PRODUCTS[0].img, label: "NEW LAUNCH",   likes: 241 },
-  { id: "d2", url: "https://instagram.com", img: PRODUCTS[4].img, label: "LONG LASTING", likes: 387 },
-  { id: "d3", url: "https://instagram.com", img: PRODUCTS[1].img, label: "DARK ANGEL",   likes: 192 },
-  { id: "d4", url: "https://instagram.com", img: PRODUCTS[5].img, label: "ALLURE",        likes: 518 },
-  { id: "d5", url: "https://instagram.com", img: PRODUCTS[2].img, label: "RISING SUN",    likes: 164 },
-  { id: "d6", url: "https://instagram.com", img: PRODUCTS[3].img, label: "SIGMA",         likes: 203 },
-  { id: "d7", url: "https://instagram.com", img: PRODUCTS[0].img, label: "BEST SELLER",   likes: 391 },
-  { id: "d8", url: "https://instagram.com", img: PRODUCTS[4].img, label: "FOR HIM",       likes: 276 },
-  { id: "r1", url: "https://www.instagram.com/magnifiscent24/reel/DNTmNBcsWsU/", img: PRODUCTS[0].img, label: "CHIC",       likes: 152 },
-  { id: "r2", url: "https://www.instagram.com/magnifiscent24/reel/DGSi7z7NDCV/", img: PRODUCTS[1].img, label: "DARK ANGEL", likes: 98  },
-  { id: "r3", url: "https://www.instagram.com/magnifiscent24/reel/DDopYO1No5-/", img: PRODUCTS[5].img, label: "ALLURE",     likes: 87  },
-  { id: "r4", url: "https://www.instagram.com/magnifiscent24/reel/DB4DwTrsDT_/", img: PRODUCTS[4].img, label: "QUEST",      likes: 201 },
+  { id: "r1", url: "https://www.instagram.com/magnifiscent24/reel/DNTmNBcsWsU/", img: "", label: "CHIC",       likes: 152 },
+  { id: "r2", url: "https://www.instagram.com/magnifiscent24/reel/DGSi7z7NDCV/", img: "", label: "DARK ANGEL", likes: 98  },
+  { id: "r3", url: "https://www.instagram.com/magnifiscent24/reel/DDopYO1No5-/", img: "", label: "ALLURE",     likes: 87  },
+  { id: "r4", url: "https://www.instagram.com/magnifiscent24/reel/DB4DwTrsDT_/", img: "", label: "QUEST",      likes: 201 },
 ];
 
 function compressImage(file: File, maxW: number, maxH: number, quality = 0.8): Promise<string> {

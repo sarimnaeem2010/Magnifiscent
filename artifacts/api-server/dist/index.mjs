@@ -67521,117 +67521,6 @@ var policyPagesTable = pgTable("policy_pages", {
 var insertPolicyPageSchema = createInsertSchema(policyPagesTable).omit({ id: true });
 
 // ../../lib/db/src/catalog.ts
-var CATALOG_PRODUCTS = [
-  {
-    id: 1,
-    name: "CHIC",
-    slug: "chic",
-    price: "Rs. 89.00",
-    priceNum: 89,
-    originalPrice: "Rs. 110.00",
-    originalPriceNum: 110,
-    reviews: 42,
-    rating: 5,
-    category: "women",
-    desc: "A warm floral fragrance with golden rose and soft jasmine notes, feminine and unforgettable. Perfect for the confident woman who embraces her femininity.",
-    notes: ["Rose", "Jasmine", "Musk", "Vanilla"],
-    size: "100ml / 3.4 Fl.oz",
-    stock: 20,
-    active: true
-  },
-  {
-    id: 2,
-    name: "Dark Angel",
-    slug: "dark-angel",
-    price: "Rs. 109.00",
-    priceNum: 109,
-    originalPrice: "Rs. 135.00",
-    originalPriceNum: 135,
-    reviews: 27,
-    rating: 5,
-    category: "women",
-    desc: "Mysterious and exotic \u2014 black amber, oud and vanilla create an irresistible dark allure. For the woman who commands every room she enters.",
-    notes: ["Black Amber", "Oud", "Vanilla", "Sandalwood"],
-    size: "100ml / 3.4 Fl.oz",
-    stock: 20,
-    active: true
-  },
-  {
-    id: 3,
-    name: "Rising Sun",
-    slug: "rising-sun",
-    price: "Rs. 75.00",
-    priceNum: 75,
-    originalPrice: "Rs. 95.00",
-    originalPriceNum: 95,
-    reviews: 18,
-    rating: 5,
-    category: "women",
-    desc: "Fresh citrus and green notes that feel like the first light of a new day. Bright, uplifting and effortlessly elegant.",
-    notes: ["Bergamot", "Lemon", "Green Tea", "White Musk"],
-    size: "100ml / 3.4 Fl.oz",
-    stock: 20,
-    active: true
-  },
-  {
-    id: 4,
-    name: "SIGMA",
-    slug: "sigma",
-    price: "Rs. 95.00",
-    priceNum: 95,
-    originalPrice: "Rs. 120.00",
-    originalPriceNum: 120,
-    reviews: 31,
-    rating: 4,
-    category: "women",
-    desc: "Warm amber and spice in a bottle \u2014 a bold, long-lasting statement scent. For those who never go unnoticed.",
-    notes: ["Amber", "Spice", "Patchouli", "Cedarwood"],
-    size: "100ml / 3.4 Fl.oz",
-    stock: 20,
-    active: true
-  },
-  {
-    id: 5,
-    name: "QUEST",
-    slug: "quest",
-    price: "Rs. 89.00",
-    priceNum: 89,
-    originalPrice: "Rs. 115.00",
-    originalPriceNum: 115,
-    reviews: 54,
-    rating: 5,
-    category: "men",
-    desc: "Bold and adventurous \u2014 deep blue aquatics and mountain freshness for the modern explorer. A signature scent for the man who lives boldly.",
-    notes: ["Blue Aquatic", "Mountain Cedar", "Bergamot", "Ambroxan"],
-    size: "100ml / 3.4 Fl.oz",
-    stock: 20,
-    active: true
-  },
-  {
-    id: 6,
-    name: "Allure",
-    slug: "allure",
-    price: "Rs. 99.00",
-    priceNum: 99,
-    originalPrice: "Rs. 125.00",
-    originalPriceNum: 125,
-    reviews: 36,
-    rating: 5,
-    category: "women",
-    desc: "A seductive and passionate fragrance \u2014 deep red roses, warm spice and a smouldering musk base. For the woman who captivates without trying.",
-    notes: ["Red Rose", "Spice", "Musk", "Amber"],
-    size: "100ml / 3.4 Fl.oz",
-    stock: 20,
-    active: true
-  }
-];
-var CATALOG_DEALS = [
-  { id: "floral-dream", name: "Floral Dream Pack", contains: ["CHIC", "SIGMA"], price: 159, originalPrice: 204, active: true, discount: 22 },
-  { id: "dark-allure", name: "Dark Allure Duo", contains: ["Dark Angel", "Allure"], price: 189, originalPrice: 224, active: true, discount: 16 },
-  { id: "fresh-bloom", name: "Fresh Bloom Duo", contains: ["Rising Sun", "CHIC"], price: 139, originalPrice: 164, active: true, discount: 15 },
-  { id: "womens-trio", name: "Women's Signature Trio", contains: ["CHIC", "Dark Angel", "SIGMA"], price: 259, originalPrice: 333, active: true, discount: 22 },
-  { id: "floral-trio", name: "Floral Trio", contains: ["CHIC", "SIGMA", "Rising Sun"], price: 239, originalPrice: 289, active: true, discount: 17 }
-];
 var CATALOG_TICKER_MESSAGES = [
   "FREE SHIPPING ON ORDERS ABOVE Rs. 100",
   "20 DAYS RETURN & REFUND POLICY",
@@ -67640,24 +67529,6 @@ var CATALOG_TICKER_MESSAGES = [
 
 // ../../lib/db/src/seed.ts
 var { Pool: Pool3 } = esm_default;
-var WOMEN_PLACEHOLDER = "/noir-product.png";
-var MEN_PLACEHOLDER = "/storm-product.png";
-var PRODUCTS = CATALOG_PRODUCTS.map((p) => ({
-  ...p,
-  img: p.category === "men" ? MEN_PLACEHOLDER : WOMEN_PLACEHOLDER,
-  img2: p.category === "men" ? MEN_PLACEHOLDER : WOMEN_PLACEHOLDER
-}));
-var DEALS = CATALOG_DEALS.map((d) => ({ ...d, contains: [...d.contains] }));
-var PRODUCT_CATEGORY_MAP = Object.fromEntries(
-  CATALOG_PRODUCTS.map((p) => [p.name, p.category])
-);
-var DEAL_IMAGES = CATALOG_DEALS.map((d) => {
-  const first = d.contains[0];
-  const second = d.contains[1] ?? d.contains[0];
-  const img1 = PRODUCT_CATEGORY_MAP[first] === "men" ? MEN_PLACEHOLDER : WOMEN_PLACEHOLDER;
-  const img2 = PRODUCT_CATEGORY_MAP[second] === "men" ? MEN_PLACEHOLDER : WOMEN_PLACEHOLDER;
-  return { dealId: d.id, img1, img2 };
-});
 var TICKER_MESSAGES = [...CATALOG_TICKER_MESSAGES];
 var DEFAULT_EMAIL_TOGGLES = {
   order_confirmation: true,
@@ -67852,40 +67723,6 @@ Last updated: 2025`
 ];
 async function seedDatabase(db2) {
   console.log("Seeding database...");
-  const existingProducts = await db2.select({ id: productsTable.id }).from(productsTable);
-  if (existingProducts.length === 0) {
-    await db2.insert(productsTable).values(PRODUCTS);
-    console.log(`Inserted ${PRODUCTS.length} products`);
-  } else {
-    console.log(`Products already seeded (${existingProducts.length} found), patching empty images`);
-    for (const p of PRODUCTS) {
-      await db2.update(productsTable).set({ img: p.img }).where(sql`${productsTable.id} = ${p.id} AND ${productsTable.img} = ''`);
-      await db2.update(productsTable).set({ img2: p.img2 }).where(sql`${productsTable.id} = ${p.id} AND ${productsTable.img2} = ''`);
-    }
-    console.log("Placeholder images applied to any products with empty img/img2 fields");
-  }
-  const existingDeals = await db2.select({ id: dealsTable.id }).from(dealsTable);
-  if (existingDeals.length === 0) {
-    await db2.insert(dealsTable).values(DEALS);
-    console.log(`Inserted ${DEALS.length} deals`);
-  } else {
-    console.log(`Deals already seeded (${existingDeals.length} found), skipping`);
-  }
-  for (const di of DEAL_IMAGES) {
-    const existing = await db2.select({ id: dealImagesTable.id, img1: dealImagesTable.img1, img2: dealImagesTable.img2 }).from(dealImagesTable).where(sql`${dealImagesTable.dealId} = ${di.dealId}`);
-    if (existing.length === 0) {
-      await db2.insert(dealImagesTable).values(di);
-    } else {
-      const row = existing[0];
-      if (row.img1 === "") {
-        await db2.update(dealImagesTable).set({ img1: di.img1 }).where(sql`${dealImagesTable.dealId} = ${di.dealId}`);
-      }
-      if (row.img2 === "") {
-        await db2.update(dealImagesTable).set({ img2: di.img2 }).where(sql`${dealImagesTable.dealId} = ${di.dealId}`);
-      }
-    }
-  }
-  console.log(`Deal image placeholders ensured for ${DEAL_IMAGES.length} deals`);
   const existingSettings = await db2.select({ id: storeSettingsTable.id }).from(storeSettingsTable);
   if (existingSettings.length === 0) {
     await db2.insert(storeSettingsTable).values({ id: 1 });

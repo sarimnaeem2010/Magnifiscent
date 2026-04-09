@@ -1,33 +1,9 @@
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
-import { sql } from "drizzle-orm";
 import * as schema from "./schema/index.js";
-import { CATALOG_PRODUCTS, CATALOG_DEALS, CATALOG_TICKER_MESSAGES } from "./catalog.js";
+import { CATALOG_TICKER_MESSAGES } from "./catalog.js";
 
 const { Pool } = pg;
-
-const WOMEN_PLACEHOLDER = "/noir-product.png";
-const MEN_PLACEHOLDER = "/storm-product.png";
-
-const PRODUCTS: schema.InsertProduct[] = CATALOG_PRODUCTS.map((p) => ({
-  ...p,
-  img: p.category === "men" ? MEN_PLACEHOLDER : WOMEN_PLACEHOLDER,
-  img2: p.category === "men" ? MEN_PLACEHOLDER : WOMEN_PLACEHOLDER,
-}));
-
-const DEALS: schema.InsertDeal[] = CATALOG_DEALS.map((d) => ({ ...d, contains: [...d.contains] }));
-
-const PRODUCT_CATEGORY_MAP: Record<string, "men" | "women"> = Object.fromEntries(
-  CATALOG_PRODUCTS.map((p) => [p.name, p.category])
-);
-
-const DEAL_IMAGES: schema.InsertDealImage[] = CATALOG_DEALS.map((d) => {
-  const first = d.contains[0] as string;
-  const second = (d.contains[1] ?? d.contains[0]) as string;
-  const img1 = PRODUCT_CATEGORY_MAP[first] === "men" ? MEN_PLACEHOLDER : WOMEN_PLACEHOLDER;
-  const img2 = PRODUCT_CATEGORY_MAP[second] === "men" ? MEN_PLACEHOLDER : WOMEN_PLACEHOLDER;
-  return { dealId: d.id, img1, img2 };
-});
 
 const TICKER_MESSAGES = [...CATALOG_TICKER_MESSAGES];
 
@@ -228,49 +204,6 @@ type DrizzleDb = ReturnType<typeof drizzle<typeof schema>>;
 
 export async function seedDatabase(db: DrizzleDb): Promise<void> {
   console.log("Seeding database...");
-
-  const existingProducts = await db.select({ id: schema.productsTable.id }).from(schema.productsTable);
-  if (existingProducts.length === 0) {
-    await db.insert(schema.productsTable).values(PRODUCTS);
-    console.log(`Inserted ${PRODUCTS.length} products`);
-  } else {
-    console.log(`Products already seeded (${existingProducts.length} found), patching empty images`);
-    for (const p of PRODUCTS) {
-      await db.update(schema.productsTable)
-        .set({ img: p.img })
-        .where(sql`${schema.productsTable.id} = ${p.id} AND ${schema.productsTable.img} = ''`);
-      await db.update(schema.productsTable)
-        .set({ img2: p.img2 })
-        .where(sql`${schema.productsTable.id} = ${p.id} AND ${schema.productsTable.img2} = ''`);
-    }
-    console.log("Placeholder images applied to any products with empty img/img2 fields");
-  }
-
-  const existingDeals = await db.select({ id: schema.dealsTable.id }).from(schema.dealsTable);
-  if (existingDeals.length === 0) {
-    await db.insert(schema.dealsTable).values(DEALS);
-    console.log(`Inserted ${DEALS.length} deals`);
-  } else {
-    console.log(`Deals already seeded (${existingDeals.length} found), skipping`);
-  }
-
-  for (const di of DEAL_IMAGES) {
-    const existing = await db.select({ id: schema.dealImagesTable.id, img1: schema.dealImagesTable.img1, img2: schema.dealImagesTable.img2 })
-      .from(schema.dealImagesTable)
-      .where(sql`${schema.dealImagesTable.dealId} = ${di.dealId}`);
-    if (existing.length === 0) {
-      await db.insert(schema.dealImagesTable).values(di);
-    } else {
-      const row = existing[0];
-      if (row.img1 === "") {
-        await db.update(schema.dealImagesTable).set({ img1: di.img1 }).where(sql`${schema.dealImagesTable.dealId} = ${di.dealId}`);
-      }
-      if (row.img2 === "") {
-        await db.update(schema.dealImagesTable).set({ img2: di.img2 }).where(sql`${schema.dealImagesTable.dealId} = ${di.dealId}`);
-      }
-    }
-  }
-  console.log(`Deal image placeholders ensured for ${DEAL_IMAGES.length} deals`);
 
   const existingSettings = await db.select({ id: schema.storeSettingsTable.id }).from(schema.storeSettingsTable);
   if (existingSettings.length === 0) {

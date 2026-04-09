@@ -2,11 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Star } from "lucide-react";
-import { PRODUCTS } from "@/data/products";
 import { api } from "@/lib/api";
 import type { ApiDeal } from "@/lib/api";
-import { useCart } from "@/context/CartContext";
-
 function StarRating({ count }: { count: number }) {
   return (
     <div className="flex items-center gap-0.5">
@@ -29,29 +26,15 @@ type LiveDeal = {
   contains: string[];
 };
 
-function DealCard({ deal }: { deal: LiveDeal }) {
-  const { addItem } = useCart();
-  const matchedProduct = PRODUCTS.find((p) =>
-    deal.contains.some((c) => c.toLowerCase() === p.name.toLowerCase())
-  );
+const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='533' viewBox='0 0 400 533'%3E%3Crect width='400' height='533' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='14' fill='%239ca3af'%3ENo Image%3C/text%3E%3C/svg%3E";
 
+function DealCard({ deal }: { deal: LiveDeal }) {
   return (
     <div className="product-card cursor-pointer">
       <div className="relative overflow-hidden bg-gray-50" style={{ aspectRatio: "3/4" }}>
         {deal.discount > 0 && <span className="sale-badge">{deal.discount}% OFF</span>}
-        <img src={deal.img1} alt={deal.name} className="product-img-main w-full h-full object-cover" />
-        <img src={deal.img2} alt={deal.name} className="product-img-alt w-full h-full object-cover" />
-        {matchedProduct && (
-          <button
-            className="quickshop-btn"
-            onClick={(e) => {
-              e.stopPropagation();
-              addItem(matchedProduct);
-            }}
-          >
-            Quick Add
-          </button>
-        )}
+        <img src={deal.img1 || PLACEHOLDER} alt={deal.name} className="product-img-main w-full h-full object-cover" />
+        <img src={deal.img2 || PLACEHOLDER} alt={deal.name} className="product-img-alt w-full h-full object-cover" />
       </div>
       <div className="pt-3 pb-2">
         {deal.savings > 0 && (

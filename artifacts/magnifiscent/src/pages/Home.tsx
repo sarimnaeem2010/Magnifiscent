@@ -2,10 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Star, Instagram } from "lucide-react";
-import { PRODUCTS } from "@/data/products";
-import heroBannerImg from "@assets/sasas_1774966788321.png";
-import womenBannerImg from "@assets/Gemini_Generated_Image_91h42l91h42l91h4.png";
-import menBannerImg from "@assets/Gemini_Generated_Image_gthzqdgthzqdgthz.png";
 import { useCart } from "@/context/CartContext";
 import { useLocation } from "wouter";
 import { api } from "@/lib/api";
@@ -35,16 +31,7 @@ const REVIEWS = [
 
 
 /* ─── Instagram Posts ─── */
-const INSTAGRAM_POSTS = [
-  { img: PRODUCTS[0].img, likes: 241, tag: "#CHIC", label: "NEW LAUNCH" },
-  { img: PRODUCTS[4].img, likes: 387, tag: "#QUEST", label: "LONG LASTING" },
-  { img: PRODUCTS[1].img, likes: 192, tag: "#DarkAngel", label: "DARK ANGEL" },
-  { img: PRODUCTS[5].img, likes: 518, tag: "#Allure", label: "ALLURE" },
-  { img: PRODUCTS[2].img, likes: 164, tag: "#RisingSun", label: "RISING SUN" },
-  { img: PRODUCTS[3].img, likes: 203, tag: "#SIGMA", label: "SIGMA" },
-  { img: PRODUCTS[0].img, likes: 391, tag: "#CHIC", label: "BEST SELLER" },
-  { img: PRODUCTS[4].img, likes: 276, tag: "#QUEST", label: "FOR HIM" },
-];
+const INSTAGRAM_POSTS: { img: string; likes: number; tag: string; label: string }[] = [];
 
 /* ─── Hero Slider ─── */
 function HeroBanner() {
@@ -65,8 +52,8 @@ function HeroBanner() {
 
   if (slides.length === 0) {
     return (
-      <section className="w-full">
-        <img src={heroBannerImg} alt="Discover your best Perfume" className="w-full block" />
+      <section className="w-full bg-gray-100 flex items-center justify-center" style={{ minHeight: 320 }}>
+        <p className="text-gray-400 text-sm font-medium uppercase tracking-widest">Upload a hero banner from the admin panel</p>
       </section>
     );
   }
@@ -118,6 +105,8 @@ function StarRating({ count }: { count: number }) {
   );
 }
 
+const PRODUCT_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='533' viewBox='0 0 400 533'%3E%3Crect width='400' height='533' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='14' fill='%239ca3af'%3ENo Image%3C/text%3E%3C/svg%3E";
+
 function ProductCard({ product }: { product: ApiProduct }) {
   const [hovered, setHovered] = useState(false);
   const { addItem } = useCart();
@@ -133,13 +122,13 @@ function ProductCard({ product }: { product: ApiProduct }) {
       <div className="relative overflow-hidden bg-gray-50" style={{ aspectRatio: "3/4" }}>
         <span className="sale-badge">SALE</span>
         <img
-          src={product.img}
+          src={product.img || PRODUCT_PLACEHOLDER}
           alt={product.name}
           className="w-full h-full object-cover absolute inset-0"
           style={{ opacity: hovered ? 0 : 1, transition: "opacity 0.4s ease" }}
         />
         <img
-          src={product.img2}
+          src={product.img2 || PRODUCT_PLACEHOLDER}
           alt={product.name}
           className="w-full h-full object-cover absolute inset-0"
           style={{ opacity: hovered ? 1 : 0, transition: "opacity 0.4s ease" }}
@@ -184,26 +173,15 @@ type LiveDeal = {
   contains: string[];
 };
 
-function HomeDealCard({ deal }: { deal: LiveDeal }) {
-  const { addItem } = useCart();
-  const matchedProduct = PRODUCTS.find((p) =>
-    deal.contains.some((c) => c.toLowerCase() === p.name.toLowerCase())
-  );
+const DEAL_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='533' viewBox='0 0 400 533'%3E%3Crect width='400' height='533' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='14' fill='%239ca3af'%3ENo Image%3C/text%3E%3C/svg%3E";
 
+function HomeDealCard({ deal }: { deal: LiveDeal }) {
   return (
     <div className="product-card cursor-pointer">
       <div className="relative overflow-hidden bg-gray-50" style={{ aspectRatio: "3/4" }}>
         {deal.discount > 0 && <span className="sale-badge">{deal.discount}% OFF</span>}
-        <img src={deal.img1} alt={deal.name} className="product-img-main w-full h-full object-cover" />
-        <img src={deal.img2} alt={deal.name} className="product-img-alt w-full h-full object-cover" />
-        {matchedProduct && (
-          <button
-            className="quickshop-btn"
-            onClick={(e) => { e.stopPropagation(); addItem(matchedProduct); }}
-          >
-            Quick Add
-          </button>
-        )}
+        <img src={deal.img1 || DEAL_PLACEHOLDER} alt={deal.name} className="product-img-main w-full h-full object-cover" />
+        <img src={deal.img2 || DEAL_PLACEHOLDER} alt={deal.name} className="product-img-alt w-full h-full object-cover" />
       </div>
       <div className="pt-3 pb-2">
         {deal.savings > 0 && (
@@ -376,12 +354,16 @@ export default function Home() {
               onClick={() => navigate("/products?gender=men")}
               className="flex-1 group cursor-pointer border-none bg-transparent p-0 text-left"
             >
-              <div className="overflow-hidden" style={{ height: 300 }}>
-                <img
-                  src={genderBanners.men || menBannerImg}
-                  alt="Men's Collection"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+              <div className="overflow-hidden bg-gray-100 flex items-center justify-center" style={{ height: 300 }}>
+                {genderBanners.men ? (
+                  <img
+                    src={genderBanners.men}
+                    alt="Men's Collection"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                ) : (
+                  <p className="text-gray-400 text-xs font-medium uppercase tracking-widest">Upload banner from admin</p>
+                )}
               </div>
               <div className="text-center mt-3">
                 <p className="font-bold text-base uppercase tracking-widest text-gray-900">MEN</p>
@@ -392,12 +374,16 @@ export default function Home() {
               onClick={() => navigate("/products?gender=women")}
               className="flex-1 group cursor-pointer border-none bg-transparent p-0 text-left"
             >
-              <div className="overflow-hidden" style={{ height: 300 }}>
-                <img
-                  src={genderBanners.women || womenBannerImg}
-                  alt="Women's Collection"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+              <div className="overflow-hidden bg-gray-100 flex items-center justify-center" style={{ height: 300 }}>
+                {genderBanners.women ? (
+                  <img
+                    src={genderBanners.women}
+                    alt="Women's Collection"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                ) : (
+                  <p className="text-gray-400 text-xs font-medium uppercase tracking-widest">Upload banner from admin</p>
+                )}
               </div>
               <div className="text-center mt-3">
                 <p className="font-bold text-base uppercase tracking-widest text-gray-900">WOMEN</p>
