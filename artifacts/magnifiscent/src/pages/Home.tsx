@@ -214,7 +214,7 @@ function ProductCard({ product }: { product: ApiProduct }) {
   );
 }
 
-function DealCard({ name, img1, img2, price, originalPrice, reviews, desc }: typeof DEALS[0]) {
+function DealCard({ name, img1, img2, price, originalPrice, reviews, desc }: { name: string; img1: string; img2: string; price: string; originalPrice: string; reviews: number; desc: string }) {
   const [hovered, setHovered] = useState(false);
   const [, navigate] = useLocation();
 
@@ -355,20 +355,22 @@ export default function Home() {
             </button>
           </div>
           {(() => {
-            const visibleDeals = DEALS.slice(0, 4);
+            const visibleDeals = apiDeals.filter((d) => d.active).slice(0, 4);
+            if (visibleDeals.length === 0) return null;
             return (
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {visibleDeals.map((d) => {
-                  const api_deal = apiDeals.find((a) => a.id === d.id);
                   const custom = dealImgs[d.id];
                   return (
                     <DealCard
                       key={d.id}
-                      {...d}
-                      price={api_deal ? `Rs. ${api_deal.price.toFixed(2)}` : d.price}
-                      originalPrice={api_deal ? `Rs. ${api_deal.originalPrice.toFixed(2)}` : d.originalPrice}
-                      img1={custom?.img1 || d.img1}
-                      img2={custom?.img2 || d.img2}
+                      name={d.name}
+                      price={`Rs. ${d.price.toFixed(2)}`}
+                      originalPrice={`Rs. ${d.originalPrice.toFixed(2)}`}
+                      img1={custom?.img1 || ""}
+                      img2={custom?.img2 || ""}
+                      reviews={0}
+                      desc=""
                     />
                   );
                 })}
