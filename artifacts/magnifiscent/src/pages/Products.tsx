@@ -17,6 +17,8 @@ function StarRating({ count }: { count: number }) {
   );
 }
 
+const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='533' viewBox='0 0 400 533'%3E%3Crect width='400' height='533' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='14' fill='%239ca3af'%3ENo Image%3C/text%3E%3C/svg%3E";
+
 function ProductCard({ product }: { product: ApiProduct }) {
   const [hovered, setHovered] = useState(false);
   const { addItem } = useCart();
@@ -32,13 +34,13 @@ function ProductCard({ product }: { product: ApiProduct }) {
       <div className="relative overflow-hidden bg-gray-50" style={{ aspectRatio: "3/4" }}>
         <span className="sale-badge">SALE</span>
         <img
-          src={product.img}
+          src={product.img || PLACEHOLDER}
           alt={product.name}
           className="w-full h-full object-cover absolute inset-0"
           style={{ opacity: hovered ? 0 : 1, transition: "opacity 0.4s ease" }}
         />
         <img
-          src={product.img2}
+          src={product.img2 || PLACEHOLDER}
           alt={product.name}
           className="w-full h-full object-cover absolute inset-0"
           style={{ opacity: hovered ? 1 : 0, transition: "opacity 0.4s ease" }}
