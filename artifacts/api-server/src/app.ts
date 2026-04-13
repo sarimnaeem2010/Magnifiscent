@@ -110,8 +110,8 @@ app.get("/sitemap.xml", async (_req, res) => {
   }
 });
 
-/* ── Static files ── */
-app.use(express.static(staticDir));
+/* ── Static files (index:false so / falls through to SSR handler) ── */
+app.use(express.static(staticDir, { index: false }));
 
 /* ── Static-page meta map ── */
 const STATIC_META: Record<string, { title: string; description: string; ogType?: string }> = {

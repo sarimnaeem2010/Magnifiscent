@@ -69291,7 +69291,7 @@ ${urlTags}
     res.status(500).send(`<?xml version="1.0" encoding="UTF-8"?><error>${message}</error>`);
   }
 });
-app.use(import_express13.default.static(staticDir));
+app.use(import_express13.default.static(staticDir, { index: false }));
 var STATIC_META = {
   "/products": {
     title: "All Perfumes \u2014 MagnifiScent Pakistan",
