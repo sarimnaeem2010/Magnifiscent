@@ -8,6 +8,7 @@ import type { ApiProduct } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
 import { useSeoMeta } from "@/hooks/useSeoMeta";
 import { useJsonLd } from "@/hooks/useJsonLd";
+import { TrustBadges } from "@/components/TrustBadges";
 
 function StarRating({ count, size = 14 }: { count: number; size?: number }) {
   return (
@@ -291,6 +292,15 @@ export default function ProductDetail() {
               </div>
             </div>
 
+            {product.stock > 0 && product.stock <= 5 && (
+              <div className="flex items-center gap-2 mb-4 px-3 py-2 bg-amber-50 border border-amber-200">
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse flex-shrink-0" />
+                <p className="text-xs font-bold text-amber-700 uppercase tracking-wide">
+                  Only {product.stock} left — order soon!
+                </p>
+              </div>
+            )}
+
             <div className="flex items-stretch gap-3 mb-6">
               <div className="flex items-center border border-gray-300" style={{ minWidth: 110 }}>
                 <button
@@ -321,10 +331,12 @@ export default function ProductDetail() {
 
             <button
               onClick={() => { addItem(product!, qty); navigate("/checkout"); }}
-              className="w-full h-12 font-bold uppercase tracking-widest text-xs border-2 border-black text-black hover:bg-black hover:text-white transition-all duration-200 bg-transparent cursor-pointer mb-8"
+              className="w-full h-12 font-bold uppercase tracking-widest text-xs border-2 border-black text-black hover:bg-black hover:text-white transition-all duration-200 bg-transparent cursor-pointer mb-6"
             >
               Buy Now
             </button>
+
+            <TrustBadges className="mb-8" />
 
             <div className="grid grid-cols-3 gap-4 pt-6 border-t border-gray-100">
               {[

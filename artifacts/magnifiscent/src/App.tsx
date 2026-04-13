@@ -17,6 +17,7 @@ import { api } from "@/lib/api";
 import type { ApiExtendedSettings } from "@/lib/api";
 import logoImg from "@assets/whitelogo_1774978057429.png";
 import { syncGlobalSeo, applyDocumentMeta } from "@/hooks/useSeoMeta";
+import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
 
 const queryClient = new QueryClient();
 
@@ -117,6 +118,7 @@ function StorefrontRouter({ ext }: { ext: ApiExtendedSettings }) {
       <ScrollToTop />
       <StorefrontEffects ext={ext} />
       <CartDrawer />
+      <FloatingWhatsApp />
       <div key={location} className="page-transition">
         <Switch>
           <Route path="/" component={Home} />

@@ -108,10 +108,14 @@ function StarRating({ count }: { count: number }) {
 
 const PRODUCT_PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='533' viewBox='0 0 400 533'%3E%3Crect width='400' height='533' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='14' fill='%239ca3af'%3ENo Image%3C/text%3E%3C/svg%3E";
 
+const isBestSeller = (p: ApiProduct) => p.rating >= 5 && p.reviews >= 30;
+
 function ProductCard({ product }: { product: ApiProduct }) {
   const [hovered, setHovered] = useState(false);
   const { addItem } = useCart();
   const [, navigate] = useLocation();
+  const bestSeller = isBestSeller(product);
+  const lowStock = product.stock > 0 && product.stock <= 5;
 
   return (
     <div
@@ -121,16 +125,20 @@ function ProductCard({ product }: { product: ApiProduct }) {
       onClick={() => navigate(`/products/${product.slug}`)}
     >
       <div className="relative overflow-hidden bg-gray-50" style={{ aspectRatio: "3/4" }}>
-        <span className="sale-badge">SALE</span>
+        {bestSeller ? (
+          <span className="sale-badge" style={{ background: "#d97706" }}>BEST SELLER</span>
+        ) : (
+          <span className="sale-badge">SALE</span>
+        )}
         <img
           src={product.img || PRODUCT_PLACEHOLDER}
-          alt={product.name}
+          alt={`${product.name} Eau de Parfum ${product.category === "men" ? "men's" : "women's"} fragrance — MagnifiScent Pakistan`}
           className="w-full h-full object-cover absolute inset-0"
           style={{ opacity: hovered ? 0 : 1, transition: "opacity 0.4s ease" }}
         />
         <img
           src={product.img2 || PRODUCT_PLACEHOLDER}
-          alt={product.name}
+          alt={`${product.name} Eau de Parfum — MagnifiScent Pakistan`}
           className="w-full h-full object-cover absolute inset-0"
           style={{ opacity: hovered ? 1 : 0, transition: "opacity 0.4s ease" }}
         />
@@ -152,9 +160,14 @@ function ProductCard({ product }: { product: ApiProduct }) {
         </div>
         <h3 className="font-bold text-sm text-gray-900 mb-1">{product.name}</h3>
         <p className="text-xs text-gray-500 leading-snug mb-2 line-clamp-2">{product.desc}</p>
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-bold text-gray-900">{product.price}</span>
-          <span className="text-xs text-gray-400 line-through">{product.originalPrice}</span>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-bold text-gray-900">{product.price}</span>
+            <span className="text-xs text-gray-400 line-through">{product.originalPrice}</span>
+          </div>
+          {lowStock && (
+            <span className="text-[10px] font-bold text-amber-600 uppercase tracking-wide">Only {product.stock} left!</span>
+          )}
         </div>
       </div>
     </div>

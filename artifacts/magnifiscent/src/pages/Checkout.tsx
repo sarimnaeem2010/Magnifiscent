@@ -6,6 +6,7 @@ import { useCart } from "@/context/CartContext";
 import { useLocation } from "wouter";
 import { api } from "@/lib/api";
 import type { ApiPaymentSettings, ApiExtendedSettings, ApiStoreSettings } from "@/lib/api";
+import { TrustBadges } from "@/components/TrustBadges";
 
 const DEFAULT_STORE: ApiStoreSettings = {
   storeName: "MagnifiScent",
@@ -500,6 +501,7 @@ export default function Checkout() {
 
             {/* Right: Order Summary */}
             <div>
+              <TrustBadges className="mb-4" />
               <div className="border border-gray-200 sticky top-28">
                 <div className="px-6 py-5 border-b border-gray-100">
                   <h2 className="font-bold text-sm uppercase tracking-widest text-gray-900">
