@@ -69211,7 +69211,7 @@ function injectMeta(html, meta) {
 // src/app.ts
 var __dirname2 = path.dirname(fileURLToPath(import.meta.url));
 var staticDir = process.env["STATIC_DIR"] || path.join(__dirname2, "..", "..", "magnifiscent", "dist", "public");
-var SITE_DOMAIN = process.env["SITE_DOMAIN"] || "https://magnifiscent.com";
+var SITE_DOMAIN = process.env["SITE_DOMAIN"] || "https://magnifiscent.com.pk";
 var app = (0, import_express13.default)();
 app.use(
   (0, import_pino_http.default)({

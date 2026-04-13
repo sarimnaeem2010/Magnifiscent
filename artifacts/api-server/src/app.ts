@@ -15,7 +15,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const staticDir = process.env["STATIC_DIR"] ||
   path.join(__dirname, "..", "..", "magnifiscent", "dist", "public");
 
-const SITE_DOMAIN = process.env["SITE_DOMAIN"] || "https://magnifiscent.com";
+const SITE_DOMAIN = process.env["SITE_DOMAIN"] || "https://magnifiscent.com.pk";
 
 const app: Express = express();
 
