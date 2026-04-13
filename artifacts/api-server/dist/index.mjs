@@ -18417,8 +18417,8 @@ var require_escape_html = __commonJS({
   "../../node_modules/.pnpm/escape-html@1.0.3/node_modules/escape-html/index.js"(exports, module) {
     "use strict";
     var matchHtmlRegExp = /["'&<>]/;
-    module.exports = escapeHtml;
-    function escapeHtml(string4) {
+    module.exports = escapeHtml2;
+    function escapeHtml2(string4) {
       var str = "" + string4;
       var match = matchHtmlRegExp.exec(str);
       if (!match) {
@@ -18549,13 +18549,13 @@ var require_finalhandler = __commonJS({
     "use strict";
     var debug = require_src()("finalhandler");
     var encodeUrl = require_encodeurl();
-    var escapeHtml = require_escape_html();
+    var escapeHtml2 = require_escape_html();
     var onFinished = require_on_finished();
     var parseUrl = require_parseurl();
     var statuses = require_statuses();
     var isFinished = onFinished.isFinished;
     function createHtmlDocument(message) {
-      var body = escapeHtml(message).replaceAll("\n", "<br>").replaceAll("  ", " &nbsp;");
+      var body = escapeHtml2(message).replaceAll("\n", "<br>").replaceAll("  ", " &nbsp;");
       return '<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<title>Error</title>\n</head>\n<body>\n<pre>' + body + "</pre>\n</body>\n</html>\n";
     }
     module.exports = finalhandler;
@@ -18676,7 +18676,7 @@ var require_view = __commonJS({
     "use strict";
     var debug = require_src()("express:view");
     var path2 = __require("node:path");
-    var fs = __require("node:fs");
+    var fs2 = __require("node:fs");
     var dirname = path2.dirname;
     var basename = path2.basename;
     var extname = path2.extname;
@@ -18756,7 +18756,7 @@ var require_view = __commonJS({
     function tryStat(path3) {
       debug('stat "%s"', path3);
       try {
-        return fs.statSync(path3);
+        return fs2.statSync(path3);
       } catch (e) {
         return void 0;
       }
@@ -22379,10 +22379,10 @@ var require_send = __commonJS({
     var createError = require_http_errors();
     var debug = require_src()("send");
     var encodeUrl = require_encodeurl();
-    var escapeHtml = require_escape_html();
+    var escapeHtml2 = require_escape_html();
     var etag = require_etag();
     var fresh = require_fresh();
-    var fs = __require("fs");
+    var fs2 = __require("fs");
     var mime = require_mime_types();
     var ms = require_ms();
     var onFinished = require_on_finished();
@@ -22432,7 +22432,7 @@ var require_send = __commonJS({
       }
       var res = this.res;
       var msg = statuses.message[status] || String(status);
-      var doc = createHtmlDocument("Error", escapeHtml(msg));
+      var doc = createHtmlDocument("Error", escapeHtml2(msg));
       clearHeaders(res);
       if (err && err.headers) {
         setHeaders(res, err.headers);
@@ -22532,7 +22532,7 @@ var require_send = __commonJS({
         return;
       }
       var loc = encodeUrl(collapseLeadingSlashes(this.path + "/"));
-      var doc = createHtmlDocument("Redirecting", "Redirecting to " + escapeHtml(loc));
+      var doc = createHtmlDocument("Redirecting", "Redirecting to " + escapeHtml2(loc));
       res.statusCode = 301;
       res.setHeader("Content-Type", "text/html; charset=UTF-8");
       res.setHeader("Content-Length", Buffer.byteLength(doc));
@@ -22664,7 +22664,7 @@ var require_send = __commonJS({
       var i = 0;
       var self = this;
       debug('stat "%s"', path3);
-      fs.stat(path3, function onstat(err, stat) {
+      fs2.stat(path3, function onstat(err, stat) {
         var pathEndsWithSep = path3[path3.length - 1] === sep;
         if (err && err.code === "ENOENT" && !extname(path3) && !pathEndsWithSep) {
           return next(err);
@@ -22681,7 +22681,7 @@ var require_send = __commonJS({
         }
         var p = path3 + "." + self._extensions[i++];
         debug('stat "%s"', p);
-        fs.stat(p, function(err2, stat) {
+        fs2.stat(p, function(err2, stat) {
           if (err2) return next(err2);
           if (stat.isDirectory()) return next();
           self.emit("file", p, stat);
@@ -22699,7 +22699,7 @@ var require_send = __commonJS({
         }
         var p = join(path3, self._index[i]);
         debug('stat "%s"', p);
-        fs.stat(p, function(err2, stat) {
+        fs2.stat(p, function(err2, stat) {
           if (err2) return next(err2);
           if (stat.isDirectory()) return next();
           self.emit("file", p, stat);
@@ -22711,7 +22711,7 @@ var require_send = __commonJS({
     SendStream.prototype.stream = function stream(path3, options) {
       var self = this;
       var res = this.res;
-      var stream2 = fs.createReadStream(path3, options);
+      var stream2 = fs2.createReadStream(path3, options);
       this.emit("stream", stream2);
       stream2.pipe(res);
       function cleanup() {
@@ -22936,7 +22936,7 @@ var require_response = __commonJS({
     var createError = require_http_errors();
     var deprecate = require_depd()("express");
     var encodeUrl = require_encodeurl();
-    var escapeHtml = require_escape_html();
+    var escapeHtml2 = require_escape_html();
     var http = __require("node:http");
     var onFinished = require_on_finished();
     var mime = require_mime_types();
@@ -23275,7 +23275,7 @@ var require_response = __commonJS({
           body = statuses.message[status] + ". Redirecting to " + address;
         },
         html: function() {
-          var u = escapeHtml(address);
+          var u = escapeHtml2(address);
           body = "<p>" + statuses.message[status] + ". Redirecting to " + u + "</p>";
         },
         default: function() {
@@ -23403,7 +23403,7 @@ var require_serve_static = __commonJS({
   "../../node_modules/.pnpm/serve-static@2.2.1/node_modules/serve-static/index.js"(exports, module) {
     "use strict";
     var encodeUrl = require_encodeurl();
-    var escapeHtml = require_escape_html();
+    var escapeHtml2 = require_escape_html();
     var parseUrl = require_parseurl();
     var resolve = __require("path").resolve;
     var send = require_send();
@@ -23489,7 +23489,7 @@ var require_serve_static = __commonJS({
         originalUrl.path = null;
         originalUrl.pathname = collapseLeadingSlashes(originalUrl.pathname + "/");
         var loc = encodeUrl(url2.format(originalUrl));
-        var doc = createHtmlDocument("Redirecting", "Redirecting to " + escapeHtml(loc));
+        var doc = createHtmlDocument("Redirecting", "Redirecting to " + escapeHtml2(loc));
         res.statusCode = 301;
         res.setHeader("Content-Type", "text/html; charset=UTF-8");
         res.setHeader("Content-Length", Buffer.byteLength(doc));
@@ -25003,7 +25003,7 @@ var require_atomic_sleep = __commonJS({
 var require_sonic_boom = __commonJS({
   "../../node_modules/.pnpm/sonic-boom@4.2.1/node_modules/sonic-boom/index.js"(exports, module) {
     "use strict";
-    var fs = __require("fs");
+    var fs2 = __require("fs");
     var EventEmitter = __require("events");
     var inherits = __require("util").inherits;
     var path2 = __require("path");
@@ -25060,20 +25060,20 @@ var require_sonic_boom = __commonJS({
       const mode = sonic.mode;
       if (sonic.sync) {
         try {
-          if (sonic.mkdir) fs.mkdirSync(path2.dirname(file2), { recursive: true });
-          const fd = fs.openSync(file2, flags, mode);
+          if (sonic.mkdir) fs2.mkdirSync(path2.dirname(file2), { recursive: true });
+          const fd = fs2.openSync(file2, flags, mode);
           fileOpened(null, fd);
         } catch (err) {
           fileOpened(err);
           throw err;
         }
       } else if (sonic.mkdir) {
-        fs.mkdir(path2.dirname(file2), { recursive: true }, (err) => {
+        fs2.mkdir(path2.dirname(file2), { recursive: true }, (err) => {
           if (err) return fileOpened(err);
-          fs.open(file2, flags, mode, fileOpened);
+          fs2.open(file2, flags, mode, fileOpened);
         });
       } else {
-        fs.open(file2, flags, mode, fileOpened);
+        fs2.open(file2, flags, mode, fileOpened);
       }
     }
     function SonicBoom(opts) {
@@ -25114,8 +25114,8 @@ var require_sonic_boom = __commonJS({
         this.flush = flushBuffer;
         this.flushSync = flushBufferSync;
         this._actualWrite = actualWriteBuffer;
-        fsWriteSync = () => fs.writeSync(this.fd, this._writingBuf);
-        fsWrite = () => fs.write(this.fd, this._writingBuf, this.release);
+        fsWriteSync = () => fs2.writeSync(this.fd, this._writingBuf);
+        fsWrite = () => fs2.write(this.fd, this._writingBuf, this.release);
       } else if (contentMode === void 0 || contentMode === kContentModeUtf8) {
         this._writingBuf = "";
         this.write = write;
@@ -25124,15 +25124,15 @@ var require_sonic_boom = __commonJS({
         this._actualWrite = actualWrite;
         fsWriteSync = () => {
           if (Buffer.isBuffer(this._writingBuf)) {
-            return fs.writeSync(this.fd, this._writingBuf);
+            return fs2.writeSync(this.fd, this._writingBuf);
           }
-          return fs.writeSync(this.fd, this._writingBuf, "utf8");
+          return fs2.writeSync(this.fd, this._writingBuf, "utf8");
         };
         fsWrite = () => {
           if (Buffer.isBuffer(this._writingBuf)) {
-            return fs.write(this.fd, this._writingBuf, this.release);
+            return fs2.write(this.fd, this._writingBuf, this.release);
           }
-          return fs.write(this.fd, this._writingBuf, "utf8", this.release);
+          return fs2.write(this.fd, this._writingBuf, "utf8", this.release);
         };
       } else {
         throw new Error(`SonicBoom supports "${kContentModeUtf8}" and "${kContentModeBuffer}", but passed ${contentMode}`);
@@ -25189,7 +25189,7 @@ var require_sonic_boom = __commonJS({
           }
         }
         if (this._fsync) {
-          fs.fsyncSync(this.fd);
+          fs2.fsyncSync(this.fd);
         }
         const len = this._len;
         if (this._reopening) {
@@ -25303,7 +25303,7 @@ var require_sonic_boom = __commonJS({
       const onDrain = () => {
         if (!this._fsync) {
           try {
-            fs.fsync(this.fd, (err) => {
+            fs2.fsync(this.fd, (err) => {
               this._flushPending = false;
               cb(err);
             });
@@ -25405,7 +25405,7 @@ var require_sonic_boom = __commonJS({
       const fd = this.fd;
       this.once("ready", () => {
         if (fd !== this.fd) {
-          fs.close(fd, (err) => {
+          fs2.close(fd, (err) => {
             if (err) {
               return this.emit("error", err);
             }
@@ -25454,7 +25454,7 @@ var require_sonic_boom = __commonJS({
           buf = this._bufs[0];
         }
         try {
-          const n = Buffer.isBuffer(buf) ? fs.writeSync(this.fd, buf) : fs.writeSync(this.fd, buf, "utf8");
+          const n = Buffer.isBuffer(buf) ? fs2.writeSync(this.fd, buf) : fs2.writeSync(this.fd, buf, "utf8");
           const releasedBufObj = releaseWritingBuf(buf, this._len, n);
           buf = releasedBufObj.writingBuf;
           this._len = releasedBufObj.len;
@@ -25470,7 +25470,7 @@ var require_sonic_boom = __commonJS({
         }
       }
       try {
-        fs.fsyncSync(this.fd);
+        fs2.fsyncSync(this.fd);
       } catch {
       }
     }
@@ -25491,7 +25491,7 @@ var require_sonic_boom = __commonJS({
           buf = mergeBuf(this._bufs[0], this._lens[0]);
         }
         try {
-          const n = fs.writeSync(this.fd, buf);
+          const n = fs2.writeSync(this.fd, buf);
           buf = buf.subarray(n);
           this._len = Math.max(this._len - n, 0);
           if (buf.length <= 0) {
@@ -25519,13 +25519,13 @@ var require_sonic_boom = __commonJS({
       this._writingBuf = this._writingBuf.length ? this._writingBuf : this._bufs.shift() || "";
       if (this.sync) {
         try {
-          const written = Buffer.isBuffer(this._writingBuf) ? fs.writeSync(this.fd, this._writingBuf) : fs.writeSync(this.fd, this._writingBuf, "utf8");
+          const written = Buffer.isBuffer(this._writingBuf) ? fs2.writeSync(this.fd, this._writingBuf) : fs2.writeSync(this.fd, this._writingBuf, "utf8");
           release(null, written);
         } catch (err) {
           release(err);
         }
       } else {
-        fs.write(this.fd, this._writingBuf, release);
+        fs2.write(this.fd, this._writingBuf, release);
       }
     }
     function actualWriteBuffer() {
@@ -25534,7 +25534,7 @@ var require_sonic_boom = __commonJS({
       this._writingBuf = this._writingBuf.length ? this._writingBuf : mergeBuf(this._bufs.shift(), this._lens.shift());
       if (this.sync) {
         try {
-          const written = fs.writeSync(this.fd, this._writingBuf);
+          const written = fs2.writeSync(this.fd, this._writingBuf);
           release(null, written);
         } catch (err) {
           release(err);
@@ -25543,7 +25543,7 @@ var require_sonic_boom = __commonJS({
         if (kCopyBuffer) {
           this._writingBuf = Buffer.from(this._writingBuf);
         }
-        fs.write(this.fd, this._writingBuf, release);
+        fs2.write(this.fd, this._writingBuf, release);
       }
     }
     function actualClose(sonic) {
@@ -25559,12 +25559,12 @@ var require_sonic_boom = __commonJS({
       sonic._lens = [];
       assert2(typeof sonic.fd === "number", `sonic.fd must be a number, got ${typeof sonic.fd}`);
       try {
-        fs.fsync(sonic.fd, closeWrapped);
+        fs2.fsync(sonic.fd, closeWrapped);
       } catch {
       }
       function closeWrapped() {
         if (sonic.fd !== 1 && sonic.fd !== 2) {
-          fs.close(sonic.fd, done);
+          fs2.close(sonic.fd, done);
         } else {
           done();
         }
@@ -28937,7 +28937,7 @@ var require_shared = __commonJS({
     "use strict";
     var urllib = __require("url");
     var util2 = __require("util");
-    var fs = __require("fs");
+    var fs2 = __require("fs");
     var nmfetch = require_fetch();
     var dns = __require("dns");
     var net = __require("net");
@@ -29338,7 +29338,7 @@ var require_shared = __commonJS({
           }
           return callback(null, parsedDataUri.data);
         } else if (content.path) {
-          return resolveStream(fs.createReadStream(content.path), callback);
+          return resolveStream(fs2.createReadStream(content.path), callback);
         }
       }
       if (typeof data[key].content === "string" && !["utf8", "usascii", "ascii"].includes(encoding)) {
@@ -32949,7 +32949,7 @@ var require_mime_node = __commonJS({
   "../../node_modules/.pnpm/nodemailer@8.0.4/node_modules/nodemailer/lib/mime-node/index.js"(exports, module) {
     "use strict";
     var crypto2 = __require("crypto");
-    var fs = __require("fs");
+    var fs2 = __require("fs");
     var punycode = require_punycode();
     var { PassThrough } = __require("stream");
     var shared = require_shared();
@@ -33671,7 +33671,7 @@ var require_mime_node = __commonJS({
             });
             return contentStream;
           }
-          return fs.createReadStream(content.path);
+          return fs2.createReadStream(content.path);
         }
         if (content && typeof content.href === "string") {
           if (this.disableUrlAccess) {
@@ -34703,7 +34703,7 @@ var require_dkim = __commonJS({
     var RelaxedBody = require_relaxed_body();
     var sign = require_sign2();
     var { PassThrough } = __require("stream");
-    var fs = __require("fs");
+    var fs2 = __require("fs");
     var path2 = __require("path");
     var crypto2 = __require("crypto");
     var DKIM_ALGO = "sha256";
@@ -34738,10 +34738,10 @@ var require_dkim = __commonJS({
         if (!this.cache || !this.cachePath) {
           return;
         }
-        fs.unlink(this.cachePath, () => false);
+        fs2.unlink(this.cachePath, () => false);
       }
       createReadCache() {
-        this.cache = fs.createReadStream(this.cachePath);
+        this.cache = fs2.createReadStream(this.cachePath);
         this.cache.once("error", (err) => {
           this.cleanup();
           this.output.emit("error", err);
@@ -34797,7 +34797,7 @@ var require_dkim = __commonJS({
       }
       createWriteCache() {
         this.output.usingCache = true;
-        this.cache = fs.createWriteStream(this.cachePath);
+        this.cache = fs2.createWriteStream(this.cachePath);
         this.cache.once("error", (err) => {
           this.cleanup();
           this.relaxedBody.unpipe(this.cache);
@@ -41510,15 +41510,15 @@ var require_pg_connection_string = __commonJS({
       if (config2.sslcert || config2.sslkey || config2.sslrootcert || config2.sslmode) {
         config2.ssl = {};
       }
-      const fs = config2.sslcert || config2.sslkey || config2.sslrootcert ? __require("fs") : null;
+      const fs2 = config2.sslcert || config2.sslkey || config2.sslrootcert ? __require("fs") : null;
       if (config2.sslcert) {
-        config2.ssl.cert = fs.readFileSync(config2.sslcert).toString();
+        config2.ssl.cert = fs2.readFileSync(config2.sslcert).toString();
       }
       if (config2.sslkey) {
-        config2.ssl.key = fs.readFileSync(config2.sslkey).toString();
+        config2.ssl.key = fs2.readFileSync(config2.sslkey).toString();
       }
       if (config2.sslrootcert) {
-        config2.ssl.ca = fs.readFileSync(config2.sslrootcert).toString();
+        config2.ssl.ca = fs2.readFileSync(config2.sslrootcert).toString();
       }
       if (options.useLibpqCompat && config2.uselibpqcompat) {
         throw new Error("Both useLibpqCompat and uselibpqcompat are set. Please use only one of them.");
@@ -43455,15 +43455,15 @@ var require_lib4 = __commonJS({
   "../../node_modules/.pnpm/pgpass@1.0.5/node_modules/pgpass/lib/index.js"(exports, module) {
     "use strict";
     var path2 = __require("path");
-    var fs = __require("fs");
+    var fs2 = __require("fs");
     var helper = require_helper();
     module.exports = function(connInfo, cb) {
       var file2 = helper.getFileName();
-      fs.stat(file2, function(err, stat) {
+      fs2.stat(file2, function(err, stat) {
         if (err || !helper.usePgPass(stat, file2)) {
           return cb(void 0);
         }
-        var st = fs.createReadStream(file2);
+        var st = fs2.createReadStream(file2);
         helper.getPassword(connInfo, st, cb);
       });
     };
@@ -44988,6 +44988,7 @@ var import_express13 = __toESM(require_express2(), 1);
 var import_cors = __toESM(require_lib3(), 1);
 var import_pino_http = __toESM(require_logger(), 1);
 import path from "path";
+import fs from "fs";
 import { fileURLToPath } from "url";
 
 // src/routes/index.ts
@@ -69158,6 +69159,53 @@ var logger = (0, import_pino.default)({
   }
 });
 
+// src/lib/injectMeta.ts
+function escapeHtml(str) {
+  return str.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+function injectMeta(html, meta) {
+  const title = escapeHtml(meta.title);
+  const desc2 = escapeHtml(meta.description);
+  const ogTitle = escapeHtml(meta.ogTitle ?? meta.title);
+  const ogDesc = escapeHtml(meta.ogDescription ?? meta.description);
+  const ogImage = escapeHtml(meta.ogImage ?? "");
+  const ogType = escapeHtml(meta.ogType ?? "website");
+  const ogUrl = escapeHtml(meta.ogUrl ?? "");
+  let result = html;
+  result = result.replace(/<title>[^<]*<\/title>/, `<title>${title}</title>`);
+  result = result.replace(
+    /<meta name="description"[^>]*>/,
+    `<meta name="description" content="${desc2}" />`
+  );
+  result = result.replace(
+    /<meta property="og:title"[^>]*>/,
+    `<meta property="og:title" content="${ogTitle}" />`
+  );
+  result = result.replace(
+    /<meta property="og:description"[^>]*>/,
+    `<meta property="og:description" content="${ogDesc}" />`
+  );
+  result = result.replace(
+    /<meta property="og:type"[^>]*>/,
+    `<meta property="og:type" content="${ogType}" />`
+  );
+  result = result.replace(
+    /<meta property="og:image"[^>]*>/,
+    `<meta property="og:image" content="${ogImage}" />`
+  );
+  result = result.replace(
+    /<meta property="og:url"[^>]*>/,
+    `<meta property="og:url" content="${ogUrl}" />`
+  );
+  if (meta.jsonLd) {
+    const schemas = Array.isArray(meta.jsonLd) ? meta.jsonLd : [meta.jsonLd];
+    const tags = schemas.map((s) => `  <script type="application/ld+json">${JSON.stringify(s)}</script>`).join("\n");
+    result = result.replace("</head>", `${tags}
+  </head>`);
+  }
+  return result;
+}
+
 // src/app.ts
 var __dirname2 = path.dirname(fileURLToPath(import.meta.url));
 var staticDir = process.env["STATIC_DIR"] || path.join(__dirname2, "..", "..", "magnifiscent", "dist", "public");
@@ -69243,8 +69291,178 @@ ${urlTags}
   }
 });
 app.use(import_express13.default.static(staticDir));
-app.get("/{*path}", (_req, res) => {
-  res.sendFile(path.join(staticDir, "index.html"));
+var STATIC_META = {
+  "/products": {
+    title: "All Perfumes \u2014 MagnifiScent Pakistan",
+    description: "Shop all premium Eau de Parfum fragrances for men and women at MagnifiScent. Long-lasting scents with Cash on Delivery across Pakistan."
+  },
+  "/products/men": {
+    title: "Men's Perfumes \u2014 MagnifiScent Pakistan",
+    description: "Explore MagnifiScent's men's fragrance collection. Bold, long-lasting Eau de Parfum with Cash on Delivery across Pakistan."
+  },
+  "/products/women": {
+    title: "Women's Perfumes \u2014 MagnifiScent Pakistan",
+    description: "Discover MagnifiScent's women's fragrance collection. Elegant, long-lasting Eau de Parfum with Cash on Delivery across Pakistan."
+  },
+  "/deals": {
+    title: "Deals & Combo Offers \u2014 MagnifiScent Pakistan",
+    description: "Save more with MagnifiScent's exclusive fragrance bundle deals. Premium perfume combos with Cash on Delivery across Pakistan."
+  },
+  "/about": {
+    title: "About MagnifiScent \u2014 Premium Perfumes Pakistan",
+    description: "Learn about MagnifiScent \u2014 Pakistan's premium Eau de Parfum brand. Authentic fragrances crafted for men and women."
+  },
+  "/contact": {
+    title: "Contact Us \u2014 MagnifiScent Pakistan",
+    description: "Get in touch with MagnifiScent. We're here to help with orders, fragrance advice, and everything in between."
+  },
+  "/returns": {
+    title: "Returns Policy \u2014 MagnifiScent Pakistan",
+    description: "MagnifiScent's returns and exchange policy for perfume orders across Pakistan."
+  },
+  "/shipping": {
+    title: "Shipping Information \u2014 MagnifiScent Pakistan",
+    description: "Shipping details, delivery times, and Cash on Delivery information for MagnifiScent orders."
+  },
+  "/privacy": {
+    title: "Privacy Policy \u2014 MagnifiScent",
+    description: "MagnifiScent's privacy policy \u2014 how we collect, use, and protect your information."
+  },
+  "/terms": {
+    title: "Terms & Conditions \u2014 MagnifiScent",
+    description: "MagnifiScent's terms and conditions of service."
+  }
+};
+function readIndexHtml() {
+  const indexPath = path.join(staticDir, "index.html");
+  try {
+    return fs.readFileSync(indexPath, "utf-8");
+  } catch {
+    return "";
+  }
+}
+app.get("/{*path}", async (req, res) => {
+  const html = readIndexHtml();
+  if (!html) {
+    res.status(404).send("Not found");
+    return;
+  }
+  const urlPath = req.path.replace(/\/$/, "") || "/";
+  if (urlPath === "/admin" || urlPath.startsWith("/admin/")) {
+    res.type("html").send(html);
+    return;
+  }
+  if (urlPath === "/") {
+    const injected = injectMeta(html, {
+      title: "MagnifiScent \u2014 Premium Eau de Parfum Pakistan",
+      description: "Discover MagnifiScent's collection of premium Eau de Parfum fragrances for men and women. Authentic, long-lasting luxury perfumes with free delivery and Cash on Delivery across Pakistan.",
+      ogType: "website",
+      ogUrl: SITE_DOMAIN
+    });
+    res.type("html").send(injected);
+    return;
+  }
+  const staticPageMeta = STATIC_META[urlPath];
+  if (staticPageMeta) {
+    const injected = injectMeta(html, {
+      ...staticPageMeta,
+      ogType: staticPageMeta.ogType ?? "website",
+      ogUrl: `${SITE_DOMAIN}${urlPath}`
+    });
+    res.type("html").send(injected);
+    return;
+  }
+  const productMatch = urlPath.match(/^\/products\/([^/]+)$/);
+  if (productMatch) {
+    const slug = productMatch[1];
+    try {
+      const rows = await db.select().from(productsTable).where(eq(productsTable.slug, slug)).limit(1);
+      if (rows.length > 0) {
+        const p = rows[0];
+        const notes = Array.isArray(p.notes) ? p.notes.join(", ") : "";
+        const rawDesc = `${p.name} by MagnifiScent \u2014 ${p.desc || `a premium Eau de Parfum with ${notes}. Long-lasting fragrance with Cash on Delivery across Pakistan.`}`;
+        const desc2 = rawDesc.length > 160 ? rawDesc.slice(0, 157) + "\u2026" : rawDesc;
+        const productSchema = {
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: p.name,
+          description: p.desc,
+          image: [p.img, p.img2].filter(Boolean),
+          brand: { "@type": "Brand", name: "MagnifiScent" },
+          sku: String(p.id),
+          offers: {
+            "@type": "Offer",
+            priceCurrency: "PKR",
+            price: p.priceNum,
+            availability: p.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+            seller: { "@type": "Organization", name: "MagnifiScent" },
+            url: `${SITE_DOMAIN}/products/${p.slug}`
+          },
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: p.rating,
+            reviewCount: p.reviews,
+            bestRating: 5,
+            worstRating: 1
+          }
+        };
+        const breadcrumbSchema = {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: SITE_DOMAIN },
+            { "@type": "ListItem", position: 2, name: "Products", item: `${SITE_DOMAIN}/products` },
+            { "@type": "ListItem", position: 3, name: p.name, item: `${SITE_DOMAIN}/products/${p.slug}` }
+          ]
+        };
+        const faqSchema = {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: [
+            {
+              "@type": "Question",
+              name: `Is ${p.name} long lasting?`,
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: `Yes, ${p.name} by MagnifiScent is formulated for long-lasting wear. It is an Eau de Parfum with ${p.size}, designed to keep you smelling great all day.`
+              }
+            },
+            {
+              "@type": "Question",
+              name: `What does ${p.name} smell like?`,
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: `${p.name} features the following scent notes: ${notes}. ${p.desc}`
+              }
+            },
+            {
+              "@type": "Question",
+              name: "Is Cash on Delivery available for this perfume?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "Yes, MagnifiScent offers Cash on Delivery (COD) across Pakistan. Simply place your order and pay when it arrives at your door."
+              }
+            }
+          ]
+        };
+        const injected = injectMeta(html, {
+          title: `${p.name} \u2014 MagnifiScent Pakistan`,
+          description: desc2,
+          ogTitle: `${p.name} \u2014 MagnifiScent Pakistan`,
+          ogDescription: desc2,
+          ogImage: p.img || "",
+          ogType: "product",
+          ogUrl: `${SITE_DOMAIN}/products/${p.slug}`,
+          jsonLd: [productSchema, breadcrumbSchema, faqSchema]
+        });
+        res.type("html").send(injected);
+        return;
+      }
+    } catch (err) {
+      logger.error({ err }, "SSR meta injection failed for product slug: " + slug);
+    }
+  }
+  res.type("html").send(html);
 });
 var app_default = app;
 

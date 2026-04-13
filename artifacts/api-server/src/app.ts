@@ -1,13 +1,15 @@
-import express, { type Express } from "express";
+import express, { type Express, type Request, type Response } from "express";
 import cors from "cors";
 import pinoHttp from "pino-http";
 import path from "path";
+import fs from "fs";
 import { fileURLToPath } from "url";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { db } from "./lib/db.js";
 import { productsTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
+import { injectMeta } from "./lib/injectMeta.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const staticDir = process.env["STATIC_DIR"] ||
@@ -107,12 +109,216 @@ app.get("/sitemap.xml", async (_req, res) => {
   }
 });
 
-// Serve built frontend static files in production
+/* ── Static files ── */
 app.use(express.static(staticDir));
 
-// SPA fallback — serve index.html for all non-API routes (Express 5 syntax)
-app.get("/{*path}", (_req, res) => {
-  res.sendFile(path.join(staticDir, "index.html"));
+/* ── Static-page meta map ── */
+const STATIC_META: Record<string, { title: string; description: string; ogType?: string }> = {
+  "/products": {
+    title: "All Perfumes — MagnifiScent Pakistan",
+    description:
+      "Shop all premium Eau de Parfum fragrances for men and women at MagnifiScent. Long-lasting scents with Cash on Delivery across Pakistan.",
+  },
+  "/products/men": {
+    title: "Men's Perfumes — MagnifiScent Pakistan",
+    description:
+      "Explore MagnifiScent's men's fragrance collection. Bold, long-lasting Eau de Parfum with Cash on Delivery across Pakistan.",
+  },
+  "/products/women": {
+    title: "Women's Perfumes — MagnifiScent Pakistan",
+    description:
+      "Discover MagnifiScent's women's fragrance collection. Elegant, long-lasting Eau de Parfum with Cash on Delivery across Pakistan.",
+  },
+  "/deals": {
+    title: "Deals & Combo Offers — MagnifiScent Pakistan",
+    description:
+      "Save more with MagnifiScent's exclusive fragrance bundle deals. Premium perfume combos with Cash on Delivery across Pakistan.",
+  },
+  "/about": {
+    title: "About MagnifiScent — Premium Perfumes Pakistan",
+    description:
+      "Learn about MagnifiScent — Pakistan's premium Eau de Parfum brand. Authentic fragrances crafted for men and women.",
+  },
+  "/contact": {
+    title: "Contact Us — MagnifiScent Pakistan",
+    description:
+      "Get in touch with MagnifiScent. We're here to help with orders, fragrance advice, and everything in between.",
+  },
+  "/returns": {
+    title: "Returns Policy — MagnifiScent Pakistan",
+    description: "MagnifiScent's returns and exchange policy for perfume orders across Pakistan.",
+  },
+  "/shipping": {
+    title: "Shipping Information — MagnifiScent Pakistan",
+    description: "Shipping details, delivery times, and Cash on Delivery information for MagnifiScent orders.",
+  },
+  "/privacy": {
+    title: "Privacy Policy — MagnifiScent",
+    description: "MagnifiScent's privacy policy — how we collect, use, and protect your information.",
+  },
+  "/terms": {
+    title: "Terms & Conditions — MagnifiScent",
+    description: "MagnifiScent's terms and conditions of service.",
+  },
+};
+
+/* ── Helper: read index.html (fresh each call in dev, but fine for production SSR) ── */
+function readIndexHtml(): string {
+  const indexPath = path.join(staticDir, "index.html");
+  try {
+    return fs.readFileSync(indexPath, "utf-8");
+  } catch {
+    return "";
+  }
+}
+
+/* ── SPA fallback with server-side meta injection ── */
+app.get("/{*path}", async (req: Request, res: Response) => {
+  const html = readIndexHtml();
+  if (!html) {
+    res.status(404).send("Not found");
+    return;
+  }
+
+  const urlPath = req.path.replace(/\/$/, "") || "/";
+
+  // Skip meta injection for admin routes
+  if (urlPath === "/admin" || urlPath.startsWith("/admin/")) {
+    res.type("html").send(html);
+    return;
+  }
+
+  // Static page meta
+  if (urlPath === "/") {
+    const injected = injectMeta(html, {
+      title: "MagnifiScent — Premium Eau de Parfum Pakistan",
+      description:
+        "Discover MagnifiScent's collection of premium Eau de Parfum fragrances for men and women. Authentic, long-lasting luxury perfumes with free delivery and Cash on Delivery across Pakistan.",
+      ogType: "website",
+      ogUrl: SITE_DOMAIN,
+    });
+    res.type("html").send(injected);
+    return;
+  }
+
+  const staticPageMeta = STATIC_META[urlPath];
+  if (staticPageMeta) {
+    const injected = injectMeta(html, {
+      ...staticPageMeta,
+      ogType: staticPageMeta.ogType ?? "website",
+      ogUrl: `${SITE_DOMAIN}${urlPath}`,
+    });
+    res.type("html").send(injected);
+    return;
+  }
+
+  // Product detail page: /products/:slug
+  const productMatch = urlPath.match(/^\/products\/([^/]+)$/);
+  if (productMatch) {
+    const slug = productMatch[1];
+    try {
+      const rows = await db
+        .select()
+        .from(productsTable)
+        .where(eq(productsTable.slug, slug))
+        .limit(1);
+
+      if (rows.length > 0) {
+        const p = rows[0];
+        const notes = Array.isArray(p.notes) ? (p.notes as string[]).join(", ") : "";
+        const rawDesc = `${p.name} by MagnifiScent — ${p.desc || `a premium Eau de Parfum with ${notes}. Long-lasting fragrance with Cash on Delivery across Pakistan.`}`;
+        const desc = rawDesc.length > 160 ? rawDesc.slice(0, 157) + "…" : rawDesc;
+
+        const productSchema = {
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: p.name,
+          description: p.desc,
+          image: [p.img, p.img2].filter(Boolean),
+          brand: { "@type": "Brand", name: "MagnifiScent" },
+          sku: String(p.id),
+          offers: {
+            "@type": "Offer",
+            priceCurrency: "PKR",
+            price: p.priceNum,
+            availability:
+              p.stock > 0
+                ? "https://schema.org/InStock"
+                : "https://schema.org/OutOfStock",
+            seller: { "@type": "Organization", name: "MagnifiScent" },
+            url: `${SITE_DOMAIN}/products/${p.slug}`,
+          },
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: p.rating,
+            reviewCount: p.reviews,
+            bestRating: 5,
+            worstRating: 1,
+          },
+        };
+
+        const breadcrumbSchema = {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: SITE_DOMAIN },
+            { "@type": "ListItem", position: 2, name: "Products", item: `${SITE_DOMAIN}/products` },
+            { "@type": "ListItem", position: 3, name: p.name, item: `${SITE_DOMAIN}/products/${p.slug}` },
+          ],
+        };
+
+        const faqSchema = {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          mainEntity: [
+            {
+              "@type": "Question",
+              name: `Is ${p.name} long lasting?`,
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: `Yes, ${p.name} by MagnifiScent is formulated for long-lasting wear. It is an Eau de Parfum with ${p.size}, designed to keep you smelling great all day.`,
+              },
+            },
+            {
+              "@type": "Question",
+              name: `What does ${p.name} smell like?`,
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: `${p.name} features the following scent notes: ${notes}. ${p.desc}`,
+              },
+            },
+            {
+              "@type": "Question",
+              name: "Is Cash on Delivery available for this perfume?",
+              acceptedAnswer: {
+                "@type": "Answer",
+                text: "Yes, MagnifiScent offers Cash on Delivery (COD) across Pakistan. Simply place your order and pay when it arrives at your door.",
+              },
+            },
+          ],
+        };
+
+        const injected = injectMeta(html, {
+          title: `${p.name} — MagnifiScent Pakistan`,
+          description: desc,
+          ogTitle: `${p.name} — MagnifiScent Pakistan`,
+          ogDescription: desc,
+          ogImage: p.img || "",
+          ogType: "product",
+          ogUrl: `${SITE_DOMAIN}/products/${p.slug}`,
+          jsonLd: [productSchema, breadcrumbSchema, faqSchema],
+        });
+
+        res.type("html").send(injected);
+        return;
+      }
+    } catch (err) {
+      logger.error({ err }, "SSR meta injection failed for product slug: " + slug);
+    }
+  }
+
+  // Default fallback
+  res.type("html").send(html);
 });
 
 export default app;
