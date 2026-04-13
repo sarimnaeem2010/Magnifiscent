@@ -292,7 +292,7 @@ export default function Home() {
     "@type": "Organization",
     name: "MagnifiScent",
     url: siteUrl,
-    logo: `${siteUrl}/assets/whitelogo_1774978057429-DT7vKnxD.png`,
+    logo: `${siteUrl}/favicon.svg`,
     sameAs: ["https://www.instagram.com/magnifiscent24/"],
     contactPoint: {
       "@type": "ContactPoint",

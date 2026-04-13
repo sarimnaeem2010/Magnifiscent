@@ -69242,6 +69242,7 @@ app.get("/robots.txt", (_req, res) => {
       "Disallow: /admin",
       "Disallow: /admin/",
       "Disallow: /checkout",
+      "Disallow: /api",
       "Disallow: /api/",
       "Allow: /",
       "",
