@@ -9,9 +9,9 @@ export interface UseSeoMetaProps {
   ogPriceCurrency?: string;
 }
 
-const DEFAULT_TITLE = "Buy Perfumes Online in Pakistan | MagnifiScent";
+const DEFAULT_TITLE = "Buy Premium Perfumes Online in Pakistan | MagnifiScent";
 const DEFAULT_DESCRIPTION =
-  "Shop premium long-lasting Eau de Parfum for men and women in Pakistan. Cash on Delivery available. Authentic fragrances — MagnifiScent.";
+  "Shop premium long-lasting Eau de Parfum for men and women in Pakistan. Free delivery & Cash on Delivery available. Authentic fragrances — MagnifiScent.";
 const DEFAULT_OG_IMAGE = "";
 
 let _globalTitle = DEFAULT_TITLE;

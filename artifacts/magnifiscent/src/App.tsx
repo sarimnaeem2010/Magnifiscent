@@ -44,9 +44,9 @@ function ScrollToTop() {
 
 function StorefrontEffects({ ext }: { ext: ApiExtendedSettings }) {
   useEffect(() => {
-    const defaultTitle = "Buy Perfumes Online in Pakistan | MagnifiScent";
+    const defaultTitle = "Buy Premium Perfumes Online in Pakistan | MagnifiScent";
     const defaultDesc =
-      "Shop premium long-lasting Eau de Parfum for men and women in Pakistan. Cash on Delivery available. Authentic fragrances — MagnifiScent.";
+      "Shop premium long-lasting Eau de Parfum for men and women in Pakistan. Free delivery & Cash on Delivery available. Authentic fragrances — MagnifiScent.";
 
     const title = ext.seoTitle || defaultTitle;
     const desc = ext.seoDescription || defaultDesc;

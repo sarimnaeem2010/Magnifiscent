@@ -72,12 +72,15 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true);
 
   const seoTitle = product
-    ? `${product.name} – ${product.category === "men" ? "Men" : "Women"}'s Perfume | MagnifiScent Pakistan`
+    ? `${product.name} – Long-Lasting ${product.category === "men" ? "Men" : "Women"}'s Perfume | MagnifiScent`
     : "Perfume | MagnifiScent Pakistan";
-  const rawDesc = product
-    ? `Buy ${product.name} Eau de Parfum. ${product.desc.slice(0, 100).trimEnd()}. Price: ${product.price}. Cash on Delivery in Pakistan.`
-    : "Premium Eau de Parfum by MagnifiScent Pakistan.";
-  const seoDesc = rawDesc.length > 160 ? rawDesc.slice(0, 157) + "…" : rawDesc;
+  const seoDesc = product
+    ? (() => {
+        const topNotes = product.notes.slice(0, 3).join(", ");
+        const raw = `Buy ${product.name} Eau de Parfum — a long-lasting ${product.category === "men" ? "men's" : "women's"} fragrance. Scent notes: ${topNotes}. ${product.price}. Cash on Delivery in Pakistan.`;
+        return raw.length > 160 ? raw.slice(0, 157) + "…" : raw;
+      })()
+    : "Premium long-lasting Eau de Parfum by MagnifiScent Pakistan. Cash on Delivery.";
 
   useSeoMeta({
     title: seoTitle,
