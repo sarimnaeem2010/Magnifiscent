@@ -125,12 +125,12 @@ export default function Deals() {
       {/* Banner */}
       <div className="bg-gray-50 border-b border-gray-100 py-10">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Exclusive Savings</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Exclusive Savings — Cash on Delivery Pakistan</p>
           <h1 className="font-bold text-3xl md:text-4xl uppercase tracking-wide" style={{ fontFamily: "Georgia, serif" }}>
-            Deals &amp; Combo
+            Perfume Deals &amp; Combo Packs
           </h1>
-          <p className="text-gray-500 text-sm mt-3 max-w-md mx-auto">
-            Save more when you bundle. Exclusive paired sets for every mood and occasion.
+          <p className="text-gray-500 text-sm mt-3 max-w-xl mx-auto">
+            Save more when you bundle. Exclusive paired fragrance sets for men and women — delivered free across Pakistan. The best perfume deals online with guaranteed authentic Eau de Parfum.
           </p>
         </div>
       </div>

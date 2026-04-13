@@ -52,20 +52,20 @@ export type HomeHeadings = {
   whyChooseSubtitle: string;
 };
 export const DEFAULT_HOME_HEADINGS: HomeHeadings = {
-  deals: "Deals & Combo",
-  dealsSubtitle: "Save more with our exclusive fragrance bundles",
-  shopByGender: "Shop By Gender",
-  shopByGenderSubtitle: "Curated collections crafted for him and for her",
-  allProducts: "All Products",
-  allProductsSubtitle: "Every scent in our signature collection",
-  shopByNotes: "Shop By Notes",
-  shopByNotesSubtitle: "Find your perfect fragrance by scent family",
+  deals: "Deals & Combo Packs — Save More",
+  dealsSubtitle: "Exclusive bundled sets with free delivery across Pakistan",
+  shopByGender: "Shop Men's & Women's Perfumes Online Pakistan",
+  shopByGenderSubtitle: "Curated long-lasting fragrances crafted for him and for her",
+  allProducts: "Long Lasting Fragrances — Buy Online Pakistan",
+  allProductsSubtitle: "Authentic Eau de Parfum with Cash on Delivery across Pakistan",
+  shopByNotes: "Shop By Scent Family",
+  shopByNotesSubtitle: "Find your perfect long-lasting fragrance by note type",
   instagramTitle: "Scent That Spreads",
   instagramSubtitle: "Everyone's favourite MagnifiScent Fragrances",
-  reviews: "Buyer's Reviews",
-  reviewsSubtitle: "Real experiences from our fragrance community",
-  whyChoose: "Why Choose MagnifiScent?",
-  whyChooseSubtitle: "Authenticity, longevity, and luxury — without compromise",
+  reviews: "Buyer's Reviews — Pakistan's Favourite Perfumes",
+  reviewsSubtitle: "Real experiences from our fragrance community across Pakistan",
+  whyChoose: "Why Pakistan Loves MagnifiScent",
+  whyChooseSubtitle: "Authenticity, longevity, and luxury — delivered free to your door",
 };
 
 /* ─── Payment Settings type ─── */

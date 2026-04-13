@@ -22,6 +22,52 @@ function StarRating({ count, size = 14 }: { count: number; size?: number }) {
 
 const PLACEHOLDER = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='533' viewBox='0 0 400 533'%3E%3Crect width='400' height='533' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-size='14' fill='%239ca3af'%3ENo Image%3C/text%3E%3C/svg%3E";
 
+const NOTE_OCCASIONS: { keywords: string[]; occasions: string[] }[] = [
+  { keywords: ["floral", "rose", "jasmine", "lily", "peony", "violet"], occasions: ["Daily Wear", "Office", "Spring / Summer"] },
+  { keywords: ["fresh", "citrus", "green", "herbal", "bergamot", "lemon"], occasions: ["Morning Wear", "Office", "Summer"] },
+  { keywords: ["aquatic", "marine", "ocean", "water"], occasions: ["Summer", "Outdoor", "Beach"] },
+  { keywords: ["oud", "agarwood"], occasions: ["Evening", "Wedding", "Winter"] },
+  { keywords: ["oriental", "amber", "incense", "resin"], occasions: ["Evening", "Formal Occasions", "Winter"] },
+  { keywords: ["woody", "cedar", "sandalwood", "vetiver", "patchouli"], occasions: ["Evening", "Casual", "Winter"] },
+  { keywords: ["spicy", "pepper", "cardamom", "saffron", "cinnamon"], occasions: ["Evening", "Date Night", "Winter"] },
+  { keywords: ["musky", "musk"], occasions: ["Date Night", "Casual Evening", "Weekend"] },
+  { keywords: ["vanilla", "tonka", "gourmand", "caramel", "chocolate"], occasions: ["Date Night", "Cozy Evenings", "Casual"] },
+];
+
+function getPerfectFor(notes: string[]): string[] {
+  const occasionSet = new Set<string>();
+  const notesStr = notes.map((n) => n.toLowerCase()).join(" ");
+  NOTE_OCCASIONS.forEach(({ keywords, occasions }) => {
+    if (keywords.some((k) => notesStr.includes(k))) {
+      occasions.forEach((o) => occasionSet.add(o));
+    }
+  });
+  if (occasionSet.size === 0) {
+    ["Daily Wear", "Evening", "Gift"].forEach((o) => occasionSet.add(o));
+  }
+  return Array.from(occasionSet).slice(0, 5);
+}
+
+function getWhyYoullLoveIt(product: ApiProduct): string {
+  const notesStr = product.notes.map((n) => n.toLowerCase()).join(" ");
+  const isOud = /oud|oriental|amber|spic|saffron|incense/.test(notesStr);
+  const isFresh = /fresh|aquatic|citrus|green|marine|herbal/.test(notesStr);
+  const isMusky = /musky|musk|vanilla|tonka|sandalwood/.test(notesStr);
+  const cat = product.category;
+  const size = product.size || "100ml";
+
+  if (isOud) {
+    return `A bold, long-lasting ${cat}'s Eau de Parfum built for evenings, weddings, and special occasions. ${product.name} (${size}) delivers strong projection and exceptional longevity — hours of presence that make a statement. Perfect for winters in Pakistan.`;
+  }
+  if (isFresh) {
+    return `A fresh, uplifting ${cat}'s Eau de Parfum ideal for office wear, daily use, and warm Pakistani summers. ${product.name} offers excellent longevity with moderate projection — light enough for any setting yet memorable enough to leave a lasting impression.`;
+  }
+  if (isMusky) {
+    return `A warm, sensual ${cat}'s fragrance with a captivating dry-down. ${product.name} (${size}) delivers intimate projection and lingering longevity — ideal for date nights, casual evenings, and cooler weather across Pakistan.`;
+  }
+  return `A versatile, long-lasting ${cat}'s Eau de Parfum with excellent projection and a memorable scent trail. ${product.name} (${size}) suits all-day wear and is crafted for the discerning fragrance lover in Pakistan.`;
+}
+
 function RelatedCard({ product }: { product: ApiProduct }) {
   const [hovered, setHovered] = useState(false);
   const [, navigate] = useLocation();
@@ -36,9 +82,9 @@ function RelatedCard({ product }: { product: ApiProduct }) {
     >
       <div className="relative overflow-hidden bg-gray-50" style={{ aspectRatio: "3/4" }}>
         <span className="sale-badge">SALE</span>
-        <img src={product.img || PLACEHOLDER} alt={product.name} className="w-full h-full object-cover absolute inset-0"
+        <img src={product.img || PLACEHOLDER} alt={`${product.name} Eau de Parfum ${product.category === "men" ? "men's" : "women's"} fragrance — MagnifiScent Pakistan`} className="w-full h-full object-cover absolute inset-0"
           style={{ opacity: hovered ? 0 : 1, transition: "opacity 0.4s ease" }} />
-        <img src={product.img2 || PLACEHOLDER} alt={product.name} className="w-full h-full object-cover absolute inset-0"
+        <img src={product.img2 || PLACEHOLDER} alt={`${product.name} Eau de Parfum — MagnifiScent Pakistan`} className="w-full h-full object-cover absolute inset-0"
           style={{ opacity: hovered ? 1 : 0, transition: "opacity 0.4s ease" }} />
         <button
           className="quickshop-btn"
@@ -247,7 +293,7 @@ export default function ProductDetail() {
                 <span className="sale-badge text-sm px-3 py-1">{discount}% OFF</span>
                 <img
                   src={product.img || PLACEHOLDER}
-                  alt={product.name}
+                  alt={`${product.name} Eau de Parfum ${product.category === "men" ? "men's" : "women's"} fragrance — MagnifiScent Pakistan`}
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -277,6 +323,27 @@ export default function ProductDetail() {
             </div>
 
             <p className="text-gray-600 text-sm leading-relaxed mb-6">{product.desc}</p>
+
+            {(() => {
+              const occasions = getPerfectFor(product.notes);
+              return occasions.length > 0 ? (
+                <div className="mb-5">
+                  <h3 className="font-bold text-xs uppercase tracking-widest text-gray-900 mb-3">Perfect For</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {occasions.map((o) => (
+                      <span key={o} className="text-xs font-semibold text-gray-700 bg-gray-100 border border-gray-200 px-3 py-1 rounded-full">
+                        {o}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : null;
+            })()}
+
+            <div className="mb-6 p-4 bg-gray-50 border-l-2 border-gray-900">
+              <h3 className="font-bold text-xs uppercase tracking-widest text-gray-900 mb-2">Why You'll Love It</h3>
+              <p className="text-xs text-gray-600 leading-relaxed">{getWhyYoullLoveIt(product)}</p>
+            </div>
 
             <div className="mb-6">
               <h3 className="font-bold text-xs uppercase tracking-widest text-gray-900 mb-3">Scent Notes</h3>

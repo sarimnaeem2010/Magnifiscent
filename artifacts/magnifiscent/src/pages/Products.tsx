@@ -161,6 +161,11 @@ export default function Products() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-10">
+        <div className="mb-8 pb-8 border-b border-gray-100">
+          <p className="text-sm text-gray-600 leading-relaxed max-w-3xl">
+            Discover MagnifiScent's full range of <strong>long-lasting Eau de Parfum</strong> for men and women — available online with <strong>Cash on Delivery across Pakistan</strong>. From fresh florals to rich oud and woody orientals, find your signature scent at unbeatable prices. Free delivery on qualifying orders. <span dir="rtl" className="font-medium">خوشبو جو دل کو چھو لے۔</span>
+          </p>
+        </div>
         <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
           <div className="flex items-center border border-gray-200">
             {(["all", "men", "women"] as const).map((f, i) => (
