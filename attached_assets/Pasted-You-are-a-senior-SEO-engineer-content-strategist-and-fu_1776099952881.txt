@@ -1,0 +1,158 @@
+You are a senior SEO engineer, content strategist, and full-stack developer with 20+ years of experience.
+
+Your task is to fully optimize a fragrance eCommerce website (based in Pakistan) for maximum organic traffic, rankings, and conversions.
+
+Business Context:
+- Niche: Perfumes / Fragrances (Inspired + Original)
+- Target Market: Pakistan (Karachi, Lahore, Islamabad)
+- Competitors: Scents N Stories, J., Saeed Ghani, etc.
+- Goal: Rank on Google Pakistan and generate organic sales
+
+-----------------------------------
+
+STEP 1: TECHNICAL SEO SETUP
+
+- Generate:
+  - SEO-friendly URL structure
+  - XML sitemap
+  - robots.txt
+- Implement:
+  - Schema Markup (Product, FAQ, Breadcrumb, Review)
+- Optimize:
+  - Core Web Vitals (LCP, CLS, FID)
+  - Page speed (<2s load time)
+- Ensure:
+  - Mobile-first design
+  - Clean internal linking structure
+
+-----------------------------------
+
+STEP 2: KEYWORD IMPLEMENTATION
+
+Use Pakistan-focused keywords including:
+- buy perfumes online Pakistan
+- long lasting perfumes Pakistan
+- perfumes under 3000 PKR
+- best perfume for men in Pakistan
+- perfume shop in Karachi
+
+Also include:
+- Urdu + Roman Urdu variations naturally
+
+Map keywords to:
+- Homepage
+- Category pages
+- Product pages
+- Blog content
+
+-----------------------------------
+
+STEP 3: ON-PAGE SEO
+
+For each page generate:
+- SEO Title (high CTR)
+- Meta Description (conversion-focused)
+- H1, H2, H3 structure
+- Image ALT tags
+- Internal linking suggestions
+
+Product Page Enhancements:
+- Unique descriptions
+- Fragrance notes (top, middle, base)
+- Longevity & projection
+- Use-case (daily, wedding, summer, etc.)
+- FAQ section
+
+-----------------------------------
+
+STEP 4: CONTENT ENGINE (BLOG SYSTEM)
+
+Generate SEO blog topics such as:
+- Top 10 Long Lasting Perfumes in Pakistan
+- Best Perfumes Under 3000 PKR
+- Scents N Stories Alternatives in Pakistan
+- Imported vs Inspired Perfumes
+
+For each blog:
+- SEO title
+- Outline
+- Full article (1000–1500 words)
+- Internal linking to products
+
+-----------------------------------
+
+STEP 5: LOCAL SEO
+
+Create pages for:
+- Karachi
+- Lahore
+- Islamabad
+
+Each page should include:
+- Local keywords
+- Delivery info
+- Trust signals
+
+-----------------------------------
+
+STEP 6: CONVERSION OPTIMIZATION
+
+Add:
+- WhatsApp CTA button
+- “Best Seller” tags
+- Scarcity (“Limited Stock”)
+- Reviews and ratings
+- Trust badges
+
+-----------------------------------
+
+STEP 7: BACKLINK STRATEGY
+
+Suggest:
+- Guest posting opportunities
+- Pakistani directories
+- Influencer collaborations
+
+-----------------------------------
+
+STEP 8: COMPETITOR SEO STRATEGY
+
+Target competitor keywords like:
+- scents n stories perfumes
+- scents n stories alternatives
+- best inspired perfumes Pakistan
+
+Create comparison content and landing pages.
+
+-----------------------------------
+
+STEP 9: ANALYTICS & TRACKING
+
+Integrate:
+- Google Analytics
+- Google Search Console
+
+Track:
+- Keyword rankings
+- Conversion rate
+- Traffic sources
+
+-----------------------------------
+
+STEP 10: OUTPUT FORMAT
+
+Provide:
+1. Full SEO strategy summary
+2. Optimized homepage content
+3. 3 category pages SEO
+4. 3 product page SEO samples
+5. 5 blog posts (SEO optimized)
+6. Technical SEO files (sitemap, robots.txt)
+7. Internal linking structure
+
+-----------------------------------
+
+Goal:
+Build a fully SEO-optimized perfume eCommerce system that ranks on Google Pakistan and drives consistent organic sales.
+
+Think aggressively. Focus on ranking + conversions, not just traffic.
