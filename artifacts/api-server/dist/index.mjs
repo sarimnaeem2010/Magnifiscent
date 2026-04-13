@@ -69199,7 +69199,9 @@ function injectMeta(html, meta) {
   );
   if (meta.jsonLd) {
     const schemas = Array.isArray(meta.jsonLd) ? meta.jsonLd : [meta.jsonLd];
-    const tags = schemas.map((s) => `  <script type="application/ld+json">${JSON.stringify(s)}</script>`).join("\n");
+    const tags = schemas.map(
+      (s) => `  <script type="application/ld+json">${JSON.stringify(s).replace(/<\/script>/gi, "<\\/script>")}</script>`
+    ).join("\n");
     result = result.replace("</head>", `${tags}
   </head>`);
   }
@@ -69377,7 +69379,7 @@ app.get("/{*path}", async (req, res) => {
   if (productMatch) {
     const slug = productMatch[1];
     try {
-      const rows = await db.select().from(productsTable).where(eq(productsTable.slug, slug)).limit(1);
+      const rows = await db.select().from(productsTable).where(and(eq(productsTable.slug, slug), eq(productsTable.active, true))).limit(1);
       if (rows.length > 0) {
         const p = rows[0];
         const notes = Array.isArray(p.notes) ? p.notes.join(", ") : "";

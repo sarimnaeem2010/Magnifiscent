@@ -8,7 +8,7 @@ import router from "./routes";
 import { logger } from "./lib/logger";
 import { db } from "./lib/db.js";
 import { productsTable } from "@workspace/db";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { injectMeta } from "./lib/injectMeta.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -221,7 +221,7 @@ app.get("/{*path}", async (req: Request, res: Response) => {
       const rows = await db
         .select()
         .from(productsTable)
-        .where(eq(productsTable.slug, slug))
+        .where(and(eq(productsTable.slug, slug), eq(productsTable.active, true)))
         .limit(1);
 
       if (rows.length > 0) {

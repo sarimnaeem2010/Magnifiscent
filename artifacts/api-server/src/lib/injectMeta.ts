@@ -57,7 +57,10 @@ export function injectMeta(html: string, meta: MetaValues): string {
   if (meta.jsonLd) {
     const schemas = Array.isArray(meta.jsonLd) ? meta.jsonLd : [meta.jsonLd];
     const tags = schemas
-      .map((s) => `  <script type="application/ld+json">${JSON.stringify(s)}</script>`)
+      .map(
+        (s) =>
+          `  <script type="application/ld+json">${JSON.stringify(s).replace(/<\/script>/gi, "<\\/script>")}</script>`,
+      )
       .join("\n");
     result = result.replace("</head>", `${tags}\n  </head>`);
   }
