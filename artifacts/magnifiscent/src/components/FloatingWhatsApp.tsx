@@ -7,7 +7,10 @@ export function FloatingWhatsApp() {
   useEffect(() => {
     api.settings.get().then((res) => {
       if (res.success && res.settings.store?.phone) {
-        const digits = res.settings.store.phone.replace(/\D/g, "");
+        let digits = res.settings.store.phone.replace(/\D/g, "");
+        if (digits.startsWith("0") && digits.length === 11) {
+          digits = "92" + digits.slice(1);
+        }
         if (digits.length >= 7) setPhone(digits);
       }
     }).catch(() => {});
