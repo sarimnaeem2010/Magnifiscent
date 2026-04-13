@@ -7,6 +7,7 @@ import type { ApiProduct } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
 import { useLocation, useSearch } from "wouter";
 import { useSeoMeta } from "@/hooks/useSeoMeta";
+import { useJsonLd } from "@/hooks/useJsonLd";
 
 function StarRating({ count }: { count: number }) {
   return (
@@ -102,6 +103,16 @@ export default function Products() {
 
   const seo = SEO[filter];
   useSeoMeta({ title: seo.title, description: seo.description });
+
+  const siteUrl = typeof window !== "undefined" ? window.location.origin : "";
+  useJsonLd("ld-breadcrumb", {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
+      { "@type": "ListItem", position: 2, name: "Products", item: `${siteUrl}/products` },
+    ],
+  });
 
   useEffect(() => {
     setLoading(true);

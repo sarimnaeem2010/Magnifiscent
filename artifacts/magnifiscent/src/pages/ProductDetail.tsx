@@ -7,6 +7,7 @@ import { api } from "@/lib/api";
 import type { ApiProduct } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
 import { useSeoMeta } from "@/hooks/useSeoMeta";
+import { useJsonLd } from "@/hooks/useJsonLd";
 
 function StarRating({ count, size = 14 }: { count: number; size?: number }) {
   return (
@@ -90,6 +91,87 @@ export default function ProductDetail() {
     ogPriceAmount: product ? String(product.priceNum) : undefined,
     ogPriceCurrency: "PKR",
   });
+
+  const siteUrl = window.location.origin;
+
+  const productSchema = product
+    ? {
+        "@context": "https://schema.org",
+        "@type": "Product",
+        name: product.name,
+        description: product.desc,
+        image: [product.img, product.img2].filter(Boolean),
+        brand: { "@type": "Brand", name: "MagnifiScent" },
+        sku: String(product.id),
+        offers: {
+          "@type": "Offer",
+          priceCurrency: "PKR",
+          price: product.priceNum,
+          availability:
+            product.stock > 0
+              ? "https://schema.org/InStock"
+              : "https://schema.org/OutOfStock",
+          seller: { "@type": "Organization", name: "MagnifiScent" },
+          url: `${siteUrl}/products/${product.slug}`,
+        },
+        aggregateRating: {
+          "@type": "AggregateRating",
+          ratingValue: product.rating,
+          reviewCount: product.reviews,
+          bestRating: 5,
+          worstRating: 1,
+        },
+      }
+    : null;
+
+  const breadcrumbSchema = product
+    ? {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
+          { "@type": "ListItem", position: 2, name: "Products", item: `${siteUrl}/products` },
+          { "@type": "ListItem", position: 3, name: product.name, item: `${siteUrl}/products/${product.slug}` },
+        ],
+      }
+    : null;
+
+  const faqSchema = product
+    ? {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: [
+          {
+            "@type": "Question",
+            name: `Is ${product.name} long lasting?`,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: `Yes, ${product.name} by MagnifiScent is formulated for long-lasting wear. It is an Eau de Parfum with ${product.size}, designed to keep you smelling great all day.`,
+            },
+          },
+          {
+            "@type": "Question",
+            name: `What does ${product.name} smell like?`,
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: `${product.name} features the following scent notes: ${product.notes.join(", ")}. ${product.desc}`,
+            },
+          },
+          {
+            "@type": "Question",
+            name: "Is Cash on Delivery available for this perfume?",
+            acceptedAnswer: {
+              "@type": "Answer",
+              text: "Yes, MagnifiScent offers Cash on Delivery (COD) across Pakistan. Simply place your order and pay when it arrives at your door.",
+            },
+          },
+        ],
+      }
+    : null;
+
+  useJsonLd("ld-product", productSchema);
+  useJsonLd("ld-breadcrumb", breadcrumbSchema);
+  useJsonLd("ld-faq", faqSchema);
 
   useEffect(() => {
     setLoading(true);

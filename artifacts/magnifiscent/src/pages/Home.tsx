@@ -8,6 +8,7 @@ import { api } from "@/lib/api";
 import type { ApiProduct, ApiDeal } from "@/lib/api";
 import { DEFAULT_HOME_HEADINGS } from "@/data/liveData";
 import type { HomeHeadings, HeroSlide } from "@/data/liveData";
+import { useJsonLd } from "@/hooks/useJsonLd";
 
 /* ─── Notes ─── */
 const NOTES = [
@@ -284,6 +285,33 @@ export default function Home() {
   );
   const [liveProducts, setLiveProducts] = useState<ApiProduct[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
+
+  const siteUrl = typeof window !== "undefined" ? window.location.origin : "";
+  useJsonLd("ld-organization", {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "MagnifiScent",
+    url: siteUrl,
+    logo: `${siteUrl}/assets/whitelogo_1774978057429-DT7vKnxD.png`,
+    sameAs: ["https://www.instagram.com/magnifiscent24/"],
+    contactPoint: {
+      "@type": "ContactPoint",
+      contactType: "customer service",
+      availableLanguage: ["English", "Urdu"],
+      areaServed: "PK",
+    },
+  });
+  useJsonLd("ld-website", {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "MagnifiScent",
+    url: siteUrl,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: { "@type": "EntryPoint", urlTemplate: `${siteUrl}/products?q={search_term_string}` },
+      "query-input": "required name=search_term_string",
+    },
+  });
 
   useEffect(() => {
     api.content.genderBanners.get().then((res) => { if (res.success) setGenderBanners(res.banners); }).catch(() => {});

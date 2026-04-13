@@ -69161,6 +69161,7 @@ var logger = (0, import_pino.default)({
 // src/app.ts
 var __dirname2 = path.dirname(fileURLToPath(import.meta.url));
 var staticDir = process.env["STATIC_DIR"] || path.join(__dirname2, "..", "..", "magnifiscent", "dist", "public");
+var SITE_DOMAIN = process.env["SITE_DOMAIN"] || "https://magnifiscent.com";
 var app = (0, import_express13.default)();
 app.use(
   (0, import_pino_http.default)({
@@ -69185,6 +69186,62 @@ app.use((0, import_cors.default)());
 app.use(import_express13.default.json({ limit: "15mb" }));
 app.use(import_express13.default.urlencoded({ extended: true, limit: "15mb" }));
 app.use("/api", routes_default);
+app.get("/robots.txt", (_req, res) => {
+  res.type("text/plain");
+  res.send(
+    [
+      "User-agent: *",
+      "Disallow: /admin",
+      "Disallow: /admin/",
+      "Disallow: /checkout",
+      "Disallow: /api/",
+      "Allow: /",
+      "",
+      `Sitemap: ${SITE_DOMAIN}/sitemap.xml`
+    ].join("\n")
+  );
+});
+app.get("/sitemap.xml", async (_req, res) => {
+  try {
+    const products = await db.select({ slug: productsTable.slug }).from(productsTable).where(eq(productsTable.active, true));
+    const today = (/* @__PURE__ */ new Date()).toISOString().slice(0, 10);
+    const staticPages = [
+      { loc: "/", changefreq: "daily", priority: "1.0", lastmod: today },
+      { loc: "/products", changefreq: "daily", priority: "0.9", lastmod: today },
+      { loc: "/deals", changefreq: "weekly", priority: "0.8", lastmod: today },
+      { loc: "/about", changefreq: "monthly", priority: "0.5", lastmod: today },
+      { loc: "/contact", changefreq: "monthly", priority: "0.5", lastmod: today },
+      { loc: "/returns", changefreq: "monthly", priority: "0.4", lastmod: today },
+      { loc: "/shipping", changefreq: "monthly", priority: "0.4", lastmod: today },
+      { loc: "/privacy", changefreq: "yearly", priority: "0.3", lastmod: today },
+      { loc: "/terms", changefreq: "yearly", priority: "0.3", lastmod: today }
+    ];
+    const productEntries = products.map((p) => ({
+      loc: `/products/${p.slug}`,
+      changefreq: "weekly",
+      priority: "0.8",
+      lastmod: today
+    }));
+    const allEntries = [...staticPages, ...productEntries];
+    const urlTags = allEntries.map(
+      (e) => `  <url>
+    <loc>${SITE_DOMAIN}${e.loc}</loc>
+    <lastmod>${e.lastmod}</lastmod>
+    <changefreq>${e.changefreq}</changefreq>
+    <priority>${e.priority}</priority>
+  </url>`
+    ).join("\n");
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urlTags}
+</urlset>`;
+    res.header("Content-Type", "application/xml");
+    res.send(xml);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    res.status(500).send(`<?xml version="1.0" encoding="UTF-8"?><error>${message}</error>`);
+  }
+});
 app.use(import_express13.default.static(staticDir));
 app.get("/{*path}", (_req, res) => {
   res.sendFile(path.join(staticDir, "index.html"));
