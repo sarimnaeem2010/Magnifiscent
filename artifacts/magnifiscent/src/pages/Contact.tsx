@@ -2,8 +2,15 @@ import React, { useState } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Mail, Phone, MapPin, Clock, Instagram, Facebook } from "lucide-react";
+import { useSeoMeta } from "@/hooks/useSeoMeta";
 
 export default function Contact() {
+  useSeoMeta({
+    title: "Contact MagnifiScent – Perfume Store Pakistan",
+    description:
+      "Get in touch with MagnifiScent. Questions about orders, perfumes, or Cash on Delivery? We're here to help. Contact us via email, phone, or social media.",
+  });
+
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
 

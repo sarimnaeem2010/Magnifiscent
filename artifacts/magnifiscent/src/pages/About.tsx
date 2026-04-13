@@ -2,9 +2,16 @@ import React from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { useLocation } from "wouter";
+import { useSeoMeta } from "@/hooks/useSeoMeta";
 
 export default function About() {
   const [, navigate] = useLocation();
+
+  useSeoMeta({
+    title: "About MagnifiScent – Premium Perfume Brand Pakistan",
+    description:
+      "Learn the story behind MagnifiScent — Pakistan's premium Eau de Parfum brand. Crafted for lasting impressions, loved across Karachi, Lahore & Islamabad.",
+  });
 
   return (
     <div className="min-h-screen bg-white text-gray-900">

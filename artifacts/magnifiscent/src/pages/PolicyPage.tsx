@@ -4,6 +4,7 @@ import { Footer } from "@/components/layout/Footer";
 import { DEFAULT_POLICY_PAGES } from "@/data/liveData";
 import type { PolicyPages } from "@/data/liveData";
 import { api } from "@/lib/api";
+import { useSeoMeta } from "@/hooks/useSeoMeta";
 
 type PolicyKey = keyof PolicyPages;
 
@@ -11,7 +12,33 @@ interface Props {
   pageKey: PolicyKey;
 }
 
+const POLICY_SEO: Record<PolicyKey, { title: string; description: string }> = {
+  returns: {
+    title: "Returns & Refunds Policy | MagnifiScent Pakistan",
+    description:
+      "Read MagnifiScent's returns and refunds policy. Easy returns on perfume orders across Pakistan. Customer satisfaction is our priority.",
+  },
+  shipping: {
+    title: "Shipping Policy – Delivery Info Pakistan | MagnifiScent",
+    description:
+      "MagnifiScent delivers across Pakistan with Cash on Delivery. Check our shipping policy for delivery timelines, charges, and coverage areas.",
+  },
+  privacy: {
+    title: "Privacy Policy | MagnifiScent Pakistan",
+    description:
+      "MagnifiScent's privacy policy explains how we collect, use, and protect your personal information when you shop online with us.",
+  },
+  terms: {
+    title: "Terms & Conditions | MagnifiScent Pakistan",
+    description:
+      "Read MagnifiScent's terms and conditions for shopping online. Know your rights and responsibilities when ordering perfumes from our store.",
+  },
+};
+
 export default function PolicyPage({ pageKey }: Props) {
+  const { title: seoTitle, description: seoDesc } = POLICY_SEO[pageKey];
+  useSeoMeta({ title: seoTitle, description: seoDesc });
+
   const [page, setPage] = useState(DEFAULT_POLICY_PAGES[pageKey]);
 
   useEffect(() => {

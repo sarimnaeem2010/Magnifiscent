@@ -6,6 +6,7 @@ import { api } from "@/lib/api";
 import type { ApiProduct } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
 import { useLocation, useSearch } from "wouter";
+import { useSeoMeta } from "@/hooks/useSeoMeta";
 
 function StarRating({ count }: { count: number }) {
   return (
@@ -72,6 +73,24 @@ function ProductCard({ product }: { product: ApiProduct }) {
   );
 }
 
+const SEO: Record<"all" | "men" | "women", { title: string; description: string }> = {
+  all: {
+    title: "Shop All Perfumes in Pakistan | MagnifiScent",
+    description:
+      "Browse MagnifiScent's full collection of authentic Eau de Parfum for men and women. Long-lasting fragrances with Cash on Delivery across Pakistan.",
+  },
+  men: {
+    title: "Men's Perfumes Online Pakistan – Long Lasting | MagnifiScent",
+    description:
+      "Shop the best long-lasting men's perfumes in Pakistan. Explore woody, musky & oud fragrances with Cash on Delivery. Order online at MagnifiScent.",
+  },
+  women: {
+    title: "Women's Perfumes Online Pakistan – Floral & Luxury | MagnifiScent",
+    description:
+      "Discover premium women's perfumes in Pakistan — floral, oriental & luxury Eau de Parfum. Cash on Delivery. Shop now at MagnifiScent.",
+  },
+};
+
 export default function Products() {
   const search = useSearch();
   const params = new URLSearchParams(search);
@@ -80,6 +99,9 @@ export default function Products() {
   const [, navigate] = useLocation();
   const [allProducts, setAllProducts] = useState<ApiProduct[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const seo = SEO[filter];
+  useSeoMeta({ title: seo.title, description: seo.description });
 
   useEffect(() => {
     setLoading(true);

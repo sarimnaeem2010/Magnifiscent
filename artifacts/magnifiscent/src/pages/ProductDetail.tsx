@@ -6,6 +6,7 @@ import { useParams, useLocation } from "wouter";
 import { api } from "@/lib/api";
 import type { ApiProduct } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
+import { useSeoMeta } from "@/hooks/useSeoMeta";
 
 function StarRating({ count, size = 14 }: { count: number; size?: number }) {
   return (
@@ -69,6 +70,23 @@ export default function ProductDetail() {
   const [product, setProduct] = useState<ApiProduct | null>(null);
   const [allProducts, setAllProducts] = useState<ApiProduct[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const seoTitle = product
+    ? `${product.name} – ${product.category === "men" ? "Men" : "Women"}'s Perfume | MagnifiScent Pakistan`
+    : "Perfume | MagnifiScent Pakistan";
+  const rawDesc = product
+    ? `Buy ${product.name} Eau de Parfum. ${product.desc.slice(0, 100).trimEnd()}. Price: ${product.price}. Cash on Delivery in Pakistan.`
+    : "Premium Eau de Parfum by MagnifiScent Pakistan.";
+  const seoDesc = rawDesc.length > 160 ? rawDesc.slice(0, 157) + "…" : rawDesc;
+
+  useSeoMeta({
+    title: seoTitle,
+    description: seoDesc,
+    ogImage: product?.img || "",
+    ogType: "product",
+    ogPriceAmount: product ? String(product.priceNum) : undefined,
+    ogPriceCurrency: "PKR",
+  });
 
   useEffect(() => {
     setLoading(true);

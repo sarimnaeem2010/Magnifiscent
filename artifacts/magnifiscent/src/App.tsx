@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import type { ApiExtendedSettings } from "@/lib/api";
 import logoImg from "@assets/whitelogo_1774978057429.png";
+import { syncGlobalSeo, applyDocumentMeta } from "@/hooks/useSeoMeta";
 
 const queryClient = new QueryClient();
 
@@ -41,31 +42,18 @@ function ScrollToTop() {
   return null;
 }
 
-function setOrClearMeta(selector: string, attr: string, val: string, fallback: string) {
-  let el = document.querySelector(selector) as HTMLMetaElement | null;
-  if (!el) {
-    el = document.createElement("meta");
-    if (attr.startsWith("[")) {
-      const [, name] = attr.match(/\[(.+?)=/) ?? [];
-      const [, value] = attr.match(/="(.+?)"/) ?? [];
-      if (name && value) el.setAttribute(name, value);
-    }
-    document.head.appendChild(el);
-  }
-  el.content = val || fallback;
-}
-
 function StorefrontEffects({ ext }: { ext: ApiExtendedSettings }) {
   useEffect(() => {
-    const defaultTitle = "MagnifiScent — Premium Eau de Parfum";
-    const defaultDesc = "Discover MagnifiScent's collection of premium Eau de Parfum fragrances.";
+    const defaultTitle = "Buy Perfumes Online in Pakistan | MagnifiScent";
+    const defaultDesc =
+      "Shop premium long-lasting Eau de Parfum for men and women in Pakistan. Cash on Delivery available. Authentic fragrances — MagnifiScent.";
 
-    document.title = ext.seoTitle || defaultTitle;
+    const title = ext.seoTitle || defaultTitle;
+    const desc = ext.seoDescription || defaultDesc;
+    const ogImage = ext.seoOgImage || "";
 
-    setOrClearMeta('meta[name="description"]', '[name="description"]', ext.seoDescription, defaultDesc);
-    setOrClearMeta('meta[property="og:title"]', '[property="og:title"]', ext.seoTitle, defaultTitle);
-    setOrClearMeta('meta[property="og:description"]', '[property="og:description"]', ext.seoDescription, defaultDesc);
-    setOrClearMeta('meta[property="og:image"]', '[property="og:image"]', ext.seoOgImage, "");
+    syncGlobalSeo(title, desc, ogImage);
+    applyDocumentMeta(title, desc, ogImage, "website");
 
     const existingGa4 = document.getElementById("ga4-script");
     if (ext.ga4Id && !existingGa4) {

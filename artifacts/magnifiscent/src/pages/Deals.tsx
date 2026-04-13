@@ -5,6 +5,7 @@ import { Star } from "lucide-react";
 import { api } from "@/lib/api";
 import type { ApiDeal, ApiProduct } from "@/lib/api";
 import { useCart } from "@/context/CartContext";
+import { useSeoMeta } from "@/hooks/useSeoMeta";
 
 function StarRating({ count }: { count: number }) {
   return (
@@ -76,6 +77,12 @@ function DealCard({ deal, liveProducts }: { deal: LiveDeal; liveProducts: ApiPro
 }
 
 export default function Deals() {
+  useSeoMeta({
+    title: "Perfume Deals & Combo Packs | MagnifiScent Pakistan",
+    description:
+      "Save more with MagnifiScent's exclusive perfume combo deals. Bundled sets for men and women — great fragrances at unbeatable prices. Cash on Delivery in Pakistan.",
+  });
+
   const [apiDeals, setApiDeals] = useState<ApiDeal[]>([]);
   const [dealImgs, setDealImgs] = useState<Record<string, { img1?: string; img2?: string }>>({});
   const [liveProducts, setLiveProducts] = useState<ApiProduct[]>([]);
