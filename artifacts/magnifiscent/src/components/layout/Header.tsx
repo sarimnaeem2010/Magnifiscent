@@ -18,6 +18,7 @@ const navLinks = [
     ],
   },
   { label: "Deals & Combo", href: "/deals" },
+  { label: "Blog", href: "/blog" },
   { label: "About Us", href: "/about" },
   { label: "Contact", href: "/contact" },
 ];

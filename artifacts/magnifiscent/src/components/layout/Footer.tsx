@@ -49,6 +49,7 @@ export function Footer() {
           <div>
             <h4 className="text-sm font-bold uppercase tracking-widest mb-5 text-gray-300">Information</h4>
             <ul className="space-y-3">
+              <li><Link href="/blog" className="text-gray-400 text-sm hover:text-white transition-colors" style={{ textDecoration: "none" }}>Blog & Guides</Link></li>
               <li><Link href="/about" className="text-gray-400 text-sm hover:text-white transition-colors" style={{ textDecoration: "none" }}>About Us</Link></li>
               <li><Link href="/contact" className="text-gray-400 text-sm hover:text-white transition-colors" style={{ textDecoration: "none" }}>Contact Us</Link></li>
               <li><Link href="/returns" className="text-gray-400 text-sm hover:text-white transition-colors" style={{ textDecoration: "none" }}>Returns Policy</Link></li>

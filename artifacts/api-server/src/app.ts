@@ -7,8 +7,8 @@ import { fileURLToPath } from "url";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { db } from "./lib/db.js";
-import { productsTable } from "@workspace/db";
-import { eq, and } from "drizzle-orm";
+import { productsTable, blogPostsTable } from "@workspace/db";
+import { eq, and, desc } from "drizzle-orm";
 import { injectMeta } from "./lib/injectMeta.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -84,6 +84,12 @@ app.get("/sitemap.xml", async (_req, res) => {
       { loc: "/terms",    changefreq: "yearly",  priority: "0.3", lastmod: today },
     ];
 
+    const blogPosts = await db
+      .select({ slug: blogPostsTable.slug, createdAt: blogPostsTable.createdAt })
+      .from(blogPostsTable)
+      .where(eq(blogPostsTable.published, true))
+      .orderBy(desc(blogPostsTable.createdAt));
+
     const productEntries = products.map((p) => ({
       loc: `/products/${p.slug}`,
       changefreq: "weekly",
@@ -91,7 +97,17 @@ app.get("/sitemap.xml", async (_req, res) => {
       lastmod: today,
     }));
 
-    const allEntries = [...staticPages, ...productEntries];
+    const blogEntries = [
+      { loc: "/blog", changefreq: "weekly", priority: "0.7", lastmod: today },
+      ...blogPosts.map((b) => ({
+        loc: `/blog/${b.slug}`,
+        changefreq: "monthly",
+        priority: "0.6",
+        lastmod: b.createdAt ? new Date(b.createdAt).toISOString().slice(0, 10) : today,
+      })),
+    ];
+
+    const allEntries = [...staticPages, ...productEntries, ...blogEntries];
 
     const urlTags = allEntries
       .map(
@@ -315,6 +331,81 @@ app.get("/{*path}", async (req: Request, res: Response) => {
       }
     } catch (err) {
       logger.error({ err }, "SSR meta injection failed for product slug: " + slug);
+    }
+  }
+
+  // Blog listing page: /blog
+  if (urlPath === "/blog") {
+    const injected = injectMeta(html, {
+      title: "Perfume Blog — Tips, Guides & Fragrance News | MagnifiScent Pakistan",
+      description:
+        "Explore the MagnifiScent blog for perfume guides, fragrance tips, top picks for Pakistan, and expert advice on finding your perfect scent.",
+      ogType: "website",
+      ogUrl: `${SITE_DOMAIN}/blog`,
+    });
+    res.type("html").send(injected);
+    return;
+  }
+
+  // Blog post page: /blog/:slug
+  const blogMatch = urlPath.match(/^\/blog\/([^/]+)$/);
+  if (blogMatch) {
+    const slug = blogMatch[1];
+    try {
+      const rows = await db
+        .select()
+        .from(blogPostsTable)
+        .where(and(eq(blogPostsTable.slug, slug), eq(blogPostsTable.published, true)))
+        .limit(1);
+
+      if (rows.length > 0) {
+        const post = rows[0];
+        const desc = post.excerpt
+          ? post.excerpt.length > 160 ? post.excerpt.slice(0, 157) + "…" : post.excerpt
+          : `${post.title} — read on the MagnifiScent blog.`;
+
+        const articleSchema = {
+          "@context": "https://schema.org",
+          "@type": "Article",
+          headline: post.title,
+          description: desc,
+          image: post.coverImage || `${SITE_DOMAIN}/og-image.jpg`,
+          author: { "@type": "Organization", name: "MagnifiScent" },
+          publisher: {
+            "@type": "Organization",
+            name: "MagnifiScent",
+            logo: { "@type": "ImageObject", url: `${SITE_DOMAIN}/logo.png` },
+          },
+          datePublished: post.createdAt ? new Date(post.createdAt).toISOString() : new Date().toISOString(),
+          url: `${SITE_DOMAIN}/blog/${post.slug}`,
+        };
+
+        const breadcrumbSchema = {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: SITE_DOMAIN },
+            { "@type": "ListItem", position: 2, name: "Blog", item: `${SITE_DOMAIN}/blog` },
+            { "@type": "ListItem", position: 3, name: post.title, item: `${SITE_DOMAIN}/blog/${post.slug}` },
+          ],
+        };
+
+        const injected = injectMeta(html, {
+          title: `${post.title} — MagnifiScent Blog`,
+          description: desc,
+          ogTitle: `${post.title} — MagnifiScent Blog`,
+          ogDescription: desc,
+          ogImage: post.coverImage || "",
+          ogType: "article",
+          ogUrl: `${SITE_DOMAIN}/blog/${post.slug}`,
+          jsonLd: [articleSchema, breadcrumbSchema],
+        });
+
+        res.type("html").send(injected);
+        return;
+      }
+    } catch (err) {
+      logger.error({ err }, "SSR meta injection failed for blog slug: " + slug);
     }
   }
 

@@ -10,6 +10,7 @@ import discountCodesRouter from "./discountCodes.js";
 import contentRouter from "./content.js";
 import adminRouter from "./admin.js";
 import exportImportRouter from "./exportImport.js";
+import blogRouter from "./blog.js";
 
 const router: IRouter = Router();
 
@@ -24,5 +25,6 @@ router.use(settingsRouter);
 router.use(dealsRouter);
 router.use(discountCodesRouter);
 router.use(contentRouter);
+router.use(blogRouter);
 
 export default router;

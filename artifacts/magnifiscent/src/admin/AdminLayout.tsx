@@ -5,7 +5,7 @@ import { api } from "@/lib/api";
 import {
   LayoutDashboard, Package, ShoppingBag, Users, Warehouse,
   Tag, Settings, LogOut, Menu, Crown, Image, Instagram, FileText, Mail,
-  Globe, CheckCircle, Loader2, ArrowUpDown,
+  Globe, CheckCircle, Loader2, ArrowUpDown, BookOpen,
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -17,6 +17,7 @@ const NAV_ITEMS = [
   { label: "Deals", icon: Tag, path: "/admin/deals" },
   { label: "Media", icon: Image, path: "/admin/media" },
   { label: "Instagram", icon: Instagram, path: "/admin/instagram" },
+  { label: "Blog", icon: BookOpen, path: "/admin/blog" },
   { label: "Pages", icon: FileText, path: "/admin/pages" },
   { label: "Email", icon: Mail, path: "/admin/email" },
   { label: "Export / Import", icon: ArrowUpDown, path: "/admin/export" },

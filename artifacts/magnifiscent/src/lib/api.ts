@@ -124,6 +124,17 @@ export type ApiExtendedSettings = {
 
 export type ApiPaymentSettings = { cod: boolean; card: boolean };
 
+export type ApiBlogPost = {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  coverImage: string;
+  published: boolean;
+  createdAt: string;
+};
+
 export type ApiDiscountCode = {
   id: string;
   code: string;
@@ -263,5 +274,23 @@ export const api = {
       variables?: Record<string, string>;
     }) =>
       post<{ success: boolean }>("/send-email", { type: "order_confirmation", ...payload }),
+  },
+
+  blog: {
+    list: () =>
+      get<{ success: boolean; posts: ApiBlogPost[] }>("/blog"),
+    get: (slug: string) =>
+      get<{ success: boolean; post: ApiBlogPost }>(`/blog/${slug}`),
+  },
+
+  adminBlog: {
+    list: () =>
+      get<{ success: boolean; posts: ApiBlogPost[] }>("/admin/blog", true),
+    create: (data: Partial<ApiBlogPost>) =>
+      post<{ success: boolean; post: ApiBlogPost }>("/admin/blog", data, true),
+    update: (id: number, data: Partial<ApiBlogPost>) =>
+      put<{ success: boolean; post: ApiBlogPost }>(`/admin/blog/${id}`, data, true),
+    delete: (id: number) =>
+      del<{ success: boolean }>(`/admin/blog/${id}`, true),
   },
 };

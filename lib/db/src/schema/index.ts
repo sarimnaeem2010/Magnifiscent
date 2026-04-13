@@ -334,3 +334,19 @@ export const policyPagesTable = pgTable("policy_pages", {
 export const insertPolicyPageSchema = createInsertSchema(policyPagesTable).omit({ id: true });
 export type InsertPolicyPage = z.infer<typeof insertPolicyPageSchema>;
 export type PolicyPage = typeof policyPagesTable.$inferSelect;
+
+/* ─── Blog Posts ─── */
+export const blogPostsTable = pgTable("blog_posts", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  excerpt: text("excerpt").notNull().default(""),
+  content: text("content").notNull().default(""),
+  coverImage: text("cover_image").notNull().default(""),
+  published: boolean("published").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertBlogPostSchema = createInsertSchema(blogPostsTable).omit({ id: true, createdAt: true });
+export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
+export type BlogPost = typeof blogPostsTable.$inferSelect;

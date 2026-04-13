@@ -11,6 +11,8 @@ import Contact from "@/pages/Contact";
 import Checkout from "@/pages/Checkout";
 import Deals from "@/pages/Deals";
 import PolicyPage from "@/pages/PolicyPage";
+import { BlogList } from "@/pages/BlogList";
+import { BlogPost } from "@/pages/BlogPost";
 import { AdminApp } from "@/admin/AdminApp";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
@@ -128,6 +130,8 @@ function StorefrontRouter({ ext }: { ext: ApiExtendedSettings }) {
           <Route path="/about" component={About} />
           <Route path="/contact" component={Contact} />
           <Route path="/checkout" component={Checkout} />
+          <Route path="/blog" component={BlogList} />
+          <Route path="/blog/:slug" component={BlogPost} />
           <Route path="/returns" component={() => <PolicyPage pageKey="returns" />} />
           <Route path="/shipping" component={() => <PolicyPage pageKey="shipping" />} />
           <Route path="/privacy" component={() => <PolicyPage pageKey="privacy" />} />
