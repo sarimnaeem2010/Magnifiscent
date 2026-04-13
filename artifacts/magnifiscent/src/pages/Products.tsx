@@ -51,7 +51,7 @@ function ProductCard({ product }: { product: ApiProduct }) {
         />
         <img
           src={product.img2 || PLACEHOLDER}
-          alt={`${product.name} Eau de Parfum — MagnifiScent Pakistan`}
+          alt={`${product.name} Eau de Parfum ${product.category === "men" ? "men's" : "women's"} fragrance — MagnifiScent Pakistan`}
           className="w-full h-full object-cover absolute inset-0"
           style={{ opacity: hovered ? 1 : 0, transition: "opacity 0.4s ease" }}
         />
