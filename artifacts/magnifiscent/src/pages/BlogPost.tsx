@@ -1,8 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useParams, useLocation } from "wouter";
 import { api, type ApiBlogPost, type ApiProduct } from "@/lib/api";
 import { useSeoMeta } from "@/hooks/useSeoMeta";
+import { useJsonLd } from "@/hooks/useJsonLd";
 import { Calendar, ArrowLeft, ShoppingBag } from "lucide-react";
+
+const SITE_DOMAIN = "https://magnifiscent.com.pk";
 
 function formatDate(dateStr: string) {
   try {
@@ -16,6 +19,23 @@ function formatDate(dateStr: string) {
   }
 }
 
+/** Sanitize a URL to only permit safe protocols. Returns "#" for disallowed ones. */
+function sanitizeHref(raw: string): string {
+  const trimmed = raw.trim();
+  if (trimmed.startsWith("/") || trimmed.startsWith("#") || trimmed.startsWith("?")) {
+    return trimmed;
+  }
+  try {
+    const url = new URL(trimmed);
+    if (url.protocol === "http:" || url.protocol === "https:" || url.protocol === "mailto:") {
+      return trimmed;
+    }
+    return "#";
+  } catch {
+    return "#";
+  }
+}
+
 function renderMarkdown(md: string): string {
   return md
     .replace(/&/g, "&amp;")
@@ -26,8 +46,14 @@ function renderMarkdown(md: string): string {
     .replace(/^#{1}\s+(.+)$/gm, "<h1>$1</h1>")
     .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
     .replace(/\*([^*]+)\*/g, "<em>$1</em>")
-    .replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-amber-700 underline">$1</a>')
-    .replace(/\[([^\]]+)\]\(([^\)]+)\)/g, '<a href="$2" class="text-amber-700 underline">$1</a>')
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, (_: string, text: string, href: string) => {
+      const safe = sanitizeHref(href);
+      return `<a href="${safe}" target="_blank" rel="noopener noreferrer" class="text-amber-700 underline">${text}</a>`;
+    })
+    .replace(/\[([^\]]+)\]\(([^\)]+)\)/g, (_: string, text: string, href: string) => {
+      const safe = sanitizeHref(href);
+      return `<a href="${safe}" class="text-amber-700 underline">${text}</a>`;
+    })
     .replace(/^---+$/gm, "<hr />")
     .replace(/^\|\s*(.+)\s*\|$/gm, (_: string, cells: string) => {
       const tds = cells.split("|").map((c: string) => `<td class="border border-stone-200 px-3 py-1.5 text-sm">${c.trim()}</td>`).join("");
@@ -44,7 +70,7 @@ function renderMarkdown(md: string): string {
       const items = m.split("\n").filter(Boolean).map((l: string) => `<li>${l.replace(/^\d+\.\s+/, "")}</li>`).join("");
       return `<ol class="list-decimal pl-5 space-y-1 my-2">${items}</ol>`;
     })
-    .replace(/^[-*✅🌸💧🚚]\s+(.+)$/gm, "<li>$1</li>")
+    .replace(/^[-*]\s+(.+)$/gm, "<li>$1</li>")
     .replace(/(<li>.*<\/li>\n?)+/gs, (m: string) => `<ul class="list-disc pl-5 space-y-1 my-2">${m.trim()}</ul>`)
     .replace(/\n{2,}/g, "\n\n")
     .replace(/^(?!<[hoult]|<hr|<tab|<li)(.*\S.*)$/gm, "<p>$1</p>")
@@ -59,6 +85,7 @@ export function BlogPost() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
 
+  /* ── SEO meta (always called, data is null until post loads) ── */
   useSeoMeta({
     title: post ? `${post.title} — MagnifiScent Blog` : "Blog — MagnifiScent Pakistan",
     description: post
@@ -67,6 +94,43 @@ export function BlogPost() {
     ogImage: post?.coverImage || "",
     ogType: "article",
   });
+
+  /* ── JSON-LD: Article schema ── */
+  const articleSchema = useMemo(() => {
+    if (!post) return null;
+    return {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      headline: post.title,
+      description: post.excerpt || post.title,
+      image: post.coverImage || `${SITE_DOMAIN}/og-image.jpg`,
+      author: { "@type": "Organization", name: "MagnifiScent" },
+      publisher: {
+        "@type": "Organization",
+        name: "MagnifiScent",
+        logo: { "@type": "ImageObject", url: `${SITE_DOMAIN}/logo.png` },
+      },
+      datePublished: post.createdAt ? new Date(post.createdAt).toISOString() : new Date().toISOString(),
+      url: `${SITE_DOMAIN}/blog/${post.slug}`,
+    };
+  }, [post]);
+
+  /* ── JSON-LD: BreadcrumbList schema ── */
+  const breadcrumbSchema = useMemo(() => {
+    if (!post) return null;
+    return {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement: [
+        { "@type": "ListItem", position: 1, name: "Home", item: SITE_DOMAIN },
+        { "@type": "ListItem", position: 2, name: "Blog", item: `${SITE_DOMAIN}/blog` },
+        { "@type": "ListItem", position: 3, name: post.title, item: `${SITE_DOMAIN}/blog/${post.slug}` },
+      ],
+    };
+  }, [post]);
+
+  useJsonLd("ld-blog-article", articleSchema);
+  useJsonLd("ld-blog-breadcrumb", breadcrumbSchema);
 
   useEffect(() => {
     if (!params.slug) return;
