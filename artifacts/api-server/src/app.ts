@@ -80,8 +80,12 @@ app.get("/sitemap.xml", async (_req, res) => {
       { loc: "/contact",  changefreq: "monthly", priority: "0.5", lastmod: today },
       { loc: "/returns",  changefreq: "monthly", priority: "0.4", lastmod: today },
       { loc: "/shipping", changefreq: "monthly", priority: "0.4", lastmod: today },
-      { loc: "/privacy",  changefreq: "yearly",  priority: "0.3", lastmod: today },
-      { loc: "/terms",    changefreq: "yearly",  priority: "0.3", lastmod: today },
+      { loc: "/privacy",         changefreq: "yearly",  priority: "0.3", lastmod: today },
+      { loc: "/terms",           changefreq: "yearly",  priority: "0.3", lastmod: today },
+      { loc: "/karachi",         changefreq: "monthly", priority: "0.7", lastmod: today },
+      { loc: "/lahore",          changefreq: "monthly", priority: "0.7", lastmod: today },
+      { loc: "/islamabad",       changefreq: "monthly", priority: "0.7", lastmod: today },
+      { loc: "/inspired-perfumes", changefreq: "monthly", priority: "0.7", lastmod: today },
     ];
 
     const blogPosts = await db
@@ -176,6 +180,26 @@ const STATIC_META: Record<string, { title: string; description: string; ogType?:
   "/terms": {
     title: "Terms & Conditions — MagnifiScent",
     description: "MagnifiScent's terms and conditions of service.",
+  },
+  "/karachi": {
+    title: "Buy Perfumes Online in Karachi — Cash on Delivery | MagnifiScent",
+    description:
+      "Shop premium long-lasting Eau de Parfum in Karachi with Cash on Delivery. Delivery in 2–3 business days to DHA, Clifton, Gulshan, PECHS and beyond. Authentic fragrances — MagnifiScent.",
+  },
+  "/lahore": {
+    title: "Buy Perfumes Online in Lahore — Cash on Delivery | MagnifiScent",
+    description:
+      "Shop premium long-lasting Eau de Parfum in Lahore with Cash on Delivery. Delivery in 2–3 business days to Gulberg, DHA, Johar Town, Model Town and beyond. Authentic fragrances — MagnifiScent.",
+  },
+  "/islamabad": {
+    title: "Buy Perfumes Online in Islamabad — Cash on Delivery | MagnifiScent",
+    description:
+      "Shop premium long-lasting Eau de Parfum in Islamabad with Cash on Delivery. Delivery in 2–3 business days to F-sectors, G-sectors, DHA, Bahria Town and beyond. Authentic fragrances — MagnifiScent.",
+  },
+  "/inspired-perfumes": {
+    title: "Best Long-Lasting Perfumes Pakistan — MagnifiScent vs Inspired Alternatives",
+    description:
+      "Looking for Scents N Stories alternatives or inspired perfumes in Pakistan? Discover why MagnifiScent's original Eau de Parfum outlasts, outperforms, and outwears any inspired dupe — with Cash on Delivery.",
   },
 };
 
