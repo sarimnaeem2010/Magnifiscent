@@ -3,6 +3,8 @@ import { useParams, useLocation } from "wouter";
 import { api, type ApiBlogPost, type ApiProduct } from "@/lib/api";
 import { useSeoMeta } from "@/hooks/useSeoMeta";
 import { useJsonLd } from "@/hooks/useJsonLd";
+import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
 import { Calendar, ArrowLeft, ShoppingBag } from "lucide-react";
 
 const SITE_DOMAIN = "https://magnifiscent.com.pk";
@@ -159,34 +161,44 @@ export function BlogPost() {
 
   if (loading) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-16 animate-pulse">
-        <div className="h-8 bg-stone-200 rounded w-3/4 mb-4" />
-        <div className="h-4 bg-stone-100 rounded w-1/3 mb-8" />
-        {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="h-4 bg-stone-100 rounded w-full mb-3" />
-        ))}
-      </div>
+      <>
+        <Header />
+        <div className="max-w-3xl mx-auto px-4 py-16 animate-pulse">
+          <div className="h-8 bg-stone-200 rounded w-3/4 mb-4" />
+          <div className="h-4 bg-stone-100 rounded w-1/3 mb-8" />
+          {[1, 2, 3, 4, 5].map((i) => (
+            <div key={i} className="h-4 bg-stone-100 rounded w-full mb-3" />
+          ))}
+        </div>
+        <Footer />
+      </>
     );
   }
 
   if (notFound || !post) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-20 text-center">
-        <p className="text-2xl font-bold text-gray-800 mb-3">Article not found</p>
-        <button
-          onClick={() => navigate("/blog")}
-          className="text-amber-700 underline text-sm font-medium"
-        >
-          Back to Blog
-        </button>
-      </div>
+      <>
+        <Header />
+        <div className="max-w-3xl mx-auto px-4 py-20 text-center">
+          <p className="text-2xl font-bold text-gray-800 mb-3">Article not found</p>
+          <button
+            onClick={() => navigate("/blog")}
+            className="text-amber-700 underline text-sm font-medium"
+          >
+            Back to Blog
+          </button>
+        </div>
+        <Footer />
+      </>
     );
   }
 
   const htmlContent = renderMarkdown(post.content);
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8 md:py-12">
+    <>
+      <Header />
+      <div className="max-w-3xl mx-auto px-4 py-8 md:py-12">
       {/* Back link */}
       <button
         onClick={() => navigate("/blog")}
@@ -271,5 +283,7 @@ export function BlogPost() {
         </section>
       )}
     </div>
+      <Footer />
+    </>
   );
 }

@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { api, type ApiBlogPost } from "@/lib/api";
 import { useSeoMeta } from "@/hooks/useSeoMeta";
+import { Header } from "@/components/layout/Header";
+import { Footer } from "@/components/layout/Footer";
 import { Calendar, ArrowRight, BookOpen } from "lucide-react";
 
 function formatDate(dateStr: string) {
@@ -36,6 +38,7 @@ export function BlogList() {
 
   return (
     <>
+      <Header />
 
       {/* Hero strip */}
       <section className="bg-gradient-to-br from-amber-50 to-stone-100 border-b border-stone-200 py-10 px-4">
@@ -104,6 +107,8 @@ export function BlogList() {
           </div>
         )}
       </div>
+
+      <Footer />
     </>
   );
 }
