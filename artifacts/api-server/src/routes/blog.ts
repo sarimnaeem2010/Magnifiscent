@@ -464,6 +464,596 @@ At MagnifiScent, every fragrance is an original composition — not an imitation
 
 Find your signature. Start at MagnifiScent.`,
     },
+    {
+      title: "Best Oud Perfumes Available in Pakistan — The Complete Guide",
+      slug: "best-oud-perfumes-pakistan",
+      excerpt: "Oud is the king of fragrance in Pakistan. Discover the finest oud-based Eau de Parfum available online with Cash on Delivery — from light Taifi rose-oud blends to deep Cambodian resin.",
+      published: true,
+      coverImage: "",
+      content: `## Best Oud Perfumes Available in Pakistan — The Complete Guide
+
+Oud — known as *عود* in Urdu — holds a place of unrivalled prestige in Pakistani fragrance culture. Used for centuries in the subcontinent and the Arab world alike, oud is derived from agarwood, the resinous heartwood of *Aquilaria* trees infected with a specific mould. The scent is complex, smoky, resinous, and deeply animalic — and it carries a cultural weight that no other ingredient can match.
+
+Whether you're dressing for an Eid celebration, a mehndi ceremony, or simply want to smell extraordinary at the office, a well-crafted oud Eau de Parfum is the ultimate statement.
+
+---
+
+## Why Oud Is Perfect for Pakistan's Climate
+
+Pakistan's warm, humid summers and cool winters are ideal for oud-based fragrances. Oud molecules are large and heavy — they evaporate slowly, creating a rich projection that lasts 8–12 hours even in Karachi's coastal heat. In winter, oud becomes even more powerful and enveloping, wrapping the wearer in a warm, resinous cocoon.
+
+---
+
+## Understanding Oud — From Taifi to Cambodian
+
+Not all oud smells the same. The origin of the agarwood significantly influences the character of the oud:
+
+### Indian Oud (Hindi Oud)
+Rich, deep, and animalic. Strong barnyard and leather undertones. Extremely powerful and best suited to evening wear and formal occasions. Pakistani fragrance traditionalists often prefer Indian oud for its raw, primal intensity.
+
+### Cambodian Oud
+Smooth, creamy, and slightly sweet. Less aggressive than Indian oud, with a clean woody quality. Cambodian oud is the "diplomatic" choice — it's approachable enough for everyday wear while still carrying the unmistakable oud signature.
+
+### Taifi Rose Oud
+Perhaps the most beloved in Pakistan — the combination of Bulgarian-style rose with Taifi oud creates a floral-resinous harmony that has been a mainstay of South Asian and Middle Eastern perfumery for generations. Romantic, rich, and deeply civilised.
+
+### Light / Modern Oud
+Contemporary perfumers have developed "cleaned" oud accords that capture the woody, resinous character of oud without the animalic intensity. These are perfect for oud first-timers or for wearing in professional settings.
+
+---
+
+## Tips for Wearing Oud in Pakistan
+
+1. **Less is more** — 2 sprays of a proper oud EDP is sufficient for 8+ hours
+2. **Apply to warm pulse points** — wrists, neck, inner elbows for maximum diffusion
+3. **Layer with a hair mist** — oud in your hair projects beautifully and lasts all day
+4. **Perfect for evenings** — oud becomes richer after body heat has worked on it for a few hours
+5. **Don't mix with strong florals** — let oud speak for itself
+
+---
+
+## The MagnifiScent Oud Collection
+
+At MagnifiScent, we've developed oud-forward Eau de Parfum compositions that respect the tradition of oud while delivering modern wearability. All our oud fragrances are:
+
+- **100% authentic Eau de Parfum** — no dilution, no imitation
+- **8–12 hour longevity** — guaranteed by our EDP concentration
+- **Available with Cash on Delivery** across Pakistan
+- **Priced honestly** — premium oud quality without the inflated designer markup
+
+**Our most popular oud picks:** ${anyLinks5}
+
+---
+
+## Shopping Oud Online in Pakistan
+
+When buying oud perfumes online in Pakistan, always ensure you're purchasing from a trusted source. The market is unfortunately full of synthetic oud imitations marketed as "pure" or "original." At MagnifiScent, every bottle comes with our authenticity guarantee.
+
+All oud fragrances ship from our warehouse within 24 hours of order placement, with delivery in 2–3 business days to Karachi, Lahore, Islamabad, and all major cities.
+
+*اچھی خوشبو انسان کی شخصیت کا آئینہ ہوتی ہے — A good fragrance is a mirror of one's character.*`,
+    },
+    {
+      title: "Best Perfumes for Women in Pakistan — 2025 Wedding Season Edit",
+      slug: "best-perfumes-women-pakistan-wedding-season",
+      excerpt: "Pakistan's wedding season is a fragrance occasion like no other. Here are the best perfumes for women in Pakistan — from mehndi mornings to baraat nights and everything in between.",
+      published: true,
+      coverImage: "",
+      content: `## Best Perfumes for Women in Pakistan — 2025 Wedding Season Edit
+
+Pakistan's wedding culture is legendary — weeks of celebrations, each with its own dress code, colour palette, and mood. And every outfit deserves a fragrance to match. The right perfume for a mehndi is very different from what you'd wear to a walima; an afternoon bridal shower calls for something entirely different from a late-night baraat reception.
+
+At **MagnifiScent**, we've created this definitive women's fragrance guide for Pakistan's wedding season, covering every occasion from the first dholki to the last rukhsati.
+
+---
+
+## The Pakistani Wedding Fragrance Calendar
+
+### Dholki — Festive, Fun, and Fresh
+**Vibe:** Joyful, energetic, informal
+**Recommended:** Fruity florals, fresh rose, light musk
+**Why it works:** Dholkis are intimate gatherings — often at home, in the garden, or in a smaller hall. Lighter fragrances that don't overwhelm in close proximity are ideal. Fruity rose or jasmine with a clean musk base is the perfect choice.
+
+### Mehndi — Romantic and Floral
+**Vibe:** Romantic, colourful, traditional
+**Recommended:** Rose oud, tuberose, oriental floral
+**Why it works:** Mehndi evenings have a magical, slightly nostalgic quality. The combination of fresh mehndi paste, incense, and colourful lights calls for a fragrance with depth — something floral with an oriental heart. A rose-oud or tuberose-amber EDP performs beautifully.
+
+### Baraat — Bold, Memorable, Unforgettable
+**Vibe:** Grand, dramatic, celebratory
+**Recommended:** Oud florals, amber woods, rich oriental
+**Why it works:** The baraat is the centrepiece of Pakistani weddings — and the fragrance you wear should match. This is the occasion for your most powerful, most memorable Eau de Parfum. Rich oud florals, deep amber, or warm sandalwood with rose will carry you through hours of dancing, photography, and ceremony.
+
+### Walima — Elegant, Refined, Sophisticated
+**Vibe:** Polished, celebratory but slightly more formal
+**Recommended:** Fresh oriental, musk floral, light amber
+**Why it works:** Walimas tend to be slightly more restrained than baraat celebrations. A sophisticated musk-floral or fresh oriental EDP is the ideal choice — present and beautiful, but never overwhelming.
+
+---
+
+## The 5 Fragrance Notes Every Pakistani Wedding Guest Should Have
+
+### 1. Rose
+Rose is the queen of Pakistani wedding fragrance. Rich, romantic, and universally loved — rose is your safe, beautiful choice for any wedding occasion.
+
+### 2. Jasmine (Chameli)
+*Chameli* holds deep cultural roots in Pakistan — jasmine garlands are used at weddings, and the scent of chameli is synonymous with celebration and femininity.
+
+### 3. Oud
+For baraat and formal wedding evenings, oud adds gravitas and longevity that nothing else can match. A rose-oud or jasmine-oud composition is the ultimate Pakistani bridal fragrance.
+
+### 4. Amber
+Amber creates warmth and sensuality that develops beautifully throughout the evening.
+
+### 5. Musk
+Clean musk extends longevity, softens other notes, and creates a beautiful, skin-close dry-down.
+
+---
+
+## MagnifiScent Wedding Fragrance Recommendations
+
+Explore our top women's picks: ${womenFeatured}
+
+Shop our full women's collection online with Cash on Delivery across Pakistan. All fragrances are 100% authentic Eau de Parfum with 6–12 hour longevity.
+
+*شادی میں خوشبو وہی — The fragrance of a wedding is forever.*`,
+    },
+    {
+      title: "How to Wear Perfume in Pakistani Winters — The Fragrance Upgrade Guide",
+      slug: "how-to-wear-perfume-pakistan-winter",
+      excerpt: "Pakistan winters from Islamabad to Lahore call for a completely different fragrance strategy. Here's how to upgrade your winter scent wardrobe with the right Eau de Parfum — available with Cash on Delivery.",
+      published: true,
+      coverImage: "",
+      content: `## How to Wear Perfume in Pakistani Winters — The Fragrance Upgrade Guide
+
+Winter in Pakistan is a completely different fragrance world. From December fog in Lahore's roads to the sharp mountain chill of Islamabad and Murree, the cooler temperatures fundamentally change how fragrance performs — and which fragrances deserve a place in your rotation.
+
+---
+
+## Why Winter Changes Everything
+
+In cold weather, fragrance molecules move more slowly — they evaporate at a lower rate, meaning:
+
+1. **Sillage (projection) is reduced** — your fragrance stays closer to the skin
+2. **Longevity increases** — slower evaporation means longer wear
+3. **Heavy notes perform best** — oud, amber, resin, leather, and tobacco shine in the cold
+4. **Light citrus and aquatics fall flat** — they rely on warmth to project properly
+
+This is why summer favourites can feel disappointing in winter, while fragrances that seemed "too heavy" in June suddenly become perfect in December.
+
+---
+
+## Best Fragrance Families for Pakistani Winters
+
+### 1. Oriental / Oud — The Quintessential Pakistani Winter Fragrance
+Nothing performs better in Pakistan's winter than a rich oud or oriental EDP. The cold air acts as a diffuser — the warmth of your body heat pushes the heavy, resinous molecules outward in a beautiful, enveloping projection.
+
+### 2. Amber & Resin — Warm, Enveloping, Sensual
+Amber fragrances create a second skin of warmth. They're incredibly comforting in cold weather — rich without being aggressive, sensual without being overwhelming.
+
+### 3. Woody & Smoky — Sophistication in the Cold
+Sandalwood, vetiver, cedar, and smoked wood fragrances find their truest expression in winter. The cool air slows their diffusion, creating an intimate projection that's perfect for close encounters and evening events.
+
+### 4. Leather & Tobacco — Bold, Distinctive, Unforgettable
+For the confident fragrance wearer, leather and tobacco notes in winter are extraordinary. Rich, animalic, and deeply distinctive — these fragrances command attention.
+
+---
+
+## How Many Sprays in Winter?
+
+| Occasion | Sprays |
+|----------|--------|
+| Office / Daytime | 3–4 |
+| Evening / Social | 4–5 |
+| Formal / Wedding | 5–6 |
+
+**Pro tip:** Apply immediately after a warm shower while your skin is still slightly warm. This drives the molecules deep into your skin and significantly extends longevity.
+
+---
+
+## Building Your Winter Fragrance Wardrobe
+
+A proper winter wardrobe for Pakistan needs at minimum:
+
+1. **A daytime oriental or amber EDP** — for office and casual wear
+2. **A rich oud EDP** — for evenings, weddings, and formal events
+
+Our top winter picks: ${anyFeatured}
+
+Shop online with Cash on Delivery — and upgrade your winter wardrobe today.`,
+    },
+    {
+      title: "Eid Perfume Gift Guide Pakistan — Best Fragrance Gifts for Eid ul Fitr & Eid ul Adha",
+      slug: "eid-perfume-gift-guide-pakistan",
+      excerpt: "Perfume is the most universally loved Eid gift in Pakistan. Here's MagnifiScent's complete Eid gift guide — for men, women, and everyone you want to impress this Eid.",
+      published: true,
+      coverImage: "",
+      content: `## Eid Perfume Gift Guide Pakistan — The Ultimate Fragrance Gifting Handbook
+
+In Pakistan, Eid gifting has one undisputed winner: **perfume**. A beautifully packaged Eau de Parfum says exactly the right thing — you value this person, and you want them to feel special.
+
+---
+
+## Why Perfume Is Pakistan's #1 Eid Gift
+
+1. **Universal appeal** — everyone wears fragrance, from children to grandparents
+2. **No sizing issues** — unlike clothing, perfume always fits
+3. **Premium feel** — a well-packaged EDP looks and feels luxurious
+4. **Practical luxury** — it's used and appreciated daily, not stored away
+5. **Price flexibility** — options exist for every budget
+
+---
+
+## Eid Gift Guide by Recipient
+
+### For Mothers — Timeless and Floral
+A classic floral oriental — rose, jasmine, or tuberose with an amber base — is universally loved. Top picks: ${womenLinks3}
+
+### For Fathers — Dignified and Strong
+A rich woody oriental with oud, cedar, and amber delivers masculine confidence without aggression. Top picks: ${menLinks3}
+
+### For Brothers — Modern and Cool
+Aquatic-woody blends, fresh citrus orientals, or modern oud accords are all excellent choices for younger men.
+
+### For Sisters — Youthful and Vibrant
+Look for peach, pear, or apple top notes with rose or jasmine hearts and clean musk bases.
+
+### For Your Spouse or Partner — Intimate and Sensual
+Rich orientals, sensual musks, and warm amber EDPs make extraordinary spousal gifts.
+
+---
+
+## Eid Gifting Tips
+
+1. **Order early** — Eid rush means shipping can slow down; order 5–7 days ahead
+2. **Cash on Delivery means no advance risk** — ideal for last-minute Eid shopping
+3. **Multiple quantities available** — buy several bottles for multiple family members
+
+---
+
+## The MagnifiScent Eid Promise
+
+All MagnifiScent fragrances are 100% authentic Eau de Parfum, beautifully packaged, and available with Cash on Delivery across Pakistan, delivered within 2–3 business days.
+
+*عید مبارک — May your Eid be as beautiful as the fragrance you gift.*`,
+    },
+    {
+      title: "Best Perfumes for Pakistani College Students — Premium Scent on a Budget",
+      slug: "best-perfumes-college-students-pakistan",
+      excerpt: "University life in Pakistan doesn't have to mean smelling ordinary. Here are the best long-lasting perfumes for college students in Pakistan — premium quality at honest prices, with Cash on Delivery.",
+      published: true,
+      coverImage: "",
+      content: `## Best Perfumes for Pakistani College Students — Premium Scent on a Budget
+
+Whether you're at Punjab University, NUST Islamabad, or Karachi University, smelling good is non-negotiable. Your fragrance is part of your first impression — and at university, you're making new first impressions every single day.
+
+But university life in Pakistan comes with a budget. The good news: you don't need to spend Rs. 15,000–25,000 on designer fragrances to smell extraordinary.
+
+---
+
+## What Makes a Great Student Fragrance?
+
+### 1. Versatility — Day to Night, Lecture to Chai Dhaba
+Your fragrance needs to work across morning lectures, afternoon labs, and evening outings — without feeling out of place in any context.
+
+### 2. Longevity — One Application, All Day
+Between morning commutes and late library sessions, you need a fragrance that lasts 6–8 hours. This means **Eau de Parfum concentration only** — EDT and cologne simply won't survive a full university day.
+
+### 3. Projection — Present but Not Overpowering
+In packed lecture halls and shared transport, moderate projection with a clean, sophisticated character is ideal.
+
+---
+
+## Best Fragrance Profiles for Pakistani Students
+
+### For Him — Fresh Oriental
+Fresh orientals open with energetic citrus or aquatic notes, then dry down to a warm, mildly spicy oriental base that lasts all day. Universally appropriate — morning lectures to evening cricket. Top picks: ${menLinks4}
+
+### For Her — Light Floral Musk
+Light floral musks are approachable, feminine, and appropriate for every setting. Top picks: ${womenLinks3}
+
+---
+
+## How to Make Your Perfume Last Longer (Student Hacks)
+
+1. **The Moisturiser Trick** — Apply unscented moisturiser before spraying; fragrance lasts 2–3 hours longer
+2. **The Clothing Spray** — A light spray on your shirt collar holds fragrance all day
+3. **The Two-Spray Rule** — Two well-placed sprays of a quality EDP is always enough
+
+---
+
+## MagnifiScent for Students
+
+All MagnifiScent fragrances are genuine Eau de Parfum — full concentration, honest pricing. Available with Cash on Delivery across Pakistan, delivered to your hostel or home.
+
+Start your fragrance journey right. Because smelling good in university isn't a luxury — it's a competitive advantage.`,
+    },
+    {
+      title: "Pakistani Bridal Fragrance Guide — How the Bride Should Smell on Her Wedding Day",
+      slug: "pakistani-bridal-fragrance-guide",
+      excerpt: "Your bridal fragrance will be tied to your wedding memories forever. This complete guide helps Pakistani brides choose the perfect Eau de Parfum for every wedding ceremony — from mehndi to rukhsati.",
+      published: true,
+      coverImage: "",
+      content: `## Pakistani Bridal Fragrance Guide — How the Bride Should Smell on Her Wedding Day
+
+Your wedding fragrance is the most powerful sensory detail of your entire wedding week. Decades after your baraat, the smell of a specific oud or rose-jasmine combination will transport you — and your husband — back to that exact moment.
+
+---
+
+## The Fragrance Philosophy of a Pakistani Bride
+
+| Ceremony | Mood | Fragrance Type |
+|----------|------|----------------|
+| Dholki | Playful, intimate | Fruity floral, fresh musk |
+| Mehndi | Romantic, colourful | Rose-oud, tuberose floral |
+| Baraat | Grand, unforgettable | Rich oriental, oud floral |
+| Walima | Elegant, sophisticated | Light oriental, musk floral |
+
+---
+
+## The Classic Pakistani Bridal Fragrance: Rose-Oud
+
+In Pakistani bridal culture, the combination of rose and oud is as iconic as red and gold in a bridal outfit. Rose brings romance, femininity, and cultural resonance. Oud brings depth, longevity, and gravitas — the weight of an occasion that matters.
+
+A rose-oud Eau de Parfum is the single most appropriate choice for a Pakistani baraat.
+
+---
+
+## Fragrance Application on Your Wedding Day
+
+**How Many Sprays:**
+- **Baraat:** 6–8 sprays — wrists, neck, décolletage, hair or dupatta
+- **Mehndi:** 4–5 sprays — lighter for indoor, warmer setting
+- **Walima:** 5–6 sprays
+
+**Timing:** Apply your fragrance **45 minutes before** you begin dressing. This allows the opening notes to pass and the beautiful heart and base notes to develop, ensuring you smell your absolute best for photographs.
+
+**The Dupatta Trick:** A light spray on your dupatta — held 30cm away — creates a beautiful cloud of fragrance around you as you move.
+
+---
+
+## MagnifiScent Bridal Recommendations
+
+Our top women's picks for wedding season: ${womenFeatured}
+
+All fragrances are Eau de Parfum — the correct concentration for a wedding day that lasts 16+ hours. Order with Cash on Delivery, delivered within 2–3 business days.
+
+*آپ کی خوشبو آپ کی یادوں کا حصہ بن جائے — May your fragrance become part of your memories.*`,
+    },
+    {
+      title: "Best Office Perfumes for Pakistani Men — Professional Fragrances That Close Deals",
+      slug: "best-office-perfumes-men-pakistan",
+      excerpt: "Your fragrance in a professional setting says as much as your suit. Here are the best office-appropriate Eau de Parfum for Pakistani men — confident, clean, and available with Cash on Delivery.",
+      published: true,
+      coverImage: "",
+      content: `## Best Office Perfumes for Pakistani Men — Professional Fragrances That Close Deals
+
+In Pakistan's corporate culture — from Karachi's I.I. Chundrigar Road banking towers to Lahore's Arfa Karim Tower tech offices to Islamabad's Blue Area government corridors — how you present yourself matters enormously. Your suit is chosen carefully. Your shoes are polished. But your fragrance? Often an afterthought.
+
+It shouldn't be. A well-chosen office fragrance is invisible confidence.
+
+---
+
+## The Cardinal Rules of Office Fragrance
+
+### Rule 1: Moderate Projection is Non-Negotiable
+In a packed boardroom or shared open-plan office, a powerful oriental or oud EDP can be oppressive. The goal is to smell present and pleasant, not to declare your presence from across the floor.
+
+### Rule 2: Inoffensive is Not the Same as Boring
+"Office appropriate" doesn't mean generic or forgettable. A well-designed woody aromatic or clean oriental is noticed and appreciated — it's just not overwhelming.
+
+### Rule 3: Longevity Still Matters
+An office fragrance needs to last a full working day — 8+ hours. This means Eau de Parfum concentration regardless of how light the profile.
+
+### Rule 4: Freshness Signals Competence
+Research consistently shows that fresh, clean fragrances are associated with competence, reliability, and professionalism.
+
+---
+
+## Best Fragrance Families for Pakistani Office Wear
+
+### 1. Woody Aromatic — The Professional Standard
+Cedar, vetiver, and light sandalwood with aromatic top notes (lavender, cardamom, herbs). These are the fragrance equivalent of a well-fitted navy suit — always appropriate, always confident.
+
+### 2. Fresh Oriental — Modern Confidence
+A fresh oriental where citrus or aquatic top notes gradually warm into mild spice and amber is the contemporary Pakistani professional's power fragrance.
+
+### 3. Light Oud — Tradition with Authority
+A well-chosen light oud carries an air of confident tradition — perfect for senior executives, directors, and government professionals.
+
+---
+
+## How to Apply for the Office
+
+1. **2 sprays maximum** — wrists and neck only
+2. **Apply 30 minutes before leaving home** — let the opening notes settle before you arrive
+3. **Seasonal adjustment:** Summer → lean fresh/aquatic; Winter → warmer woods and light orientals
+
+Our top men's professional picks: ${menFeatured}
+
+Shop MagnifiScent's professional collection with Cash on Delivery across Pakistan — delivered to your home or office within 2–3 business days.`,
+    },
+    {
+      title: "How to Gift Perfume in Pakistan — The Complete Gifting Etiquette Guide",
+      slug: "how-to-gift-perfume-pakistan",
+      excerpt: "Gifting perfume in Pakistan comes with its own cultural etiquette. This complete guide covers everything — from choosing the right fragrance to presentation, budgeting, and gift-giving occasions.",
+      published: true,
+      coverImage: "",
+      content: `## How to Gift Perfume in Pakistan — The Complete Gifting Etiquette Guide
+
+Perfume is the most intimate and meaningful gift in Pakistani culture. Whether it's for Eid, a wedding, a birthday, or an anniversary, a well-chosen Eau de Parfum says something no card or envelope of cash can: *I thought about you specifically when I chose this.*
+
+---
+
+## Is Perfume a Good Gift in Pakistan?
+
+**Absolutely yes.** In Pakistani culture, fragrance has deep roots in religious, social, and familial traditions. The Prophet Muhammad (PBUH) famously loved good fragrance, and gifting attar or perfume has been a sunnah-aligned gesture for centuries.
+
+---
+
+## Reading the Recipient — Fragrance Clues
+
+### Watch What They Currently Wear
+The most reliable indicator of someone's fragrance preferences is what they already wear. If your father has worn a heavy woody-oriental for years, he'll appreciate something in the same family.
+
+### Consider Their Personality
+- **Bold, outgoing** → Rich oriental, oud, spicy
+- **Reserved, professional** → Clean woody, light aromatic, fresh musk
+- **Romantic, creative** → Floral oriental, rose, warm amber
+- **Young and modern** → Fresh, fruity, light oriental
+
+---
+
+## Budget Guide for Fragrance Gifting in Pakistan
+
+| Recipient / Occasion | Suggested Budget |
+|---------------------|------------------|
+| Office colleague | Rs. 1,500–3,000 |
+| Close friend | Rs. 2,000–5,000 |
+| Sibling | Rs. 3,000–8,000 |
+| Parent | Rs. 5,000–15,000 |
+| Spouse / Partner | Rs. 5,000–20,000 |
+| Wedding gift | Rs. 5,000–15,000 |
+
+---
+
+## Safe Choices When You're Unsure
+
+**For men:** A clean, moderate woody oriental — fresh top notes with a warm amber-wood base. Universally appreciated. Top picks: ${menLinks3}
+
+**For women:** A warm floral oriental — rose or jasmine with a soft amber-musk base. Appropriate for any age group. Top picks: ${womenLinks3}
+
+---
+
+## MagnifiScent: Pakistan's Gift-Ready Fragrance Brand
+
+All MagnifiScent fragrances arrive in gift-ready packaging and are available with Cash on Delivery. Delivered within 2–3 business days across Pakistan.
+
+*ایک اچھا تحفہ وہ ہے جو دل سے دیا جائے — The best gift is the one given from the heart.*`,
+    },
+    {
+      title: "How to Store Perfume in Pakistan's Heat — Protect Your Fragrance Collection",
+      slug: "how-to-store-perfume-pakistan-heat",
+      excerpt: "Pakistan's extreme summers can ruin an expensive perfume collection in weeks. Here's the definitive guide to storing your Eau de Parfum properly in Karachi, Lahore, and Multan's heat.",
+      published: true,
+      coverImage: "",
+      content: `## How to Store Perfume in Pakistan's Heat — Protect Your Fragrance Collection
+
+If you've ever opened a favourite perfume after a summer away and found it smells flat or completely different — you've experienced fragrance degradation. In Pakistan's extreme summer heat, an expensive Eau de Parfum can deteriorate in weeks if stored incorrectly. Temperatures in Multan, Jacobabad, and Karachi regularly exceed 45°C in June — conditions that rapidly break down delicate aromatic molecules.
+
+---
+
+## How Heat Destroys Fragrance
+
+1. **Oxidation** — Heat accelerates the reaction between fragrance molecules and oxygen, creating harsh or "sour" notes
+2. **Evaporation** — High temperatures drive alcohol out of the bottle even when sealed
+3. **Molecular breakdown** — Delicate molecular bonds break apart under prolonged heat
+4. **Colour change** — A fragrance turning significantly darker signals oxidative damage
+
+---
+
+## Pakistan's Heat Problem — City by City
+
+| City | Peak Summer Temp | Risk Level |
+|------|-----------------|------------|
+| Jacobabad | 50°C+ | Extreme |
+| Multan | 48°C+ | Extreme |
+| Lahore | 44°C+ | High |
+| Karachi | 40°C+ | High |
+| Islamabad | 38°C+ | Moderate |
+
+If you live in Lahore, Karachi, or southern Punjab, proper storage is **essential**.
+
+---
+
+## The Golden Rules of Fragrance Storage in Pakistan
+
+### Rule 1: Keep Away from Direct Sunlight
+UV radiation accelerates oxidation faster than heat alone. Never store perfume on a sunny windowsill or bathroom shelf with natural light.
+
+### Rule 2: Maintain Stable, Cool Temperatures
+In Pakistani summers, this means:
+- **Air-conditioned room storage** — ideal if your bedroom is regularly air-conditioned
+- **Inner wardrobe storage** — inside a closed wardrobe in a cooler room
+- **Refrigerator storage** — the vegetable drawer (4–8°C) works excellently in extreme heat
+
+### Rule 3: Keep Bottles in Their Original Boxes
+The cardboard box blocks light and provides thermal insulation. **Always store perfume in its original box** when not in daily use.
+
+### Rule 4: Store Upright
+When stored on their side, the liquid is in constant contact with the cap seal, which degrades faster and can cause leakage.
+
+---
+
+## Signs Your Perfume Has Gone Bad
+
+- Significantly darker colour
+- Unusually harsh or alcoholic opening
+- Much flatter, less complex scent
+- Sour or vinegary character
+
+---
+
+## Invest in Proper Storage — Protect Your Investment
+
+A proper 100ml EDP is a genuine investment in Pakistan's premium fragrance market. Our fragrances are filled in high-quality sealed bottles — but no bottle can protect against Pakistan's summer heat without your help. Shop online with Cash on Delivery and store your collection correctly from day one.`,
+    },
+    {
+      title: "Best Unisex Perfumes in Pakistan — Fragrances That Work for Everyone",
+      slug: "best-unisex-perfumes-pakistan",
+      excerpt: "Unisex fragrances are the fastest-growing category in Pakistan's perfume market. Here are the best gender-neutral Eau de Parfum options — beautiful on both men and women, available with Cash on Delivery.",
+      published: true,
+      coverImage: "",
+      content: `## Best Unisex Perfumes in Pakistan — Fragrances That Work for Everyone
+
+The fastest-growing segment of Pakistan's fragrance market isn't masculine or feminine — it's neither. Gender-neutral fragrances are finding enthusiastic audiences among younger Pakistani consumers who see fragrance as personal expression rather than gender signalling.
+
+---
+
+## What Makes a Fragrance Truly Unisex?
+
+The concept of gendered fragrance is largely a 20th-century marketing construct. Historically, fragrance has had no gender — roses, oud, amber, and musk were worn by kings and queens alike across all cultures.
+
+A fragrance tends to be perceived as unisex when it:
+- **Avoids extremely heavy floral hearts** — like overwhelmingly sweet rose bouquets
+- **Avoids extremely aggressive masculines** — like heavy leather or crude tobacco
+- **Uses neutral base notes** — oud, cedar, vetiver, amber, soft musk
+- **Has a balanced profile** — neither overtly sweet nor overtly harsh
+
+---
+
+## Why Unisex Fragrances Are Perfect for Pakistan
+
+Pakistan has a rich olfactive tradition where many ingredients are inherently non-gendered. Oud has been worn by both men and women for centuries. Rose-oud, which reads as feminine in some Western markets, is regularly worn by Pakistani men at weddings and formal occasions. This existing cultural openness makes Pakistani consumers perfectly suited to enjoying unisex fragrances.
+
+---
+
+## The Best Fragrance Families for Unisex Wear in Pakistan
+
+### 1. Oud — The Original Unisex Fragrance
+Oud is neither masculine nor feminine in Pakistani culture — it's prestigious, traditional, and beautiful.
+
+### 2. Woody — Sophisticated and Versatile
+Cedar, sandalwood, and vetiver-based fragrances project sophistication and groundedness without skewing to any gender.
+
+### 3. Clean Musk — Modern and Universally Appealing
+Clean white musk fragrances smell like clean skin — intimate, soft, and fresh. Universally beautiful.
+
+### 4. Aquatic Woody — Modern Pakistan's Favourite
+Fresh aquatic notes with a clean woody base create a modern, contemporary fragrance profile completely free of traditional gender associations.
+
+---
+
+## The Unisex Gifting Advantage
+
+When gifting and you're unsure of the recipient's preferences, a well-chosen unisex fragrance is your safest option. A beautiful oud, clean musk, or woody EDP is guaranteed to be appreciated regardless of gender.
+
+Our most versatile, gender-neutral picks: ${anyFeatured}
+
+Shop MagnifiScent's full collection with Cash on Delivery across Pakistan.
+
+*خوشبو کا کوئی جنس نہیں ہوتا — Fragrance has no gender.*`,
+    },
   ];
 }
 
@@ -475,9 +1065,6 @@ async function seedBlogPosts() {
   if (seeded) return;
   seeded = true;
   try {
-    const existing = await db.select({ id: blogPostsTable.id }).from(blogPostsTable).limit(1);
-    if (existing.length > 0) return;
-
     const products = await db
       .select({ slug: productsTable.slug, name: productsTable.name, category: productsTable.category })
       .from(productsTable)
