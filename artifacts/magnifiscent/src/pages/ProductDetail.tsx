@@ -316,6 +316,14 @@ export default function ProductDetail() {
               <span className="text-sm text-gray-600 font-medium">{product.reviews} reviews</span>
             </div>
 
+            {product.size && (
+              <div className="mb-4">
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-full uppercase tracking-wider">
+                  {product.size} · Eau de Parfum
+                </span>
+              </div>
+            )}
+
             <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-100">
               <span className="text-2xl font-bold text-gray-900">{product.price}</span>
               <span className="text-base text-gray-400 line-through">{product.originalPrice}</span>

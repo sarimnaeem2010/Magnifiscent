@@ -11,6 +11,7 @@ type ProductForm = {
   stock: string;
   desc: string;
   notes: string;
+  size: string;
   active: boolean;
   img: string;
   img2: string;
@@ -83,6 +84,7 @@ const emptyForm: ProductForm = {
   stock: "",
   desc: "",
   notes: "",
+  size: "100ml",
   active: true,
   img: "",
   img2: "",
@@ -189,6 +191,15 @@ function Modal({ title, onClose, onSave, form, setForm }: {
                 placeholder="Rose, Jasmine, Musk"
               />
             </div>
+            <div>
+              <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">Volume / Size</label>
+              <input
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
+                value={form.size}
+                onChange={(e) => setForm((f) => ({ ...f, size: e.target.value }))}
+                placeholder="e.g. 100ml"
+              />
+            </div>
             <div className="col-span-2 flex items-center gap-3">
               <label className="text-sm font-medium text-gray-700">Active (visible on store)</label>
               <button
@@ -253,6 +264,7 @@ export function AdminProducts() {
       stock: String(p.stock),
       desc: p.desc,
       notes: p.notes.join(", "),
+      size: p.size || "100ml",
       active: p.active,
       img: p.img || "",
       img2: p.img2 || "",
@@ -265,6 +277,8 @@ export function AdminProducts() {
     const origNum = parseFloat(form.originalPrice) || 0;
     const stock = parseInt(form.stock) || 0;
     const notes = form.notes.split(",").map((n) => n.trim()).filter(Boolean);
+
+    const sizeVal = form.size.trim() || "100ml";
 
     if (editingId !== null) {
       setProducts((prev) =>
@@ -281,6 +295,7 @@ export function AdminProducts() {
                 stock,
                 desc: form.desc,
                 notes,
+                size: sizeVal,
                 active: form.active,
                 ...(form.img ? { img: form.img } : {}),
                 ...(form.img2 ? { img2: form.img2 } : {}),
@@ -306,10 +321,10 @@ export function AdminProducts() {
           stock,
           desc: form.desc,
           notes,
+          size: sizeVal,
           active: form.active,
           reviews: 0,
           rating: 5,
-          size: "100ml / 3.4 Fl.oz",
         },
       ]);
     }

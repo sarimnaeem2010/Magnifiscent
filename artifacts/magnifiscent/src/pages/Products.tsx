@@ -69,9 +69,12 @@ function ProductCard({ product }: { product: ApiProduct }) {
           <StarRating count={product.rating} />
           <span className="text-gray-400 text-xs ml-1">({product.reviews})</span>
         </div>
-        <h3 className="font-semibold text-sm text-gray-900 hover:text-gray-600 transition-colors mb-1">
+        <h3 className="font-semibold text-sm text-gray-900 hover:text-gray-600 transition-colors mb-0.5">
           {product.name}
         </h3>
+        {product.size && (
+          <p className="text-[11px] text-amber-600 font-semibold mb-1">{product.size}</p>
+        )}
         <p className="text-xs text-gray-500 mb-2 leading-relaxed line-clamp-2">{product.desc}</p>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">

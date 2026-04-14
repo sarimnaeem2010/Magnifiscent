@@ -158,7 +158,10 @@ function ProductCard({ product }: { product: ApiProduct }) {
           <StarRating count={product.rating} />
           <span className="text-gray-400 text-xs ml-1">({product.reviews})</span>
         </div>
-        <h3 className="font-bold text-sm text-gray-900 mb-1">{product.name}</h3>
+        <h3 className="font-bold text-sm text-gray-900 mb-0.5">{product.name}</h3>
+        {product.size && (
+          <p className="text-[11px] text-amber-600 font-semibold mb-1">{product.size}</p>
+        )}
         <p className="text-xs text-gray-500 leading-snug mb-2 line-clamp-2">{product.desc}</p>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
