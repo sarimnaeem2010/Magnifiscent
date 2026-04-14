@@ -358,19 +358,6 @@ export default function Home() {
       {/* ── Hero Banner / Slider ── */}
       <HeroBanner />
 
-      {/* ── SEO Header Strip ── */}
-      <section className="bg-white py-6 border-b border-gray-100 text-center">
-        <div className="max-w-3xl mx-auto px-4">
-          <h1 className="font-bold text-xl md:text-2xl text-gray-900" style={{ fontFamily: "Georgia, serif" }}>
-            Premium Perfumes Online Pakistan — Cash on Delivery
-          </h1>
-          <p className="text-gray-500 text-sm mt-2">
-            Long-lasting Eau de Parfum for men and women, delivered free across Pakistan.{" "}
-            <span className="text-gray-700 font-medium" dir="rtl">خوشبو جو دل کو چھو لے</span>
-          </p>
-        </div>
-      </section>
-
       {/* ── Deals & Combo ── */}
       {apiDeals.filter((d) => d.active).length > 0 && (() => {
         const activeDeals: LiveDeal[] = apiDeals.filter((d) => d.active).map((d) => {
