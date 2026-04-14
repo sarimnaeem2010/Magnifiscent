@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { useAdmin } from "../AdminContext";
-import { ShoppingBag, DollarSign, Clock, Package } from "lucide-react";
+import { ShoppingBag, DollarSign, Clock, Package, Loader } from "lucide-react";
 
 function StatCard({ label, value, sub, icon: Icon, color }: {
   label: string; value: string; sub: string; icon: React.ElementType; color: string;
@@ -130,10 +130,13 @@ export function AdminDashboard() {
   const { orders, products } = useAdmin();
 
   const stats = useMemo(() => {
-    const total = orders.reduce((s, o) => s + o.total, 0);
+    const deliveredOrders = orders.filter((o) => o.status === "Delivered");
+    const processingOrders = orders.filter((o) => o.status === "Processing");
+    const deliveredTotal = deliveredOrders.reduce((s, o) => s + o.total, 0);
+    const processingTotal = processingOrders.reduce((s, o) => s + o.total, 0);
     const pending = orders.filter((o) => o.status === "Pending").length;
-    const delivered = orders.filter((o) => o.status === "Delivered").length;
-    return { total, pending, delivered };
+    const delivered = deliveredOrders.length;
+    return { deliveredTotal, processingTotal, pending, delivered };
   }, [orders]);
 
   const chartData = useMemo(() => {
@@ -164,9 +167,10 @@ export function AdminDashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Total Revenue" value={`PKR ${stats.total.toLocaleString()}`} sub="All time" icon={DollarSign} color="#10b981" />
-        <StatCard label="Total Orders" value={String(orders.length)} sub={`${stats.delivered} delivered`} icon={ShoppingBag} color="#3b82f6" />
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        <StatCard label="Delivered Revenue" value={`PKR ${stats.deliveredTotal.toLocaleString()}`} sub={`${stats.delivered} delivered orders`} icon={DollarSign} color="#10b981" />
+        <StatCard label="Processing Revenue" value={`PKR ${stats.processingTotal.toLocaleString()}`} sub="Orders in processing" icon={Loader} color="#3b82f6" />
+        <StatCard label="Total Orders" value={String(orders.length)} sub={`${stats.delivered} delivered`} icon={ShoppingBag} color="#6366f1" />
         <StatCard label="Pending Orders" value={String(stats.pending)} sub="Awaiting action" icon={Clock} color="#f59e0b" />
         <StatCard label="Products" value={String(products.length)} sub={`${products.filter((p) => p.active).length} active`} icon={Package} color="#8b5cf6" />
       </div>
