@@ -2,6 +2,8 @@ import { Router } from "express";
 import { db } from "../lib/db.js";
 import { storeSettingsTable } from "@workspace/db";
 import { requireAdminAuth } from "../middleware/auth.js";
+import path from "path";
+import fs from "fs/promises";
 
 const router = Router();
 
@@ -67,6 +69,27 @@ router.post("/admin/change-password", requireAdminAuth, async (req, res) => {
         set: { adminPassword: newPassword },
       });
     res.json({ success: true });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    res.status(500).json({ success: false, error: message });
+  }
+});
+
+/* POST /api/admin/upload — admin auth required; saves base64 image to disk and returns a URL */
+router.post("/admin/upload", requireAdminAuth, async (req, res) => {
+  try {
+    const { image } = req.body as { image?: string };
+    if (!image || typeof image !== "string" || !image.startsWith("data:image/")) {
+      res.status(400).json({ success: false, error: "Invalid image data" });
+      return;
+    }
+    const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
+    const buffer = Buffer.from(base64Data, "base64");
+    const uploadDir = path.join(process.cwd(), "uploads", "products");
+    await fs.mkdir(uploadDir, { recursive: true });
+    const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
+    await fs.writeFile(path.join(uploadDir, filename), buffer);
+    res.json({ success: true, url: `/uploads/products/${filename}` });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     res.status(500).json({ success: false, error: message });

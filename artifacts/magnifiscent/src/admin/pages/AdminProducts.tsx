@@ -1,7 +1,26 @@
 import React, { useState, useRef } from "react";
 import { useAdmin } from "../AdminContext";
 import type { AdminProduct } from "../AdminContext";
-import { Plus, Pencil, Trash2, X, Check, ImageIcon } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Check, ImageIcon, Loader2 } from "lucide-react";
+
+const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "/api";
+function getAdminToken() { return sessionStorage.getItem("admin_api_token") ?? ""; }
+
+async function uploadImageToServer(base64: string): Promise<string> {
+  try {
+    const res = await fetch(`${API_BASE}/admin/upload`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${getAdminToken()}`,
+      },
+      body: JSON.stringify({ image: base64 }),
+    });
+    const data = await res.json();
+    if (data.success && data.url) return data.url as string;
+  } catch {}
+  return base64;
+}
 
 type ProductForm = {
   name: string;
@@ -41,17 +60,23 @@ function compressImage(file: File, maxW: number, maxH: number, quality = 0.78): 
   });
 }
 
-function ImgUploadCell({ src, label, onChange }: { src: string; label: string; onChange: (b64: string) => void }) {
+function ImgUploadCell({ src, label, onChange }: { src: string; label: string; onChange: (url: string) => void }) {
   const ref = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
   return (
     <div>
       <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">{label}</label>
       <div
         className="relative w-full rounded-lg overflow-hidden border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center cursor-pointer group hover:border-gray-400 transition-colors"
         style={{ aspectRatio: "3/4" }}
-        onClick={() => ref.current?.click()}
+        onClick={() => !uploading && ref.current?.click()}
       >
-        {src ? (
+        {uploading ? (
+          <div className="flex flex-col items-center gap-1 text-gray-400 p-2">
+            <Loader2 size={20} className="animate-spin" />
+            <p className="text-[10px] font-medium text-center">Uploading…</p>
+          </div>
+        ) : src ? (
           <>
             <img src={src} alt={label} className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
@@ -68,7 +93,16 @@ function ImgUploadCell({ src, label, onChange }: { src: string; label: string; o
       <input ref={ref} type="file" accept="image/*" className="hidden"
         onChange={async (e) => {
           const file = e.target.files?.[0];
-          if (file) { const b64 = await compressImage(file, 600, 800, 0.80); onChange(b64); }
+          if (file) {
+            setUploading(true);
+            try {
+              const b64 = await compressImage(file, 600, 800, 0.80);
+              const url = await uploadImageToServer(b64);
+              onChange(url);
+            } finally {
+              setUploading(false);
+            }
+          }
           e.target.value = "";
         }}
       />

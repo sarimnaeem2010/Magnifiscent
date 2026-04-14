@@ -42,6 +42,11 @@ app.use(cors());
 app.use(express.json({ limit: "15mb" }));
 app.use(express.urlencoded({ extended: true, limit: "15mb" }));
 
+/* ── Serve uploaded product images as static files ── */
+const uploadsDir = path.join(process.cwd(), "uploads");
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+app.use("/uploads", express.static(uploadsDir, { maxAge: "30d" }));
+
 app.use("/api", router);
 
 /* ── robots.txt ── */
