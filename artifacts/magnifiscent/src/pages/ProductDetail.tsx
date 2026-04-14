@@ -118,6 +118,8 @@ export default function ProductDetail() {
   const [product, setProduct] = useState<ApiProduct | null>(null);
   const [allProducts, setAllProducts] = useState<ApiProduct[]>([]);
   const [loading, setLoading] = useState(true);
+  const [freeShippingThreshold, setFreeShippingThreshold] = useState<number | null>(null);
+  const [currency, setCurrency] = useState("Rs.");
 
   const seoTitle = product
     ? `${product.name} – Long-Lasting ${product.category === "men" ? "Men" : "Women"}'s Perfume | MagnifiScent`
@@ -229,6 +231,13 @@ export default function ProductDetail() {
 
     api.products.list().then((res) => {
       if (res.success) setAllProducts(res.products);
+    }).catch(() => {});
+
+    api.settings.get().then((res) => {
+      if (res.success) {
+        setFreeShippingThreshold(res.settings.store.freeShippingThreshold ?? null);
+        setCurrency(res.settings.store.currency || "Rs.");
+      }
     }).catch(() => {});
   }, [params.slug]);
 
@@ -415,7 +424,7 @@ export default function ProductDetail() {
 
             <div className="grid grid-cols-3 gap-4 pt-6 border-t border-gray-100">
               {[
-                { icon: Package, label: "Free shipping", sub: "On orders over Rs. 100" },
+                { icon: Package, label: "Free shipping", sub: freeShippingThreshold !== null ? `On orders over ${currency} ${freeShippingThreshold.toLocaleString()}` : "On all orders" },
                 { icon: RotateCcw, label: "Easy returns", sub: "20-day return policy" },
                 { icon: Shield, label: "Authentic", sub: "100% genuine" },
               ].map(({ icon: Icon, label, sub }) => (
