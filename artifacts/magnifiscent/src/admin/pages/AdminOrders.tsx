@@ -80,20 +80,49 @@ function OrderDetailPanel({ order, onClose, onStatusChange, cur }: {
           </div>
 
           {/* Summary */}
-          <div className="bg-gray-50 rounded-xl p-4">
-            <div className="flex justify-between text-sm text-gray-500 mb-1">
+          <div className="bg-gray-50 rounded-xl p-4 space-y-1.5">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Order Summary</p>
+
+            <div className="flex justify-between text-sm text-gray-500">
               <span>Subtotal</span>
+              <span>{cur} {(order.subtotal ?? order.total).toFixed(2)}</span>
+            </div>
+
+            {(order.discountAmount ?? 0) > 0 && (
+              <div className="flex justify-between text-sm text-green-600">
+                <span className="flex items-center gap-1">
+                  Coupon
+                  {order.couponCode && (
+                    <span className="bg-green-100 text-green-700 text-xs font-bold px-1.5 py-0.5 rounded">
+                      {order.couponCode}
+                    </span>
+                  )}
+                </span>
+                <span>− {cur} {(order.discountAmount ?? 0).toFixed(2)}</span>
+              </div>
+            )}
+
+            {(order.discountAmount ?? 0) === 0 && (
+              <div className="flex justify-between text-sm text-gray-400">
+                <span>Coupon</span>
+                <span>None applied</span>
+              </div>
+            )}
+
+            <div className="flex justify-between text-sm text-gray-500">
+              <span>Shipping</span>
+              {(order.shippingAmount ?? 0) === 0
+                ? <span className="text-green-600 font-medium">Free</span>
+                : <span>{cur} {(order.shippingAmount ?? 0).toFixed(2)}</span>
+              }
+            </div>
+
+            <div className="flex justify-between font-bold text-gray-900 border-t border-gray-200 pt-2 mt-1">
+              <span>Total</span>
               <span>{cur} {order.total.toFixed(2)}</span>
             </div>
-            <div className="flex justify-between text-sm text-gray-500 mb-2">
-              <span>Shipping</span>
-              <span className="text-green-600">{order.total >= 100 ? "Free" : `${cur} 9.99`}</span>
-            </div>
-            <div className="flex justify-between font-bold text-gray-900 border-t border-gray-200 pt-2">
-              <span>Total</span>
-              <span>{cur} {(order.total + (order.total >= 100 ? 0 : 9.99)).toFixed(2)}</span>
-            </div>
-            <p className="text-xs text-gray-400 mt-2">Payment: {order.paymentMethod}</p>
+
+            <p className="text-xs text-gray-400 pt-1">Payment: {order.paymentMethod}</p>
           </div>
         </div>
       </div>

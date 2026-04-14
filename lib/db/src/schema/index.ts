@@ -63,6 +63,10 @@ export const ordersTable = pgTable("orders", {
   customer: jsonb("customer")
     .$type<{ name: string; email: string; phone: string; address: string }>()
     .notNull(),
+  subtotal: real("subtotal").notNull().default(0),
+  discountAmount: real("discount_amount").notNull().default(0),
+  couponCode: text("coupon_code"),
+  shippingAmount: real("shipping_amount").notNull().default(0),
   total: real("total").notNull(),
   status: orderStatusEnum("status").notNull().default("Pending"),
   date: text("date").notNull(),

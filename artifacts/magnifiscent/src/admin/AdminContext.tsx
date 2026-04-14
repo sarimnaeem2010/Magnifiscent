@@ -15,6 +15,10 @@ export type Order = {
   id: string;
   customer: { name: string; email: string; phone: string; address: string };
   items: OrderItem[];
+  subtotal: number;
+  discountAmount: number;
+  couponCode: string | null;
+  shippingAmount: number;
   total: number;
   status: OrderStatus;
   date: string;

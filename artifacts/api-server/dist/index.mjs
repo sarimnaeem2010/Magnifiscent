@@ -67360,6 +67360,10 @@ var insertProductSchema = createInsertSchema(productsTable);
 var ordersTable = pgTable("orders", {
   id: text("id").primaryKey(),
   customer: jsonb("customer").$type().notNull(),
+  subtotal: real("subtotal").notNull().default(0),
+  discountAmount: real("discount_amount").notNull().default(0),
+  couponCode: text("coupon_code"),
+  shippingAmount: real("shipping_amount").notNull().default(0),
   total: real("total").notNull(),
   status: orderStatusEnum("status").notNull().default("Pending"),
   date: text("date").notNull(),
