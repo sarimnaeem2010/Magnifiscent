@@ -19,6 +19,13 @@ function OrderDetailPanel({ order, onClose, onStatusChange, cur }: {
   onStatusChange: (id: string, status: OrderStatus) => void;
   cur: string;
 }) {
+  const itemsSubtotal = order.items.reduce((s, i) => s + i.price * i.qty, 0);
+  const isLegacy = (order.subtotal ?? 0) === 0 && itemsSubtotal > 0;
+  const subtotal = itemsSubtotal;
+  const discountAmount = order.discountAmount ?? 0;
+  const shippingAmount = order.shippingAmount ?? 0;
+  const couponCode = order.couponCode ?? null;
+
   return (
     <div className="fixed inset-0 z-50 flex">
       <div className="flex-1 bg-black/40" onClick={onClose} />
@@ -85,37 +92,59 @@ function OrderDetailPanel({ order, onClose, onStatusChange, cur }: {
 
             <div className="flex justify-between text-sm text-gray-500">
               <span>Subtotal</span>
-              <span>{cur} {(order.subtotal ?? order.total).toFixed(2)}</span>
+              <span>{cur} {subtotal.toFixed(2)}</span>
             </div>
 
-            {(order.discountAmount ?? 0) > 0 && (
+            {!isLegacy && discountAmount > 0 && (
               <div className="flex justify-between text-sm text-green-600">
-                <span className="flex items-center gap-1">
+                <span className="flex items-center gap-1.5">
                   Coupon
-                  {order.couponCode && (
+                  {couponCode && (
                     <span className="bg-green-100 text-green-700 text-xs font-bold px-1.5 py-0.5 rounded">
-                      {order.couponCode}
+                      {couponCode}
                     </span>
                   )}
                 </span>
-                <span>− {cur} {(order.discountAmount ?? 0).toFixed(2)}</span>
+                <span>− {cur} {discountAmount.toFixed(2)}</span>
               </div>
             )}
 
-            {(order.discountAmount ?? 0) === 0 && (
+            {!isLegacy && discountAmount === 0 && (
               <div className="flex justify-between text-sm text-gray-400">
                 <span>Coupon</span>
                 <span>None applied</span>
               </div>
             )}
 
-            <div className="flex justify-between text-sm text-gray-500">
-              <span>Shipping</span>
-              {(order.shippingAmount ?? 0) === 0
-                ? <span className="text-green-600 font-medium">Free</span>
-                : <span>{cur} {(order.shippingAmount ?? 0).toFixed(2)}</span>
-              }
-            </div>
+            {isLegacy && (
+              <div className="flex justify-between text-sm text-gray-400">
+                <span>Coupon</span>
+                <span className="italic">—</span>
+              </div>
+            )}
+
+            {!isLegacy && (
+              <div className="flex justify-between text-sm text-gray-500">
+                <span>Shipping</span>
+                {shippingAmount === 0
+                  ? <span className="text-green-600 font-medium">Free</span>
+                  : <span>{cur} {shippingAmount.toFixed(2)}</span>
+                }
+              </div>
+            )}
+
+            {isLegacy && (
+              <div className="flex justify-between text-sm text-gray-400">
+                <span>Shipping</span>
+                <span className="italic">—</span>
+              </div>
+            )}
+
+            {isLegacy && (
+              <p className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2 mt-1">
+                Coupon & shipping breakdown was not captured for this order. Total paid is accurate.
+              </p>
+            )}
 
             <div className="flex justify-between font-bold text-gray-900 border-t border-gray-200 pt-2 mt-1">
               <span>Total</span>
