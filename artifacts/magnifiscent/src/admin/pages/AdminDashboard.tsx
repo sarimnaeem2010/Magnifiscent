@@ -26,7 +26,7 @@ function RevenueChart({ data }: { data: { date: string; revenue: number }[] }) {
 
   const W = 680;
   const H = 180;
-  const padL = 48;
+  const padL = 68;
   const padR = 12;
   const padT = 12;
   const padB = 28;
@@ -73,7 +73,7 @@ function RevenueChart({ data }: { data: { date: string; revenue: number }[] }) {
           <g key={t.y}>
             <line x1={padL} y1={t.y} x2={W - padR} y2={t.y} stroke="#f1f5f9" strokeWidth={1} />
             <text x={padL - 6} y={t.y + 4} textAnchor="end" fontSize={10} fill="#9ca3af">
-              ${t.val}
+              Rs.{t.val}
             </text>
           </g>
         ))}
@@ -148,7 +148,10 @@ export function AdminDashboard() {
       const key = d.toISOString().split("T")[0];
       const label = d.toLocaleDateString("en-US", { weekday: "short" });
       const revenue = orders
-        .filter((o) => o.date === key && o.status !== "Cancelled")
+        .filter((o) => {
+          const orderDay = (o.date || "").split("T")[0];
+          return orderDay === key && o.status !== "Cancelled";
+        })
         .reduce((s, o) => s + o.total, 0);
       days.push({ date: label, revenue });
     }
