@@ -67821,10 +67821,16 @@ if (!process.env.DATABASE_URL) {
   );
 }
 var _dbUrl = new URL(process.env.DATABASE_URL);
-if (_dbUrl.searchParams.has("sslmode")) {
+var isLocalDb = !_dbUrl.hostname.includes(".") || _dbUrl.hostname === "localhost" || _dbUrl.hostname === "127.0.0.1";
+if (isLocalDb) {
+  _dbUrl.searchParams.set("sslmode", "disable");
+} else if (_dbUrl.searchParams.has("sslmode")) {
   _dbUrl.searchParams.set("sslmode", "verify-full");
 }
-var pool = new Pool4({ connectionString: _dbUrl.toString() });
+var pool = new Pool4({
+  connectionString: _dbUrl.toString(),
+  ssl: isLocalDb ? false : void 0
+});
 var db = drizzle(pool, { schema: schema_exports });
 
 // src/middleware/auth.ts
