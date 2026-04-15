@@ -152,4 +152,31 @@ router.patch("/orders/:id/status", requireAdminAuth, async (req, res) => {
   }
 });
 
+/* DELETE /api/orders/:id — admin auth required; permanently removes order + all its items */
+router.delete("/orders/:id", requireAdminAuth, async (req, res) => {
+  try {
+    const orderId = String(req.params.id);
+
+    const existing = await db
+      .select({ id: ordersTable.id })
+      .from(ordersTable)
+      .where(eq(ordersTable.id, orderId));
+
+    if (existing.length === 0) {
+      res.status(404).json({ success: false, error: "Order not found" });
+      return;
+    }
+
+    await db.transaction(async (tx) => {
+      await tx.delete(orderItemsTable).where(eq(orderItemsTable.orderId, orderId));
+      await tx.delete(ordersTable).where(eq(ordersTable.id, orderId));
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Unknown error";
+    res.status(500).json({ success: false, error: message });
+  }
+});
+
 export default router;

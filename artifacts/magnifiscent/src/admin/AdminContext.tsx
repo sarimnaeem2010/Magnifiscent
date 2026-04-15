@@ -39,6 +39,7 @@ type AdminContextType = {
   setProducts: (updater: AdminProduct[] | ((prev: AdminProduct[]) => AdminProduct[])) => void;
   orders: Order[];
   setOrders: (updater: Order[] | ((prev: Order[]) => Order[])) => void;
+  deleteOrder: (id: string) => Promise<void>;
   deals: DealAdmin[];
   setDeals: (updater: DealAdmin[] | ((prev: DealAdmin[]) => DealAdmin[])) => void;
   settings: StoreSettings;
@@ -139,6 +140,11 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       const res = await api.orders.list();
       if (res.success) setOrdersState(res.orders as Order[]);
     } catch {}
+  }, []);
+
+  const deleteOrder = useCallback(async (id: string) => {
+    await api.orders.delete(id);
+    setOrdersState((prev) => prev.filter((o) => o.id !== id));
   }, []);
 
   const setProducts = useCallback(
@@ -260,6 +266,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       setProducts,
       orders,
       setOrders,
+      deleteOrder,
       deals,
       setDeals,
       settings,

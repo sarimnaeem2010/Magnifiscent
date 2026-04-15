@@ -175,6 +175,8 @@ export const api = {
       post<{ success: boolean; orderId: string }>("/orders", order),
     updateStatus: (id: string, status: string) =>
       patch<{ success: boolean; order: ApiOrder }>(`/orders/${id}/status`, { status }, true),
+    delete: (id: string) =>
+      del<{ success: boolean }>(`/orders/${id}`, true),
   },
 
   deals: {
