@@ -3,6 +3,7 @@ import { eq, desc, inArray } from "drizzle-orm";
 import { db } from "../lib/db.js";
 import { ordersTable, orderItemsTable } from "@workspace/db";
 import { requireAdminAuth } from "../middleware/auth.js";
+import { sendEmailInternal } from "../lib/sendEmail.js";
 
 const router = Router();
 
@@ -39,10 +40,14 @@ router.get("/orders", requireAdminAuth, async (_req, res) => {
   }
 });
 
-/* POST /api/orders — public (called from checkout); inserts order + items in a transaction */
+/* POST /api/orders — public (called from checkout); inserts order + items, fires confirmation emails */
 router.post("/orders", async (req, res) => {
   try {
-    const { id, customer, items, total, status, date, paymentMethod } = req.body;
+    const {
+      id, customer, items, total, status, date, paymentMethod,
+      subtotal, discountAmount, couponCode, shippingAmount,
+    } = req.body;
+
     if (!id || !customer || !items || total === undefined || !date) {
       res.status(400).json({ success: false, error: "Missing required fields: id, customer, items, total, date" });
       return;
@@ -56,6 +61,10 @@ router.post("/orders", async (req, res) => {
       await tx.insert(ordersTable).values({
         id,
         customer,
+        subtotal: subtotal ?? 0,
+        discountAmount: discountAmount ?? 0,
+        couponCode: couponCode ?? null,
+        shippingAmount: shippingAmount ?? 0,
         total,
         status: status ?? "Pending",
         date,
@@ -73,13 +82,33 @@ router.post("/orders", async (req, res) => {
     });
 
     res.status(201).json({ success: true, orderId: id });
+
+    // Fire emails after responding (non-blocking)
+    const customerName = customer?.name ?? "";
+    const customerEmail = customer?.email ?? "";
+    const orderTotal = String(total);
+
+    sendEmailInternal({
+      type: "order_confirmation",
+      customerEmail,
+      customerName,
+      orderId: id,
+      orderTotal,
+    });
+
+    sendEmailInternal({
+      type: "new_order_alert",
+      customerName,
+      orderId: id,
+      orderTotal,
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     res.status(500).json({ success: false, error: message });
   }
 });
 
-/* PATCH /api/orders/:id/status — admin auth required; update order status */
+/* PATCH /api/orders/:id/status — admin auth required; update status + fire status emails */
 router.patch("/orders/:id/status", requireAdminAuth, async (req, res) => {
   try {
     const { status } = req.body;
@@ -91,16 +120,32 @@ router.patch("/orders/:id/status", requireAdminAuth, async (req, res) => {
       });
       return;
     }
+
     const [updated] = await db
       .update(ordersTable)
       .set({ status })
       .where(eq(ordersTable.id, String(req.params.id)))
       .returning();
+
     if (!updated) {
       res.status(404).json({ success: false, error: "Order not found" });
       return;
     }
+
     res.json({ success: true, order: updated });
+
+    // Fire status-change emails after responding (non-blocking)
+    if (status === "Shipped" || status === "Delivered") {
+      const customer = updated.customer as { name?: string; email?: string };
+      const emailType = status === "Shipped" ? "order_shipped" : "order_delivered";
+      sendEmailInternal({
+        type: emailType,
+        customerEmail: customer?.email ?? "",
+        customerName: customer?.name ?? "",
+        orderId: updated.id,
+        orderTotal: String(updated.total),
+      });
+    }
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     res.status(500).json({ success: false, error: message });

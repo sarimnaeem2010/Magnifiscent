@@ -68270,6 +68270,62 @@ var products_default = router4;
 
 // src/routes/orders.ts
 var import_express5 = __toESM(require_express2(), 1);
+
+// src/lib/sendEmail.ts
+var import_nodemailer2 = __toESM(require_nodemailer(), 1);
+function replacePlaceholders2(template, vars) {
+  return template.replace(/\{\{(\w+)\}\}/g, (_, key) => vars[key] ?? "");
+}
+var SERVER_DEFAULT_SUBJECTS = {
+  order_confirmation: "Your MagnifiScent Order is Confirmed!",
+  order_shipped: "Your MagnifiScent order has been shipped!",
+  order_delivered: "Your MagnifiScent order has been delivered!",
+  new_order_alert: "New Order Received \u2014 {{order_id}}"
+};
+var SERVER_DEFAULT_BODIES = {
+  order_confirmation: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#fff;border:1px solid #e5e7eb;border-radius:8px"><h2 style="font-family:Georgia,serif;color:#111827;margin-top:0">Order Confirmed! \u{1F389}</h2><p>Dear {{customer_name}},</p><p>Thank you for your order <strong>{{order_id}}</strong> totalling <strong>Rs. {{order_total}}</strong>. It is now being processed and will be dispatched within 1\u20132 business days.</p><p style="color:#6b7280;font-size:14px"><em>\u2014 The {{store_name}} Team</em></p></div>`,
+  order_shipped: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#fff;border:1px solid #e5e7eb;border-radius:8px"><h2 style="font-family:Georgia,serif;color:#111827;margin-top:0">Your Order Is On Its Way! \u{1F69A}</h2><p>Dear {{customer_name}},</p><p>Your order <strong>{{order_id}}</strong> has been shipped. Estimated delivery: 3\u20135 business days.</p><p style="color:#6b7280;font-size:14px"><em>\u2014 The {{store_name}} Team</em></p></div>`,
+  order_delivered: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#fff;border:1px solid #e5e7eb;border-radius:8px"><h2 style="font-family:Georgia,serif;color:#111827;margin-top:0">Order Delivered! \u2705</h2><p>Dear {{customer_name}},</p><p>Your order <strong>{{order_id}}</strong> has been delivered. We hope you love your fragrance!</p><p style="color:#6b7280;font-size:14px"><em>\u2014 The {{store_name}} Team</em></p></div>`,
+  new_order_alert: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#fff;border:1px solid #e5e7eb;border-radius:8px"><h2 style="font-family:Georgia,serif;color:#111827;margin-top:0">New Order Alert \u{1F6CD}\uFE0F</h2><p>Customer: <strong>{{customer_name}}</strong></p><p>Order ID: <strong>{{order_id}}</strong> \u2014 Total: <strong>Rs. {{order_total}}</strong></p></div>`
+};
+async function sendEmailInternal(opts) {
+  try {
+    const config2 = await readConfig();
+    if (!config2.smtp?.host || !config2.smtp?.username || !config2.smtp?.password) return;
+    const isAdminAlert = opts.type === "new_order_alert" || opts.type === "low_stock_alert";
+    if (opts.type !== "test" && config2.toggles[opts.type] === false) return;
+    const savedTpl = config2.templates[opts.type];
+    const defaultSubject = SERVER_DEFAULT_SUBJECTS[opts.type] ?? "";
+    const defaultBody = SERVER_DEFAULT_BODIES[opts.type] ?? "";
+    const subject = savedTpl?.subject && savedTpl.subject.trim() ? savedTpl.subject : defaultSubject;
+    const body = savedTpl?.body && savedTpl.body.trim() ? savedTpl.body : defaultBody;
+    if (!subject || !body) return;
+    const vars = {
+      customer_name: opts.customerName ?? "",
+      order_id: opts.orderId ?? "",
+      order_total: String(opts.orderTotal ?? ""),
+      store_name: "MagnifiScent",
+      ...opts.variables ?? {}
+    };
+    const to = isAdminAlert ? config2.smtp.fromEmail : opts.customerEmail ?? config2.smtp.fromEmail;
+    const transporter = import_nodemailer2.default.createTransport({
+      host: config2.smtp.host,
+      port: config2.smtp.port ?? 587,
+      secure: config2.smtp.secure ?? false,
+      auth: { user: config2.smtp.username, pass: config2.smtp.password }
+    });
+    await transporter.sendMail({
+      from: `"${config2.smtp.fromName}" <${config2.smtp.fromEmail}>`,
+      replyTo: config2.smtp.replyTo || void 0,
+      to,
+      subject: replacePlaceholders2(subject, vars),
+      html: replacePlaceholders2(body, vars)
+    });
+  } catch {
+  }
+}
+
+// src/routes/orders.ts
 var router5 = (0, import_express5.Router)();
 router5.get("/orders", requireAdminAuth, async (_req, res) => {
   try {
@@ -68294,7 +68350,19 @@ router5.get("/orders", requireAdminAuth, async (_req, res) => {
 });
 router5.post("/orders", async (req, res) => {
   try {
-    const { id, customer, items, total, status, date: date6, paymentMethod } = req.body;
+    const {
+      id,
+      customer,
+      items,
+      total,
+      status,
+      date: date6,
+      paymentMethod,
+      subtotal,
+      discountAmount,
+      couponCode,
+      shippingAmount
+    } = req.body;
     if (!id || !customer || !items || total === void 0 || !date6) {
       res.status(400).json({ success: false, error: "Missing required fields: id, customer, items, total, date" });
       return;
@@ -68307,6 +68375,10 @@ router5.post("/orders", async (req, res) => {
       await tx.insert(ordersTable).values({
         id,
         customer,
+        subtotal: subtotal ?? 0,
+        discountAmount: discountAmount ?? 0,
+        couponCode: couponCode ?? null,
+        shippingAmount: shippingAmount ?? 0,
         total,
         status: status ?? "Pending",
         date: date6,
@@ -68323,6 +68395,22 @@ router5.post("/orders", async (req, res) => {
       );
     });
     res.status(201).json({ success: true, orderId: id });
+    const customerName = customer?.name ?? "";
+    const customerEmail = customer?.email ?? "";
+    const orderTotal = String(total);
+    sendEmailInternal({
+      type: "order_confirmation",
+      customerEmail,
+      customerName,
+      orderId: id,
+      orderTotal
+    });
+    sendEmailInternal({
+      type: "new_order_alert",
+      customerName,
+      orderId: id,
+      orderTotal
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     res.status(500).json({ success: false, error: message });
@@ -68345,6 +68433,17 @@ router5.patch("/orders/:id/status", requireAdminAuth, async (req, res) => {
       return;
     }
     res.json({ success: true, order: updated });
+    if (status === "Shipped" || status === "Delivered") {
+      const customer = updated.customer;
+      const emailType = status === "Shipped" ? "order_shipped" : "order_delivered";
+      sendEmailInternal({
+        type: emailType,
+        customerEmail: customer?.email ?? "",
+        customerName: customer?.name ?? "",
+        orderId: updated.id,
+        orderTotal: String(updated.total)
+      });
+    }
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";
     res.status(500).json({ success: false, error: message });
