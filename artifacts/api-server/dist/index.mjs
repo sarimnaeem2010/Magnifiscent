@@ -67913,7 +67913,7 @@ var saveEmailConfigHandler = async (req, res) => {
     const newTemplates = templates !== void 0 ? templates : existing.templates;
     const dbValues = {
       id: 1,
-      host: newSmtp?.host ?? "mail.magnifiscent.com.pk",
+      host: newSmtp?.host ?? "smtp.hostinger.com",
       port: newSmtp?.port ?? 465,
       secure: newSmtp?.secure ?? true,
       username: newSmtp?.username ?? "info@magnifiscent.com.pk",

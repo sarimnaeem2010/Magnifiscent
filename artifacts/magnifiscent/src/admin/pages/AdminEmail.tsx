@@ -56,7 +56,7 @@ type EmailLogEntry = {
 };
 
 const DEFAULT_SMTP: SmtpFormState = {
-  host: "mail.magnifiscent.com.pk", port: 465, secure: true,
+  host: "smtp.hostinger.com", port: 465, secure: true,
   username: "info@magnifiscent.com.pk", password: "",
   fromName: "MagnifiScent", fromEmail: "info@magnifiscent.com.pk", replyTo: "info@magnifiscent.com.pk",
 };
