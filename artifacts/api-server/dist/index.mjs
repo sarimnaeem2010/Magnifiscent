@@ -67913,14 +67913,14 @@ var saveEmailConfigHandler = async (req, res) => {
     const newTemplates = templates !== void 0 ? templates : existing.templates;
     const dbValues = {
       id: 1,
-      host: newSmtp?.host ?? "smtp.gmail.com",
-      port: newSmtp?.port ?? 587,
-      secure: newSmtp?.secure ?? false,
-      username: newSmtp?.username ?? "",
+      host: newSmtp?.host ?? "mail.magnifiscent.com.pk",
+      port: newSmtp?.port ?? 465,
+      secure: newSmtp?.secure ?? true,
+      username: newSmtp?.username ?? "info@magnifiscent.com.pk",
       password: newSmtp?.password ?? "",
       fromName: newSmtp?.fromName ?? "MagnifiScent",
-      fromEmail: newSmtp?.fromEmail ?? "hello@magnifiscent.com",
-      replyTo: newSmtp?.replyTo ?? "hello@magnifiscent.com",
+      fromEmail: newSmtp?.fromEmail ?? "info@magnifiscent.com.pk",
+      replyTo: newSmtp?.replyTo ?? "info@magnifiscent.com.pk",
       toggles: newToggles,
       templates: newTemplates
     };

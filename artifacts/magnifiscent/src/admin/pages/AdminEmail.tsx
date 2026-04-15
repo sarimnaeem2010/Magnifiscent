@@ -56,9 +56,9 @@ type EmailLogEntry = {
 };
 
 const DEFAULT_SMTP: SmtpFormState = {
-  host: "smtp.gmail.com", port: 587, secure: false,
-  username: "", password: "",
-  fromName: "MagnifiScent", fromEmail: "hello@magnifiscent.com", replyTo: "hello@magnifiscent.com",
+  host: "mail.magnifiscent.com.pk", port: 465, secure: true,
+  username: "info@magnifiscent.com.pk", password: "",
+  fromName: "MagnifiScent", fromEmail: "info@magnifiscent.com.pk", replyTo: "info@magnifiscent.com.pk",
 };
 
 function Field({ label, value, onChange, type = "text", placeholder = "", hint }: {
