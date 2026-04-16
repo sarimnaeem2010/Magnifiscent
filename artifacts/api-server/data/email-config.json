@@ -1,0 +1,19 @@
+{
+  "smtp": {
+    "host": "smtp.hostinger.com",
+    "port": 465,
+    "secure": true,
+    "username": "info@magnifiscent.com.pk",
+    "password": "",
+    "fromName": "MagnifiScent",
+    "fromEmail": "info@magnifiscent.com.pk",
+    "replyTo": ""
+  },
+  "toggles": {
+    "order_confirmation": true,
+    "order_shipped": true,
+    "order_delivered": true,
+    "new_order_alert": true
+  },
+  "templates": {}
+}
